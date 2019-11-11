@@ -168,7 +168,7 @@ class plateau(object):
     def deplace_joueur(self,id_joueur,input):
         
         entite_joueur = self.dico_joueurs[id_joueur]
-        entite_carte = entite_joueur.position
+        entite_carte = entite_joueur.carte_position
         carte_coord = entite_carte.coord
         retour = [] #Stocke les informations nécessaires à renvoyer au joueur dans l'interface graphique
         
@@ -208,7 +208,7 @@ class plateau(object):
                     retour.append("Vous avez déjà exploré cette carte")
                 
                 else:
-                    entite_joueur.position = nv_carte #On déplace le joueur
+                    entite_joueur.carte_position = nv_carte #On déplace le joueur
                     entite_joueur.cartes_explorees.append(nv_carte)
                     
                     #Si il y a une pépite sur la nouvelle carte, le joueur la ramasse
