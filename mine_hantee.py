@@ -1,10 +1,7 @@
 import numpy as np
 import random as rd
 
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 class carte(object):
     
     def __init__(self, ID, orientation, deplacable=False, id_fantome = 0):
@@ -17,9 +14,8 @@ class carte(object):
         
         
 class joueur(object):
-    
-<<<<<<< Updated upstream
-    def __init__(self, ID, nom, niveau = 0, fantome_target, position):
+
+    def __init__(self, ID, nom, niveau, fantome_target, position):
         self.id = ID
         self.nom = nom
         self.niveau = niveau
@@ -27,18 +23,8 @@ class joueur(object):
         self.position = position
         self.points = 0  
 
-class plateau(object):
-    def __init__(self, nb_joueurs, liste_noms, liste_niveaux, N=7):
-        self.
-=======
-    def __init__(self, ID, nom, niveau, fantome_target, position):
-        self.id = ID
-        self.nom = nom
-        if niveau !=0:
-            self.niveau = niveau
-        self.fantome_target = fantome_target
-        self.position = position
-        self.points = 0  
+
+
 
 
 class plateau(object):
@@ -123,4 +109,3 @@ class plateau(object):
                 
                 
 test=plateau(3,["Antoine","Christine","Michel"],0,7)
->>>>>>> Stashed changes
