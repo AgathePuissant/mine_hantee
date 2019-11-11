@@ -41,9 +41,9 @@ class plateau(object):
         #créer une combinaison des types de cartes
         nb_deplacable=N//2*(N//2+1+N)+1
         #orientations et types de murs de chaque carte
-        pool1=[[[1,0,1,0],[0,1,0,1]][rd.randint(0,1)] for i in range(int(nb_deplacable*13/34))]
-        pool2=[[[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*15/34))]
-        pool3=[[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*6/34))]
+        pool1=[rd.choice([[1,0,1,0],[0,1,0,1]]) for i in range(int(nb_deplacable*13/34))]
+        pool2=[rd.choice([[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]]) for i in range(int(nb_deplacable*15/34))]
+        pool3=[rd.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) for i in range(int(nb_deplacable*6/34))]
         pool=pool1+pool2+pool3
         while len(pool)<nb_deplacable:
             pool.append(rd.choice([rd.choice(pool1),rd.choice(pool2),rd.choice(pool3)]))
@@ -55,7 +55,6 @@ class plateau(object):
                 self.position[ligne,colonne]=int(compte_id)
                 #cases indéplaçables
                 if ligne%2 ==0 and colonne%2==0:
-                    print(["indéplaçable",ligne,colonne])
                     deplacable=False
                     #cases du milieu où les joueurs commencent la partie
                     if ligne==N//2-1 and colonne==N//2-1:
@@ -80,19 +79,18 @@ class plateau(object):
                             orientation=[0,1,1,0]
                     
                     #cases qui font les bords et les autres indéplaçables
-                    elif ligne>colonne and N-ligne>N-colonne:
+                    
+                    elif ligne<colonne and N-ligne-1>colonne:
                         orientation=[1,0,0,0]
-                    elif ligne>colonne:
+                    elif ligne<colonne and N-ligne-1<colonne:
                         orientation=[0,1,0,0]
-                    elif N-ligne<N-colonne:
+                    elif ligne>colonne and N-ligne-1<colonne:
                         orientation=[0,0,1,0]
-                    else:
+                    elif ligne>colonne and N-ligne-1>colonne:
                         orientation=[0,0,0,1]
-                    print(orientation)
                 
                 #cases déplaçables
                 else:
-                    print("deplaçable"+str(ligne)+str(colonne))
                     orientation=pool[compte_deplacable]
                     compte_deplacable+=1
                     deplacable=True
