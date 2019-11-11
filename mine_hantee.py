@@ -48,7 +48,7 @@ class plateau(object):
                 
                 carte_sauvegardee.id_fantome=0 #on supprime le fantôme de la carte sortie
             
-        elif x==N: #carte insérée en bas
+        elif x==N-1: #carte insérée en bas
             
             carte_sauvegardee=self.position[0,y] #on sauvegarde la carte qui va sortir du plateau
             
@@ -78,7 +78,7 @@ class plateau(object):
                 
                 carte_sauvegardee.id_fantome=0 #on supprime le fantôme de la carte sortie
             
-        elif y==N: #carte insérée sur le côté droit
+        elif y==N-1: #carte insérée sur le côté droit
             
             carte_sauvegardee=self.position[x,0] #on sauvegarde la carte qui va sortir du plateau
             
