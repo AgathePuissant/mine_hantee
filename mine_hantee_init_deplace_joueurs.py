@@ -277,10 +277,6 @@ class plateau(object):
         print(retour)
                     
             
-            
-            
-    
 test=plateau(3,["Antoine","Christine","Michel"],[],7)
-    
-    
+test.deplace_joueur(1,"LEFT")
         
