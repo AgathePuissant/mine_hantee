@@ -1,6 +1,7 @@
 import numpy as np
 import random as rd
-
+from PIL import Image
+import matplotlib.pyplot as plt
 
 class carte(object):
     
@@ -107,3 +108,35 @@ class plateau(object):
                 
                 
 test=plateau(3,["Antoine","Christine","Michel"],0,7)
+
+def affiche_plateau(plateau):
+    
+    array_image=np.array([plateau.dict_cartes[i].orientation for i in plateau.dict_cartes]).reshape(7,7,4)
+    
+    
+    grid=np.zeros((50*7,50*7,3), 'uint8')
+    for ligne in range(len(array_image)):
+        for colonne in range(len(array_image)):
+            
+            subgrid=np.zeros((50,50,3), 'uint8')
+            subgrid[..., 0] = np.array([0 for i in range(50*50)]).reshape(50,50)
+            subgrid[..., 1] = np.array([150 for i in range(50*50)]).reshape(50,50)
+            subgrid[..., 2] = np.array([0 for i in range(50*50)]).reshape(50,50)
+            orientation=array_image[ligne,colonne]
+            
+            for mur in range(4):
+                if orientation[mur]==1 and mur==0:
+                    subgrid[:5,:,1]=np.array([256 for i in range(5*50)]).reshape(5,50)
+                elif orientation[mur]==1 and mur==1:
+                    subgrid[:,45:,1]=np.array([256 for i in range(5*50)]).reshape(50,5)
+                elif orientation[mur]==1 and mur==2:
+                    subgrid[45:,:,1]=np.array([256 for i in range(5*50)]).reshape(5,50)
+                elif orientation[mur]==1 and mur==3:
+                    subgrid[:,:5,1]=np.array([256 for i in range(5*50)]).reshape(50,5)
+                    
+            grid[50*ligne:50*(ligne+1),50*colonne:50*(colonne+1),]=subgrid
+    
+    img = Image.fromarray(grid)
+    plt.imshow(img)
+
+affiche_plateau(test)
