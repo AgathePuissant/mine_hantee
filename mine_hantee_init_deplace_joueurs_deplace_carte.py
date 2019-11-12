@@ -357,4 +357,77 @@ class plateau(object):
                 carte_sauvegardee.id_fantome=0 #on supprime le fantôme de la carte sortie
             
         self.carte_a_jouer=carte_sauvegardee #update la carte à jouer
+        
+    def cartes_accessibles1(self,carte):
+        """
+        carte=carte de la position pour laquelle on veut trouver les cartes accessibles
+        """
+        cartes_accessibles=[] #liste des entités des cartes accessibles
+        coord=carte.coord
+                    
+        if ((coord[0]-1)>=0 and carte.orientation[3]==0): 
+            #Si on est pas sur l'extrêmité gauche du plateau
+            #et si aucun mur de la carte position ne barre le passage
+            #On trouve l'entité de la carte à notre gauche
+            for i in self.dico_cartes.values():
+                if i.coord == [coord[0]-1,coord[1]]:
+                    carte_access = i
+            if carte_access.orientation[1] == 0: #Si aucun mur de la carte accessible ne barre le passage
+                cartes_accessibles.append(carte_access)
+            
+        if ((coord[0]+1)<self.N and carte.orientation[1]==0): 
+            #Si on est pas sur l'extrêmité droite du plateau
+            for i in self.dico_cartes.values():
+                if i.coord == [coord[0]+1,coord[1]]:
+                    carte_access = i
+            if carte_access.orientation[3] == 0:
+                cartes_accessibles.append(carte_access)
+        
+        if ((coord[1]-1)>=0 and carte.orientation[0]==0): #Si on est pas sur l'extrêmité haute du plateau
+            for i in self.dico_cartes.values():
+                if i.coord == [coord[0],coord[1]-1]:
+                    carte_access = i
+            if carte_access.orientation[2] == 0:
+                cartes_accessibles.append(carte_access)
+        
+        if ((coord[1]+1)<self.N and carte.orientation[2]==0): #Si on est pas sur l'extrêmité basse du plateau
+            for i in self.dico_cartes.values():
+                if i.coord == [coord[0],coord[1]+1]:
+                    carte_access = i
+            if carte_access.orientation[0] == 0:
+                cartes_accessibles.append(carte_access)
+        
+        return cartes_accessibles
+    
 
+    def chemins_possibles(self, carte_depart=0, chemin_en_cours=[]):
+        """
+        fonction récursive
+        un chemin correspond à une suite de cartes
+        amélioration possible : soit on donne le chemin de départ, soit on donne le chemin en cours. 
+        """
+        L_chemin_possibles=[]
+        #si on se trouve au niveau du point de départ
+        if carte_depart!=0:
+            #on initialise le chemin à la position de départ
+            chemin=[carte_depart]
+            #le joueur peut rester à sa place, donc le chemin ne contenant 
+            #que la carte de départ fait partie des chemins possibles.
+            L_chemin_possibles=L_chemin_possibles+[chemin]
+            chemin_en_cours=chemin
+        
+        #on prend la dernière carte du chemin en cours.
+        carte=chemin_en_cours[-1]
+        options=self.cartes_accessibles1(carte)
+        for i in options:
+            #le joueur ne peut pas repasser sur une carte où il est déjà passé. 
+            if i not in chemin_en_cours:
+                chemin=chemin_en_cours+[i]
+                L_chemin_possibles=L_chemin_possibles+[chemin]
+                nouveaux_chemins=self.chemins_possibles(chemin_en_cours=chemin)
+                if len(nouveaux_chemins)!=0:
+                    L_chemin_possibles=L_chemin_possibles+nouveaux_chemins
+            
+        return L_chemin_possibles
+    
+test=plateau(3,["Antoine","Christine","Michel"],[],7)
