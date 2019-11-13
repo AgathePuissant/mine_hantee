@@ -171,11 +171,7 @@ class plateau(object):
             compte += 1
     
         
-    def deplace_carte(self,orientation,coord) :
-        
-        self.carte_a_jouer.orientation=orientation
-        
-        N=len(self.position)
+    def deplace_carte(self,coord) :
         
         x=coord[0]
         y=coord[1]
@@ -189,19 +185,19 @@ class plateau(object):
         
         if x==0 : #carte insérée en haut
             
-            carte_sauvegardee=self.dico_cartes[self.position[N-1,y]] #on sauvegarde la carte qui va sortir du plateau
+            carte_sauvegardee=self.dico_cartes[self.position[self.N-1,y]] #on sauvegarde la carte qui va sortir du plateau
             
-            for i in range(1,N):
+            for i in range(1,self.N):
                 
-                self.dico_cartes[self.position[N-i-1,y]].coord[0]+=1
+                self.dico_cartes[self.position[self.N-i-1,y]].coord[0]+=1
                 #en partant du bas, on change la carte pour la carte d'avant jusqu'à la première carte
-                self.position[N-i,y]=self.position[N-i-1,y]
+                self.position[self.N-i,y]=self.position[self.N-i-1,y]
                             
-        elif x==N-1: #carte insérée en bas
+        elif x==self.N-1: #carte insérée en bas
             
             carte_sauvegardee=self.dico_cartes[self.position[0,y]] #on sauvegarde la carte qui va sortir du plateau
             
-            for i in range(1,N):
+            for i in range(1,self.N):
                 
                 self.dico_cartes[self.position[i-1,y]].coord[0]-=1
                 #en partant du haut, on change la carte pour la carte d'après jusqu'à la dernière carte
@@ -209,19 +205,19 @@ class plateau(object):
             
         elif y==0: #carte insérée sur le côté gauche
             
-            carte_sauvegardee=self.dico_cartes[self.position[x,N-1]] #on sauvegarde la carte qui va sortir du plateau
+            carte_sauvegardee=self.dico_cartes[self.position[x,self.N-1]] #on sauvegarde la carte qui va sortir du plateau
             
-            for i in range(1,N):
+            for i in range(1,self.N):
                 
-                self.dico_cartes[self.position[x,N-i-1]].coord[1]+=1
+                self.dico_cartes[self.position[x,self.N-i-1]].coord[1]+=1
                 #en partant de la droite, on change la carte pour la carte d'avant jusqu'à la première carte
-                self.position[x,N-i]=self.position[x,N-i-1]
+                self.position[x,self.N-i]=self.position[x,self.N-i-1]
             
-        elif y==N-1: #carte insérée sur le côté droit
+        elif y==self.N-1: #carte insérée sur le côté droit
             
             carte_sauvegardee=self.dico_cartes[self.position[x,0]] #on sauvegarde la carte qui va sortir du plateau
             
-            for i in range(1,N):
+            for i in range(1,self.N):
                 
                 self.dico_cartes[self.position[x,i-1]].coord[1]-=1
                 #en partant de la gauche, on change la carte pour la carte d'après jusqu'à la dernière carte
@@ -468,7 +464,7 @@ while continuer:
         if event.type == MOUSEBUTTONDOWN :
             if event.button==1:
                 coord=[event.pos[0]//100,event.pos[1]//100]
-                test.deplace_carte(test.carte_a_jouer.orientation,coord)
+                test.deplace_carte(coord)
             
         test.affiche_plateau(fenetre)
         pygame.display.flip()     
