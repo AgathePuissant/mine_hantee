@@ -295,10 +295,10 @@ class plateau(object):
             
             for i in range(1,N):
                 
-                self.dico_cartes[self.position[N-i,y]]=self.dico_cartes[self.position[N-i-1,y]] #en partant du bas, on change la carte pour la carte d'avant jusqu'à la première carte
+                #en partant du bas, on change la carte pour la carte d'avant jusqu'à la première carte
                 self.position[N-i,y]=self.position[N-i-1,y]
             
-            self.dico_cartes[self.position[x,y]]=self.carte_a_jouer #la première carte est changée par la carte à jouer
+            #la première carte est changée par la carte à jouer
             self.position[x,y]=self.carte_a_jouer.id
             
             if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
@@ -312,10 +312,10 @@ class plateau(object):
             carte_sauvegardee=self.dico_cartes[self.position[0,y]] #on sauvegarde la carte qui va sortir du plateau
             
             for i in range(1,N):
-                self.dico_cartes[self.position[i,y]]=self.dico_cartes[self.position[i-1,y]] #en partant du haut, on change la carte pour la carte d'après jusqu'à la dernière carte
+                #en partant du haut, on change la carte pour la carte d'après jusqu'à la dernière carte
                 self.position[i,y]=self.position[i-1,y]
             
-            self.dico_cartes[self.position[x,y]]=self.carte_a_jouer #la dernière carte est changée par la carte à jouer
+            #la dernière carte est changée par la carte à jouer
             self.position[x,y]=self.carte_a_jouer.id
             
             if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
@@ -329,10 +329,10 @@ class plateau(object):
             carte_sauvegardee=self.dico_cartes[self.position[x,N-1]] #on sauvegarde la carte qui va sortir du plateau
             
             for i in range(1,N):
-                self.dico_cartes[self.position[x,N-i]]=self.dico_cartes[self.position[x,N-i-1]] #en partant de la droite, on change la carte pour la carte d'avant jusqu'à la première carte
+                #en partant de la droite, on change la carte pour la carte d'avant jusqu'à la première carte
                 self.position[x,N-i]=self.position[x,N-i-1]
             
-            self.dico_cartes[self.position[x,y]]=self.carte_a_jouer #la première carte est changée par la carte à jouer
+            #la première carte est changée par la carte à jouer
             self.position[x,y]=self.carte_a_jouer.id
             
             if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
@@ -346,10 +346,10 @@ class plateau(object):
             carte_sauvegardee=self.dico_cartes[self.position[x,0]] #on sauvegarde la carte qui va sortir du plateau
             
             for i in range(1,N):
-                self.dico_cartes[self.position[x,i]]=self.dico_cartes[self.position[x,i-1]] #en partant de la gauche, on change la carte pour la carte d'après jusqu'à la dernière carte
+                #en partant de la gauche, on change la carte pour la carte d'après jusqu'à la dernière carte
                 self.position[x,i]=self.position[x,i-1]
             
-            self.dico_cartes[self.position[x,y]]=self.carte_a_jouer #la dernière carte est changée par la carte à jouer
+            #la dernière carte est changée par la carte à jouer
             self.position[x,y]=self.carte_a_jouer.id
             
             if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
