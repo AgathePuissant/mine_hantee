@@ -7,6 +7,8 @@ Ceci est un script temporaire.
 
 import numpy as np
 import random as rd
+from PIL import Image
+import matplotlib.pyplot as plt
 
 class carte(object):
     
@@ -293,10 +295,10 @@ class plateau(object):
             
             for i in range(1,N):
                 
-                self.dico_cartes[self.position[N-i,y]]=self.dico_cartes[self.position[N-i-1,y]] #en partant du bas, on change la carte pour la carte d'avant jusqu'à la première carte
+                #en partant du bas, on change la carte pour la carte d'avant jusqu'à la première carte
                 self.position[N-i,y]=self.position[N-i-1,y]
             
-            self.dico_cartes[self.position[x,y]]=self.carte_a_jouer #la première carte est changée par la carte à jouer
+            #la première carte est changée par la carte à jouer
             self.position[x,y]=self.carte_a_jouer.id
             
             if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
@@ -310,10 +312,10 @@ class plateau(object):
             carte_sauvegardee=self.dico_cartes[self.position[0,y]] #on sauvegarde la carte qui va sortir du plateau
             
             for i in range(1,N):
-                self.dico_cartes[self.position[i,y]]=self.dico_cartes[self.position[i-1,y]] #en partant du haut, on change la carte pour la carte d'après jusqu'à la dernière carte
+                #en partant du haut, on change la carte pour la carte d'après jusqu'à la dernière carte
                 self.position[i,y]=self.position[i-1,y]
             
-            self.dico_cartes[self.position[x,y]]=self.carte_a_jouer #la dernière carte est changée par la carte à jouer
+            #la dernière carte est changée par la carte à jouer
             self.position[x,y]=self.carte_a_jouer.id
             
             if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
@@ -327,10 +329,10 @@ class plateau(object):
             carte_sauvegardee=self.dico_cartes[self.position[x,N-1]] #on sauvegarde la carte qui va sortir du plateau
             
             for i in range(1,N):
-                self.dico_cartes[self.position[x,N-i]]=self.dico_cartes[self.position[x,N-i-1]] #en partant de la droite, on change la carte pour la carte d'avant jusqu'à la première carte
+                #en partant de la droite, on change la carte pour la carte d'avant jusqu'à la première carte
                 self.position[x,N-i]=self.position[x,N-i-1]
             
-            self.dico_cartes[self.position[x,y]]=self.carte_a_jouer #la première carte est changée par la carte à jouer
+            #la première carte est changée par la carte à jouer
             self.position[x,y]=self.carte_a_jouer.id
             
             if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
@@ -344,10 +346,10 @@ class plateau(object):
             carte_sauvegardee=self.dico_cartes[self.position[x,0]] #on sauvegarde la carte qui va sortir du plateau
             
             for i in range(1,N):
-                self.dico_cartes[self.position[x,i]]=self.dico_cartes[self.position[x,i-1]] #en partant de la gauche, on change la carte pour la carte d'après jusqu'à la dernière carte
+                #en partant de la gauche, on change la carte pour la carte d'après jusqu'à la dernière carte
                 self.position[x,i]=self.position[x,i-1]
             
-            self.dico_cartes[self.position[x,y]]=self.carte_a_jouer #la dernière carte est changée par la carte à jouer
+            #la dernière carte est changée par la carte à jouer
             self.position[x,y]=self.carte_a_jouer.id
             
             if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
@@ -357,4 +359,113 @@ class plateau(object):
                 carte_sauvegardee.id_fantome=0 #on supprime le fantôme de la carte sortie
             
         self.carte_a_jouer=carte_sauvegardee #update la carte à jouer
+        
+    def cartes_accessibles1(self,carte):
+        """
+        carte=carte de la position pour laquelle on veut trouver les cartes accessibles
+        """
+        cartes_accessibles=[] #liste des entités des cartes accessibles
+        coord=carte.coord
+                    
+        if ((coord[0]-1)>=0 and carte.orientation[3]==0): 
+            #Si on est pas sur l'extrêmité gauche du plateau
+            #et si aucun mur de la carte position ne barre le passage
+            #On trouve l'entité de la carte à notre gauche
+            for i in self.dico_cartes.values():
+                if i.coord == [coord[0]-1,coord[1]]:
+                    carte_access = i
+            if carte_access.orientation[1] == 0: #Si aucun mur de la carte accessible ne barre le passage
+                cartes_accessibles.append(carte_access)
+            
+        if ((coord[0]+1)<self.N and carte.orientation[1]==0): 
+            #Si on est pas sur l'extrêmité droite du plateau
+            for i in self.dico_cartes.values():
+                if i.coord == [coord[0]+1,coord[1]]:
+                    carte_access = i
+            if carte_access.orientation[3] == 0:
+                cartes_accessibles.append(carte_access)
+        
+        if ((coord[1]-1)>=0 and carte.orientation[0]==0): #Si on est pas sur l'extrêmité haute du plateau
+            for i in self.dico_cartes.values():
+                if i.coord == [coord[0],coord[1]-1]:
+                    carte_access = i
+            if carte_access.orientation[2] == 0:
+                cartes_accessibles.append(carte_access)
+        
+        if ((coord[1]+1)<self.N and carte.orientation[2]==0): #Si on est pas sur l'extrêmité basse du plateau
+            for i in self.dico_cartes.values():
+                if i.coord == [coord[0],coord[1]+1]:
+                    carte_access = i
+            if carte_access.orientation[0] == 0:
+                cartes_accessibles.append(carte_access)
+        
+        return cartes_accessibles
+    
 
+    def chemins_possibles(self, carte_depart=0, chemin_en_cours=[]):
+        """
+        fonction récursive
+        un chemin correspond à une suite de cartes
+        amélioration possible : soit on donne le chemin de départ, soit on donne le chemin en cours. 
+        """
+        L_chemin_possibles=[]
+        #si on se trouve au niveau du point de départ
+        if carte_depart!=0:
+            #on initialise le chemin à la position de départ
+            chemin=[carte_depart]
+            #le joueur peut rester à sa place, donc le chemin ne contenant 
+            #que la carte de départ fait partie des chemins possibles.
+            L_chemin_possibles=L_chemin_possibles+[chemin]
+            chemin_en_cours=chemin
+        
+        #on prend la dernière carte du chemin en cours.
+        carte=chemin_en_cours[-1]
+        options=self.cartes_accessibles1(carte)
+        for i in options:
+            #le joueur ne peut pas repasser sur une carte où il est déjà passé. 
+            if i not in chemin_en_cours:
+                chemin=chemin_en_cours+[i]
+                L_chemin_possibles=L_chemin_possibles+[chemin]
+                nouveaux_chemins=self.chemins_possibles(chemin_en_cours=chemin)
+                if len(nouveaux_chemins)!=0:
+                    L_chemin_possibles=L_chemin_possibles+nouveaux_chemins
+            
+        return L_chemin_possibles
+    
+    
+def affiche_plateau(plateau):
+    N=plateau.N
+    array_image=[]
+    for i in range(N):
+        for j in range(N):
+            array_image.append(plateau.dico_cartes[plateau.position[i,j]].orientation)
+    array_image=np.array(array_image).reshape(N,N,4)
+    
+    
+    grid=np.zeros((50*N,50*N,3), 'uint8')
+    for ligne in range(len(array_image)):
+        for colonne in range(len(array_image)):
+            
+            subgrid=np.zeros((50,50,3), 'uint8')
+            subgrid[..., 0] = np.array([0 for i in range(50*50)]).reshape(50,50)
+            subgrid[..., 1] = np.array([150 for i in range(50*50)]).reshape(50,50)
+            subgrid[..., 2] = np.array([0 for i in range(50*50)]).reshape(50,50)
+            orientation=array_image[ligne,colonne]
+            
+            for mur in range(4):
+                if orientation[mur]==1 and mur==0:
+                    subgrid[:5,:,1]=np.array([256 for i in range(5*50)]).reshape(5,50)
+                elif orientation[mur]==1 and mur==1:
+                    subgrid[:,45:,1]=np.array([256 for i in range(5*50)]).reshape(50,5)
+                elif orientation[mur]==1 and mur==2:
+                    subgrid[45:,:,1]=np.array([256 for i in range(5*50)]).reshape(5,50)
+                elif orientation[mur]==1 and mur==3:
+                    subgrid[:,:5,1]=np.array([256 for i in range(5*50)]).reshape(50,5)
+                    
+            grid[50*ligne:50*(ligne+1),50*colonne:50*(colonne+1),]=subgrid
+    
+    img = Image.fromarray(grid)
+    plt.imshow(img)
+    
+test=plateau(3,["Antoine","Christine","Michel"],[],7)
+affiche_plateau(test)
