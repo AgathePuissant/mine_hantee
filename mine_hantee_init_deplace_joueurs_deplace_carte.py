@@ -434,11 +434,15 @@ class plateau(object):
     
     
 def affiche_plateau(plateau):
+    N=plateau.N
+    array_image=[]
+    for i in range(N):
+        for j in range(N):
+            array_image.append(plateau.dico_cartes[plateau.position[i,j]].orientation)
+    array_image=np.array(array_image).reshape(N,N,4)
     
-    array_image=np.array([plateau.dict_cartes[i].orientation for i in plateau.dict_cartes]).reshape(7,7,4)
     
-    
-    grid=np.zeros((50*7,50*7,3), 'uint8')
+    grid=np.zeros((50*N,50*N,3), 'uint8')
     for ligne in range(len(array_image)):
         for colonne in range(len(array_image)):
             
@@ -464,3 +468,4 @@ def affiche_plateau(plateau):
     plt.imshow(img)
     
 test=plateau(3,["Antoine","Christine","Michel"],[],7)
+affiche_plateau(test)
