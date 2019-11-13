@@ -412,7 +412,8 @@ class plateau(object):
     
     def affiche_plateau(self,fenetre):
         #Chargement et collage du fond
-    
+        
+        fenetre.blit(fond_ext,(0,0))
         fenetre.blit(fond, (0,0))
         
         
@@ -442,6 +443,7 @@ class plateau(object):
             x=self.dico_joueurs[i].carte_position.coord[0]*100
             y=self.dico_joueurs[i].carte_position.coord[1]*100
             fenetre.blit(liste_im_joueur[i],(x,y))
+            fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(self.dico_joueurs[i].points),True,pygame.Color("#000000")),(750,300+i*100))
         
         x=750
         y=50
@@ -478,19 +480,23 @@ pepite = pygame.image.load("pepite.png").convert_alpha()
 police = pygame.font.Font(None,28)
 transparent = (0, 0, 0, 0)
 
-fenetre.blit(fond_ext,(0,0))
-                                                                                           
-test.affiche_plateau(fenetre)
-
-#Rafraîchissement de l'écran
-pygame.display.flip()
 
 continuer = 1
+erreur_deplacement=""
 
 #Boucle infinie
 while continuer:
     
     test.affiche_plateau(fenetre)
+    
+    
+    for i in range(len(test.dico_joueurs)) :
+            x=test.dico_joueurs[i].carte_position.coord[0]*100
+            y=test.dico_joueurs[i].carte_position.coord[1]*100
+            fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(test.dico_joueurs[i].points),True,pygame.Color("#000000")),(750,300+i*100))
+                                  
+    fenetre.blit(police.render(erreur_deplacement,True,pygame.Color("#000000")),(750,250))
+                                                                    
     pygame.display.flip()
     
     for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
@@ -506,10 +512,11 @@ while continuer:
         if event.type == MOUSEBUTTONDOWN :
             if event.button==1:
                 coord=[event.pos[0]//100,event.pos[1]//100]
-                fenetre.blit(fond_ext,(0,0))
                 if test.deplace_carte(coord)==False :
-                    fenetre.blit(police.render("Vous ne pouvez pas insérer la carte ici!",False,pygame.Color("#000000"),pygame.Color("#FFFFFF")),(750,250))
-        
+                    erreur_deplacement="Vous ne pouvez pas insérer la carte ici!"
+                else :
+                    erreur_deplacement=""
+                    
         if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) :
             test.deplace_joueur(1,event.key)
                 
