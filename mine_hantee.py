@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """
+<<<<<<< HEAD
 Éditeur de Spyder
 
 Ceci est un script temporaire.
@@ -13,22 +14,42 @@ import matplotlib.pyplot as plt
 class carte(object):
     
     def __init__(self, ID, orientation, coord, deplacable=False, id_fantome = 0):
+=======
+Created on Fri Nov  8 10:35:50 2019
+
+@author: eloda
+"""
+
+#Mine hantée
+
+class carte(object):
+    
+    def __init__(self, ID, orientation, deplacable=False, id_fantome = 0):
+>>>>>>> 44b72541c4c45211da78bb145581b96badc9b358
         
         self.id = ID
         self.orientation = orientation
         self.deplacable = deplacable
         self.id_fantome = id_fantome
         self.presence_pepite = True
+<<<<<<< HEAD
         self.coord = coord
+=======
+>>>>>>> 44b72541c4c45211da78bb145581b96badc9b358
         
         
 class joueur(object):
     
+<<<<<<< HEAD
     def __init__(self, ID, nom, niveau, fantome_target, carte_position):
+=======
+    def __init__(self, ID, nom, niveau = 0, fantome_target, position):
+>>>>>>> 44b72541c4c45211da78bb145581b96badc9b358
         self.id = ID
         self.nom = nom
         self.niveau = niveau
         self.fantome_target = fantome_target
+<<<<<<< HEAD
         self.carte_position = carte_position
         self.points = 0
         self.cartes_explorees = []
@@ -474,3 +495,7 @@ def affiche_plateau(plateau):
     
 test=plateau(3,["Antoine","Christine","Michel"],[],7)
 affiche_plateau(test)
+=======
+        self.position = position
+        self.points = 0
+>>>>>>> 44b72541c4c45211da78bb145581b96badc9b358
