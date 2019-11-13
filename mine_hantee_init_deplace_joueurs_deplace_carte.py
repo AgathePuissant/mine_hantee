@@ -292,7 +292,6 @@ class plateau(object):
         if x==0 : #carte insérée en haut
             
             carte_sauvegardee=self.dico_cartes[self.position[N-1,y]] #on sauvegarde la carte qui va sortir du plateau
-            id_carte_sauvegardee=self.position[N-1,y]
             
             for i in range(1,N):
                 
