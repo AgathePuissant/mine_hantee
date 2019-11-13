@@ -7,6 +7,8 @@ Ceci est un script temporaire.
 
 import numpy as np
 import random as rd
+from PIL import Image
+import matplotlib.pyplot as plt
 
 class carte(object):
     
