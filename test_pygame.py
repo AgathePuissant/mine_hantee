@@ -176,10 +176,10 @@ class plateau(object):
         x=coord[0]
         y=coord[1]
         
-        self.dico_cartes[self.carte_a_jouer.id].coord=[x,y]
-        
         if self.dico_cartes[self.position[x,y]].deplacable==False :
-            return ('False')
+            return False
+        
+        self.dico_cartes[self.carte_a_jouer.id].coord=[x,y]
         
         #Traite tous les cas possible : carte insérée de chaque côté
         
@@ -199,9 +199,9 @@ class plateau(object):
             
             for i in range(1,self.N):
                 
-                self.dico_cartes[self.position[i-1,y]].coord[0]-=1
+                self.dico_cartes[self.position[i,y]].coord[0]-=1
                 #en partant du haut, on change la carte pour la carte d'après jusqu'à la dernière carte
-                self.position[i,y]=self.position[i-1,y]
+                self.position[i-1,y]=self.position[i,y]
             
         elif y==0: #carte insérée sur le côté gauche
             
@@ -219,9 +219,12 @@ class plateau(object):
             
             for i in range(1,self.N):
                 
-                self.dico_cartes[self.position[x,i-1]].coord[1]-=1
+                self.dico_cartes[self.position[x,i]].coord[1]-=1
                 #en partant de la gauche, on change la carte pour la carte d'après jusqu'à la dernière carte
-                self.position[x,i]=self.position[x,i-1]
+                self.position[x,i-1]=self.position[x,i]
+                
+        else :
+            return False
                 
         self.position[x,y]=self.carte_a_jouer.id
                 
@@ -396,6 +399,7 @@ class plateau(object):
             for j in range(len(self.position)) :
                 x=self.dico_cartes[self.position[i,j]].coord[0]*100
                 y=self.dico_cartes[self.position[i,j]].coord[1]*100
+                
                 for k in range(len(self.dico_cartes[self.position[i,j]].orientation)) :
                    if self.dico_cartes[self.position[i,j]].orientation[k]==1 :
                        if k==0 :
@@ -434,9 +438,10 @@ test=plateau(3,["Antoine","Christine","Michel"],[],7)
 pygame.init()
 
 #Ouverture de la fenêtre Pygame
-fenetre = pygame.display.set_mode((900, 700))
+fenetre = pygame.display.set_mode((1200, 700))
 
 fond = pygame.image.load("fond.jpg").convert()
+fond_ext = pygame.image.load("fond_ext.png").convert()
 mur1 = pygame.image.load("mur1.png").convert_alpha()
 mur2 = pygame.image.load("mur2.png").convert_alpha()
 mur3 = pygame.image.load("mur3.png").convert_alpha()
@@ -445,6 +450,11 @@ liste_im_joueur = [pygame.image.load("joueur"+str(i)+".png").convert_alpha() for
 fond_a_jouer = pygame.image.load("fond_carte_a_jouer.png").convert()
 fantome = pygame.image.load("fantome.png").convert()
 
+police = pygame.font.Font(None,28)
+transparent = (0, 0, 0, 0)
+
+fenetre.blit(fond_ext,(0,0))
+                                                                                           
 test.affiche_plateau(fenetre)
 
 #Rafraîchissement de l'écran
@@ -468,10 +478,12 @@ while continuer:
         if event.type == MOUSEBUTTONDOWN :
             if event.button==1:
                 coord=[event.pos[0]//100,event.pos[1]//100]
-                test.deplace_carte(coord)
-            
+                fenetre.blit(fond_ext,(0,0))
+                if test.deplace_carte(coord)==False :
+                    fenetre.blit(police.render("Vous ne pouvez pas insérer la carte ici!",False,pygame.Color("#000000"),pygame.Color("#FFFFFF")),(750,250))
+                
         test.affiche_plateau(fenetre)
-        pygame.display.flip()     
+        pygame.display.flip()
                 
                 
                 
