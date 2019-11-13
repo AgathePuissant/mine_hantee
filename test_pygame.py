@@ -437,13 +437,13 @@ class plateau(object):
                     fenetre.blit(pepite,(x,y))
                 if self.dico_cartes[self.position[i,j]].id_fantome!=0 :
                     fenetre.blit(fantome,(x,y))
-                    fenetre.blit(police.render(str(self.dico_cartes[self.position[i,j]].id_fantome),True,pygame.Color("#000000")),(x+35,y+35))
+                    fenetre.blit(police.render(str(self.dico_cartes[self.position[i,j]].id_fantome),True,pygame.Color("#000000")),(x+40,y+40))
                            
         for i in range(len(self.dico_joueurs)) :
             x=self.dico_joueurs[i].carte_position.coord[0]*100
             y=self.dico_joueurs[i].carte_position.coord[1]*100
             fenetre.blit(liste_im_joueur[i],(x,y))
-            fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(self.dico_joueurs[i].points),True,pygame.Color("#000000")),(750,300+i*100))
+            
         
         x=750
         y=50
@@ -477,7 +477,7 @@ fond_a_jouer = pygame.image.load("fond_carte_a_jouer.png").convert()
 fantome = pygame.image.load("fantome.png").convert_alpha()
 pepite = pygame.image.load("pepite.png").convert_alpha()
 
-police = pygame.font.Font(None,28)
+police = pygame.font.Font(None,24)
 transparent = (0, 0, 0, 0)
 
 
@@ -493,7 +493,7 @@ while continuer:
     for i in range(len(test.dico_joueurs)) :
             x=test.dico_joueurs[i].carte_position.coord[0]*100
             y=test.dico_joueurs[i].carte_position.coord[1]*100
-            fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(test.dico_joueurs[i].points),True,pygame.Color("#000000")),(750,300+i*100))
+            fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(test.dico_joueurs[i].points),True,pygame.Color("#000000")),(800,300+i*100))
                                   
     fenetre.blit(police.render(erreur_deplacement,True,pygame.Color("#000000")),(750,250))
                                                                     
@@ -518,7 +518,7 @@ while continuer:
                     erreur_deplacement=""
                     
         if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) :
-            test.deplace_joueur(1,event.key)
+            test.deplace_joueur(0,event.key)
                 
                 
                 
