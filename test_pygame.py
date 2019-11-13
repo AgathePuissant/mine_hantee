@@ -407,10 +407,13 @@ class plateau(object):
                        elif k==3 :
                            fenetre.blit(mur3,(x,y))
                            
+                if self.dico_cartes[self.position[i,j]].id_fantome!=0 :
+                    fenetre.blit(fantome,(x,y))
+                           
         for i in range(len(self.dico_joueurs)) :
             x=self.dico_joueurs[i].carte_position.coord[0]*100
             y=self.dico_joueurs[i].carte_position.coord[1]*100
-            fenetre.blit(im_joueur,(x,y))
+            fenetre.blit(liste_im_joueur[i],(x,y))
         
         x=750
         y=50
@@ -438,8 +441,9 @@ mur1 = pygame.image.load("mur1.png").convert_alpha()
 mur2 = pygame.image.load("mur2.png").convert_alpha()
 mur3 = pygame.image.load("mur3.png").convert_alpha()
 mur4 = pygame.image.load("mur4.png").convert_alpha()
-im_joueur = pygame.image.load("joueur.png").convert_alpha()
+liste_im_joueur = [pygame.image.load("joueur"+str(i)+".png").convert_alpha() for i in range(1,5)]
 fond_a_jouer = pygame.image.load("fond_carte_a_jouer.png").convert()
+fantome = pygame.image.load("fantome.png").convert()
 
 test.affiche_plateau(fenetre)
 
