@@ -287,6 +287,9 @@ class plateau(object):
         x=coord[0]
         y=coord[1]
         
+        if self.dico_cartes[self.position[x,y]].deplacable==False :
+            return ('False')
+        
         #Traite tous les cas possible : carte insérée de chaque côté
         
         if x==0 : #carte insérée en haut
