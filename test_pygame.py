@@ -547,6 +547,31 @@ def game() :
                         
             if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
                 test.deplace_joueur(0,event.key)
+                
+            if event.type == KEYDOWN and event.key == K_SPACE :
+                pause()
+                
+def pause() :
+    
+    pause=1
+    
+    while pause :
+        
+        fenetre.blit(fond_menu,(0,0))
+    
+        fenetre.blit(police.render("Pause",True,pygame.Color("#000000")),(600,350))
+                                                         
+        pygame.display.flip() #Update l'écran
+    
+        for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+            
+            if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                pygame.display.quit()
+                pygame.quit()
+                continuer = 0      #On arrête la boucle
+                
+            if event.type == KEYDOWN and event.key == K_SPACE :
+                game()
 
 
 #-----------------------------------------Affichage graphique et début du jeu------------------------------
