@@ -10,6 +10,7 @@ from pygame.locals import *
 import numpy as np
 import random as rd
 import pickle
+import glob
 
 class carte(object):
     
@@ -468,6 +469,7 @@ def button(fenetre,msg,x,y,w,h,ic,ac,action=None):
 #---------------------------------------Défintion des instructions graphiques------------------------------
     
 def menu():
+    global fenetre
     
     intro = True
 
@@ -476,16 +478,29 @@ def menu():
         fenetre.blit(fond_menu,(0,0))  #On colle le fond du menu
         
         #Création du bouton qui lance le jeu
-        button(fenetre,"Jouer",600,350,100,50,pygame.Color("#b46503"),pygame.Color("#d09954"),game)
+        button(fenetre,"Nouvelle partie",500,350,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),game)
                                                            
         pygame.display.flip() #Update l'écran
         
         for event in pygame.event.get(): #Instructions de sortie
             if event.type == pygame.QUIT:
+                intro=False
                 pygame.quit()
-                quit()
+                pygame.quit()
+                
+            if event.type == pygame.VIDEORESIZE:
+                fenetre = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE)
 
 def game() :
+    global fenetre,num_partie
+    
+    liste_sauv=glob.glob("sauvegarde*")
+    if liste_sauv!=[] :
+        num_partie=[i for i in liste_sauv]
+        num_partie=[int(num_partie[i][-1]) for i in range(len(num_partie))]
+        num_partie=max(num_partie)+1
+    else :
+        num_partie=1
     
     
     continuer = 1
@@ -531,8 +546,11 @@ def game() :
             if event.type == KEYDOWN and event.key == K_SPACE :
                 pause()
                 
+            if event.type == pygame.VIDEORESIZE:
+                fenetre = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE)
+                
 def pause() :
-    global texte_sauv
+    global fenetre,texte_sauv
     
     pause=1
     
@@ -555,15 +573,18 @@ def pause() :
             if event.type == QUIT:     #Si un de ces événements est de type QUIT
                 pygame.display.quit()
                 pygame.quit()
-                continuer = 0      #On arrête la boucle
+                pause = 0      #On arrête la boucle
                 
             if event.type == KEYDOWN and event.key == K_SPACE :
                 game()
                 
+            if event.type == pygame.VIDEORESIZE:
+                fenetre = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE)
+                
 def sauvegarder():
-    global texte_sauv
+    global texte_sauv,num_partie
     
-    pickle.dump(test,open("sauvegarde","wb"))
+    pickle.dump(test,open("sauvegarde"+str(num_partie),"wb"))
     texte_sauv="Partie sauvegardee"
 
 
@@ -572,7 +593,7 @@ def sauvegarder():
 pygame.init()
 
 #Ouverture de la fenêtre Pygame
-fenetre = pygame.display.set_mode((1200, 700))
+fenetre = pygame.display.set_mode((1200, 700),pygame.RESIZABLE)
 
 
 
