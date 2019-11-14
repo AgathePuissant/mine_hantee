@@ -9,8 +9,7 @@ import pygame
 from pygame.locals import *
 import numpy as np
 import random as rd
-from PIL import Image
-import matplotlib.pyplot as plt
+import pickle
 
 class carte(object):
     
@@ -477,7 +476,7 @@ def menu():
         fenetre.blit(fond_menu,(0,0))  #On colle le fond du menu
         
         #Création du bouton qui lance le jeu
-        button(fenetre,"Jouer",600,350,100,50,pygame.Color("#DC143C"),pygame.Color("#F08080"),game)
+        button(fenetre,"Jouer",600,350,100,50,pygame.Color("#b46503"),pygame.Color("#d09954"),game)
                                                            
         pygame.display.flip() #Update l'écran
         
@@ -533,15 +532,22 @@ def game() :
                 pause()
                 
 def pause() :
+    global texte_sauv
     
     pause=1
+    
+    texte_sauv=""
     
     while pause :
         
         fenetre.blit(fond_menu,(0,0))
     
-        fenetre.blit(police.render("Pause",True,pygame.Color("#000000")),(600,350))
-                                                         
+        fenetre.blit(police.render("Pause",True,pygame.Color("#000000")),(600,200))
+                                                             
+        button(fenetre,"Sauvegarder",550,350,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),sauvegarder)                            
+                                  
+        fenetre.blit(police.render(texte_sauv,True,pygame.Color("#000000")),(550,500))
+                                                                
         pygame.display.flip() #Update l'écran
     
         for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
@@ -553,6 +559,12 @@ def pause() :
                 
             if event.type == KEYDOWN and event.key == K_SPACE :
                 game()
+                
+def sauvegarder():
+    global texte_sauv
+    
+    pickle.dump(test,open("sauvegarde","wb"))
+    texte_sauv="Partie sauvegardee"
 
 
 #-----------------------------------------Affichage graphique et début du jeu------------------------------
