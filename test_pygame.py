@@ -389,56 +389,6 @@ class plateau(object):
                     L_chemin_possibles=L_chemin_possibles+nouveaux_chemins
             
         return L_chemin_possibles
-    
-    
-    def affiche_plateau(self,fenetre):
-        #Chargement et collage du fond
-        
-        fenetre.blit(fond_ext,(0,0))
-        fenetre.blit(fond, (0,0))
-        
-        
-        for i in range(len(self.position)) :
-            for j in range(len(self.position)) :
-                x=self.dico_cartes[self.position[i,j]].coord[0]*100
-                y=self.dico_cartes[self.position[i,j]].coord[1]*100
-                
-                for k in range(len(self.dico_cartes[self.position[i,j]].orientation)) :
-                   if self.dico_cartes[self.position[i,j]].orientation[k]==1 :
-                       if k==0 :
-                           fenetre.blit(mur1,(x,y))
-                       elif k==1 :
-                           fenetre.blit(mur4,(x,y))
-                       elif k==2 :
-                           fenetre.blit(mur2,(x,y))
-                       elif k==3 :
-                           fenetre.blit(mur3,(x,y))
-                           
-                if self.dico_cartes[self.position[i,j]].presence_pepite==True:
-                    fenetre.blit(pepite,(x,y))
-                if self.dico_cartes[self.position[i,j]].id_fantome!=0 :
-                    fenetre.blit(fantome,(x,y))
-                    fenetre.blit(police.render(str(self.dico_cartes[self.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(x+40,y+8))
-                           
-        for i in range(len(self.dico_joueurs)) :
-            x=self.dico_joueurs[i].carte_position.coord[0]*100
-            y=self.dico_joueurs[i].carte_position.coord[1]*100
-            fenetre.blit(liste_im_joueur[i],(x,y))
-            
-        
-        x=750
-        y=50
-        fenetre.blit(fond_a_jouer,(x,y))
-        for k in range(len(self.carte_a_jouer.orientation)):
-            if self.carte_a_jouer.orientation[k]==1 :
-                if k==0 :
-                   fenetre.blit(mur1,(x,y))
-                elif k==1 :
-                   fenetre.blit(mur4,(x,y))
-                elif k==2 :
-                   fenetre.blit(mur2,(x,y))
-                elif k==3 :
-                   fenetre.blit(mur3,(x,y))
                    
                    
 #---------------------------------------Définition des objets graphiques---------------------------------
@@ -486,11 +436,60 @@ def button_charger_partie(fenetre,msg,x,y,w,h,ic,ac,i):
     textRect.center = ( (x+(w/2)), (y+(h/2)) )
     fenetre.blit(textSurf, textRect)
     
+def affiche_plateau(plat,fenetre):
+    #Chargement et collage du fond
+    
+    fenetre.blit(fond_ext,(0,0))
+    fenetre.blit(fond, (0,0))
+    
+    
+    for i in range(len(plat.position)) :
+        for j in range(len(plat.position)) :
+            x=plat.dico_cartes[plat.position[i,j]].coord[0]*100
+            y=plat.dico_cartes[plat.position[i,j]].coord[1]*100
+            
+            for k in range(len(plat.dico_cartes[plat.position[i,j]].orientation)) :
+               if plat.dico_cartes[plat.position[i,j]].orientation[k]==1 :
+                   if k==0 :
+                       fenetre.blit(mur1,(x,y))
+                   elif k==1 :
+                       fenetre.blit(mur4,(x,y))
+                   elif k==2 :
+                       fenetre.blit(mur2,(x,y))
+                   elif k==3 :
+                       fenetre.blit(mur3,(x,y))
+                       
+            if plat.dico_cartes[plat.position[i,j]].presence_pepite==True:
+                fenetre.blit(pepite,(x,y))
+            if plat.dico_cartes[plat.position[i,j]].id_fantome!=0 :
+                fenetre.blit(fantome,(x,y))
+                fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(x+40,y+8))
+                       
+    for i in range(len(plat.dico_joueurs)) :
+        x=plat.dico_joueurs[i].carte_position.coord[0]*100
+        y=plat.dico_joueurs[i].carte_position.coord[1]*100
+        fenetre.blit(liste_im_joueur[i],(x,y))
+        
+    
+    x=750
+    y=50
+    fenetre.blit(fond_a_jouer,(x,y))
+    for k in range(len(plat.carte_a_jouer.orientation)):
+        if plat.carte_a_jouer.orientation[k]==1 :
+            if k==0 :
+               fenetre.blit(mur1,(x,y))
+            elif k==1 :
+               fenetre.blit(mur4,(x,y))
+            elif k==2 :
+               fenetre.blit(mur2,(x,y))
+            elif k==3 :
+               fenetre.blit(mur3,(x,y))
+
     
 #---------------------------------------Défintion des instructions graphiques------------------------------
     
 def menu():
-    global fenetre,liste_sauv,num_partie
+    global fenetre,liste_sauv,num_partie,nouvelle
     
     intro = True
 
@@ -501,6 +500,8 @@ def menu():
         liste_sauv=glob.glob("sauvegarde*")
         liste_sauv=[int(liste_sauv[i][-1]) for i in range(len(liste_sauv))]
         
+        nouvelle=False
+        
         #Création du bouton qui lance le jeu
         button(fenetre,"Nouvelle partie",500,350,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),nouvelle_partie)
         button(fenetre,"Charger une partie",500,450,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),charger_partie)
@@ -509,19 +510,18 @@ def menu():
         
         for event in pygame.event.get(): #Instructions de sortie
             if event.type == pygame.QUIT:
-                intro=False
                 pygame.display.quit()
                 pygame.quit()
+                intro=False
 
 def game() :
-    global fenetre,num_partie,nouvelle
+    global fenetre,num_partie,nouvelle,plateau_test
     
     if nouvelle==False :
-        test=pickle.load(open("sauvegarde"+str(num_partie),"rb"))
+        plateau_test=pickle.load(open("sauvegarde"+str(num_partie),"rb"))
     else :
-        #Plateau de test
-        test=plateau(3,["Antoine","Christine","Michel"],[],7)
-    
+        #Plateau de plateau_test
+        plateau_test=plateau(3,["Antoine","Christine","Michel"],[],7)
     
     continuer = 1
     
@@ -530,13 +530,13 @@ def game() :
     #Boucle infinie
     while continuer:
         
-        test.affiche_plateau(fenetre) #on re-colle le plateau
+        affiche_plateau(plateau_test,fenetre) #on re-colle le plateau
         
         
-        for i in range(len(test.dico_joueurs)) : #affichage des scores
-                x=test.dico_joueurs[i].carte_position.coord[0]*100
-                y=test.dico_joueurs[i].carte_position.coord[1]*100
-                fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(test.dico_joueurs[i].points),True,pygame.Color("#FFFFFF")),(760,300+i*100))
+        for i in range(len(plateau_test.dico_joueurs)) : #affichage des scores
+                x=plateau_test.dico_joueurs[i].carte_position.coord[0]*100
+                y=plateau_test.dico_joueurs[i].carte_position.coord[1]*100
+                fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(plateau_test.dico_joueurs[i].points),True,pygame.Color("#FFFFFF")),(760,300+i*100))
                                       
         fenetre.blit(police.render(erreur_deplacement,True,pygame.Color("#000000")),(750,250)) #affichage du message d'erreur
                                                                         
@@ -545,18 +545,18 @@ def game() :
         for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
                 
             if event.type == KEYDOWN and event.key == K_r: #Si on appuie sur R, rotation de la carte à jouer
-                test.carte_a_jouer.orientation[0],test.carte_a_jouer.orientation[1],test.carte_a_jouer.orientation[2],test.carte_a_jouer.orientation[3]=test.carte_a_jouer.orientation[3],test.carte_a_jouer.orientation[0],test.carte_a_jouer.orientation[1],test.carte_a_jouer.orientation[2]
+                plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2],plateau_test.carte_a_jouer.orientation[3]=plateau_test.carte_a_jouer.orientation[3],plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2]
             
             if event.type == MOUSEBUTTONDOWN : 
                 if event.button==1: #clic gauche : insertion de la carte à jouer
                     coord=[event.pos[0]//100,event.pos[1]//100]
-                    if test.deplace_carte(coord)==False :
+                    if plateau_test.deplace_carte(coord)==False :
                         erreur_deplacement="Vous ne pouvez pas insérer la carte ici!"
                     else :
                         erreur_deplacement=""
                         
             if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
-                test.deplace_joueur(0,event.key)
+                plateau_test.deplace_joueur(0,event.key)
                 
             if event.type == KEYDOWN and event.key == K_SPACE :
                 pause()
@@ -598,9 +598,9 @@ def pause() :
                 pause = 0      #On arrête la boucle
                 
 def sauvegarder():
-    global texte_sauv,num_partie
+    global texte_sauv,num_partie,plateau_test
     
-    pickle.dump(test,open("sauvegarde"+str(num_partie),"wb"))
+    pickle.dump(plateau_test,open("sauvegarde"+str(num_partie),"wb"))
     texte_sauv="Partie sauvegardee"
 
     
