@@ -458,14 +458,107 @@ class plateau(object):
                    fenetre.blit(mur2,(x,y))
                 elif k==3 :
                    fenetre.blit(mur3,(x,y))
+                   
+                   
+#---------------------------------------Définition des objets graphiques---------------------------------
+ 
+#code nécessaire pour créer des boutons associés à une action
+def text_objects(text, font):
+    textSurface = font.render(text, True, pygame.Color("#000000"))
+    return textSurface, textSurface.get_rect()
+      
+def button(fenetre,msg,x,y,w,h,ic,ac,action=None):
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+    
+    if x+w > mouse[0] > x and y+h > mouse[1] > y:
+        pygame.draw.rect(fenetre, ac,(x,y,w,h))
+
+        if click[0] == 1 and action != None:
+            action()         
+    else:
+        pygame.draw.rect(fenetre, ic,(x,y,w,h))
+
+    smallText = pygame.font.SysFont("comicsansms",20)
+    textSurf, textRect = text_objects(msg, smallText)
+    textRect.center = ( (x+(w/2)), (y+(h/2)) )
+    fenetre.blit(textSurf, textRect)
+    
+    
+#---------------------------------------Défintion des instructions graphiques------------------------------
+    
+def menu():
+    
+    intro = True
+
+    while intro: #Boucle infinie
+        
+        fenetre.blit(fond_menu,(0,0))  #On colle le fond du menu
+        
+        #Création du bouton qui lance le jeu
+        button(fenetre,"Jouer",600,350,100,50,pygame.Color("#DC143C"),pygame.Color("#F08080"),game)
+                                                           
+        pygame.display.flip() #Update l'écran
+        
+        for event in pygame.event.get(): #Instructions de sortie
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+def game() :
+    
+    
+    continuer = 1
+    
+    erreur_deplacement="" #Initialisation du texte d'erreur
+    
+    #Boucle infinie
+    while continuer:
+        
+        test.affiche_plateau(fenetre) #on re-colle le plateau
+        
+        
+        for i in range(len(test.dico_joueurs)) : #affichage des scores
+                x=test.dico_joueurs[i].carte_position.coord[0]*100
+                y=test.dico_joueurs[i].carte_position.coord[1]*100
+                fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(test.dico_joueurs[i].points),True,pygame.Color("#FFFFFF")),(760,300+i*100))
+                                      
+        fenetre.blit(police.render(erreur_deplacement,True,pygame.Color("#000000")),(750,250)) #affichage du message d'erreur
+                                                                        
+        pygame.display.flip() #Update l'écran
+        
+        for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
             
-test=plateau(3,["Antoine","Christine","Michel"],[],7)
+            if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                pygame.display.quit()
+                pygame.quit()
+                continuer = 0      #On arrête la boucle
+                
+            if event.type == KEYDOWN and event.key == K_r: #Si on appuie sur R, rotation de la carte à jouer
+                test.carte_a_jouer.orientation[0],test.carte_a_jouer.orientation[1],test.carte_a_jouer.orientation[2],test.carte_a_jouer.orientation[3]=test.carte_a_jouer.orientation[3],test.carte_a_jouer.orientation[0],test.carte_a_jouer.orientation[1],test.carte_a_jouer.orientation[2]
+            
+            if event.type == MOUSEBUTTONDOWN : 
+                if event.button==1: #clic gauche : insertion de la carte à jouer
+                    coord=[event.pos[0]//100,event.pos[1]//100]
+                    if test.deplace_carte(coord)==False :
+                        erreur_deplacement="Vous ne pouvez pas insérer la carte ici!"
+                    else :
+                        erreur_deplacement=""
+                        
+            if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
+                test.deplace_joueur(0,event.key)
+
+
+#-----------------------------------------Affichage graphique et début du jeu------------------------------
 
 pygame.init()
 
 #Ouverture de la fenêtre Pygame
 fenetre = pygame.display.set_mode((1200, 700))
 
+
+
+#Création des images nécesssaires au jeu
 fond = pygame.image.load("fond.jpg").convert()
 fond_ext = pygame.image.load("fond_ext.png").convert()
 mur1 = pygame.image.load("mur1.png").convert_alpha()
@@ -476,50 +569,17 @@ liste_im_joueur = [pygame.image.load("joueur"+str(i)+".png").convert_alpha() for
 fond_a_jouer = pygame.image.load("fond_carte_a_jouer.png").convert()
 fantome = pygame.image.load("fantome.png").convert_alpha()
 pepite = pygame.image.load("pepite.png").convert_alpha()
-
+fond_menu = pygame.image.load("fond_menu.png").convert()
+#Création de la police du jeu
 police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
 
-transparent = (0, 0, 0, 0)
+#Plateau de test
+test=plateau(3,["Antoine","Christine","Michel"],[],7)
+
+#Lancement du menu
+menu()
 
 
-continuer = 1
-erreur_deplacement=""
-
-#Boucle infinie
-while continuer:
-    
-    test.affiche_plateau(fenetre)
-    
-    
-    for i in range(len(test.dico_joueurs)) :
-            x=test.dico_joueurs[i].carte_position.coord[0]*100
-            y=test.dico_joueurs[i].carte_position.coord[1]*100
-            fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(test.dico_joueurs[i].points),True,pygame.Color("#FFFFFF")),(760,300+i*100))
-                                  
-    fenetre.blit(police.render(erreur_deplacement,True,pygame.Color("#000000")),(750,250))
-                                                                    
-    pygame.display.flip()
-    
-    for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
-        
-        if event.type == QUIT:     #Si un de ces événements est de type QUIT
-            pygame.display.quit()
-            pygame.quit()
-            continuer = 0      #On arrête la boucle
-            
-        if event.type == KEYDOWN and event.key == K_r:
-            test.carte_a_jouer.orientation[0],test.carte_a_jouer.orientation[1],test.carte_a_jouer.orientation[2],test.carte_a_jouer.orientation[3]=test.carte_a_jouer.orientation[3],test.carte_a_jouer.orientation[0],test.carte_a_jouer.orientation[1],test.carte_a_jouer.orientation[2]
-        
-        if event.type == MOUSEBUTTONDOWN :
-            if event.button==1:
-                coord=[event.pos[0]//100,event.pos[1]//100]
-                if test.deplace_carte(coord)==False :
-                    erreur_deplacement="Vous ne pouvez pas insérer la carte ici!"
-                else :
-                    erreur_deplacement=""
-                    
-        if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) :
-            test.deplace_joueur(0,event.key)
                 
                 
                 
