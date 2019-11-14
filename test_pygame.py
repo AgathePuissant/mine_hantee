@@ -437,7 +437,7 @@ class plateau(object):
                     fenetre.blit(pepite,(x,y))
                 if self.dico_cartes[self.position[i,j]].id_fantome!=0 :
                     fenetre.blit(fantome,(x,y))
-                    fenetre.blit(police.render(str(self.dico_cartes[self.position[i,j]].id_fantome),True,pygame.Color("#000000")),(x+40,y+40))
+                    fenetre.blit(police.render(str(self.dico_cartes[self.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(x+40,y+8))
                            
         for i in range(len(self.dico_joueurs)) :
             x=self.dico_joueurs[i].carte_position.coord[0]*100
@@ -477,7 +477,8 @@ fond_a_jouer = pygame.image.load("fond_carte_a_jouer.png").convert()
 fantome = pygame.image.load("fantome.png").convert_alpha()
 pepite = pygame.image.load("pepite.png").convert_alpha()
 
-police = pygame.font.Font(None,24)
+police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
+
 transparent = (0, 0, 0, 0)
 
 
@@ -493,7 +494,7 @@ while continuer:
     for i in range(len(test.dico_joueurs)) :
             x=test.dico_joueurs[i].carte_position.coord[0]*100
             y=test.dico_joueurs[i].carte_position.coord[1]*100
-            fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(test.dico_joueurs[i].points),True,pygame.Color("#000000")),(800,300+i*100))
+            fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(test.dico_joueurs[i].points),True,pygame.Color("#FFFFFF")),(760,300+i*100))
                                   
     fenetre.blit(police.render(erreur_deplacement,True,pygame.Color("#000000")),(750,250))
                                                                     
