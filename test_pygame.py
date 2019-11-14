@@ -246,37 +246,37 @@ class plateau(object):
         """
         carte=carte de la position pour laquelle on veut trouver les cartes accessibles
         """
-        cartes_accessibles=[] #liste des entités des cartes accessibles
+        cartes_accessibles=[] #liste des entitÃ©s des cartes accessibles
         coord=carte.coord
                     
-        if ((coord[0]-1)>=0 and carte.orientation[3]==0): 
-            #Si on est pas sur l'extrêmité gauche du plateau
+        if ((coord[1]-1)>=0 and carte.orientation[3]==0): 
+            #Si on est pas sur l'extrÃªmitÃ© gauche du plateau
             #et si aucun mur de la carte position ne barre le passage
-            #On trouve l'entité de la carte à notre gauche
+            #On trouve l'entitÃ© de la carte Ã  notre gauche
             for i in self.dico_cartes.values():
-                if i.coord == [coord[0]-1,coord[1]]:
+                if i.coord == [coord[0],coord[1]-1]:
                     carte_access = i
             if carte_access.orientation[1] == 0: #Si aucun mur de la carte accessible ne barre le passage
                 cartes_accessibles.append(carte_access)
             
-        if ((coord[0]+1)<self.N and carte.orientation[1]==0): 
-            #Si on est pas sur l'extrêmité droite du plateau
+        if ((coord[1]+1)<self.N and carte.orientation[1]==0):
+            #Si on est pas sur l'extrÃªmitÃ© droite du plateau
             for i in self.dico_cartes.values():
-                if i.coord == [coord[0]+1,coord[1]]:
+                if i.coord == [coord[0],coord[1]+1]:
                     carte_access = i
             if carte_access.orientation[3] == 0:
                 cartes_accessibles.append(carte_access)
         
-        if ((coord[1]-1)>=0 and carte.orientation[0]==0): #Si on est pas sur l'extrêmité haute du plateau
+        if ((coord[0]-1)>=0 and carte.orientation[0]==0): #Si on est pas sur l'extrÃªmitÃ© haute du plateau
             for i in self.dico_cartes.values():
-                if i.coord == [coord[0],coord[1]-1]:
+                if i.coord == [coord[0]-1,coord[1]]:
                     carte_access = i
             if carte_access.orientation[2] == 0:
                 cartes_accessibles.append(carte_access)
         
-        if ((coord[1]+1)<self.N and carte.orientation[2]==0): #Si on est pas sur l'extrêmité basse du plateau
+        if ((coord[0]+1)<self.N and carte.orientation[2]==0): #Si on est pas sur l'extrÃªmitÃ© basse du plateau
             for i in self.dico_cartes.values():
-                if i.coord == [coord[0],coord[1]+1]:
+                if i.coord == [coord[0]+1,coord[1]]:
                     carte_access = i
             if carte_access.orientation[0] == 0:
                 cartes_accessibles.append(carte_access)
