@@ -465,11 +465,32 @@ def button(fenetre,msg,x,y,w,h,ic,ac,action=None):
     textRect.center = ( (x+(w/2)), (y+(h/2)) )
     fenetre.blit(textSurf, textRect)
     
+def button_charger_partie(fenetre,msg,x,y,w,h,ic,ac,i):
+    global num_partie,retour_partie
+    
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+    
+    if x+w > mouse[0] > x and y+h > mouse[1] > y:
+        pygame.draw.rect(fenetre, ac,(x,y,w,h))
+
+        if click[0] == 1 and i != None:
+            num_partie=i
+            retour_partie=True
+            
+    else:
+        pygame.draw.rect(fenetre, ic,(x,y,w,h))   
+
+    smallText = pygame.font.SysFont("comicsansms",20)
+    textSurf, textRect = text_objects(msg, smallText)
+    textRect.center = ( (x+(w/2)), (y+(h/2)) )
+    fenetre.blit(textSurf, textRect)
+    
     
 #---------------------------------------Défintion des instructions graphiques------------------------------
     
 def menu():
-    global fenetre
+    global fenetre,liste_sauv,num_partie
     
     intro = True
 
@@ -477,30 +498,29 @@ def menu():
         
         fenetre.blit(fond_menu,(0,0))  #On colle le fond du menu
         
+        liste_sauv=glob.glob("sauvegarde*")
+        liste_sauv=[int(liste_sauv[i][-1]) for i in range(len(liste_sauv))]
+        
         #Création du bouton qui lance le jeu
-        button(fenetre,"Nouvelle partie",500,350,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),game)
-                                                           
+        button(fenetre,"Nouvelle partie",500,350,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),nouvelle_partie)
+        button(fenetre,"Charger une partie",500,450,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),charger_partie)
+                                                                     
         pygame.display.flip() #Update l'écran
         
         for event in pygame.event.get(): #Instructions de sortie
             if event.type == pygame.QUIT:
                 intro=False
+                pygame.display.quit()
                 pygame.quit()
-                pygame.quit()
-                
-            if event.type == pygame.VIDEORESIZE:
-                fenetre = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE)
 
 def game() :
-    global fenetre,num_partie
+    global fenetre,num_partie,nouvelle
     
-    liste_sauv=glob.glob("sauvegarde*")
-    if liste_sauv!=[] :
-        num_partie=[i for i in liste_sauv]
-        num_partie=[int(num_partie[i][-1]) for i in range(len(num_partie))]
-        num_partie=max(num_partie)+1
+    if nouvelle==False :
+        test=pickle.load(open("sauvegarde"+str(num_partie),"rb"))
     else :
-        num_partie=1
+        #Plateau de test
+        test=plateau(3,["Antoine","Christine","Michel"],[],7)
     
     
     continuer = 1
@@ -523,11 +543,6 @@ def game() :
         pygame.display.flip() #Update l'écran
         
         for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
-            
-            if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                pygame.display.quit()
-                pygame.quit()
-                continuer = 0      #On arrête la boucle
                 
             if event.type == KEYDOWN and event.key == K_r: #Si on appuie sur R, rotation de la carte à jouer
                 test.carte_a_jouer.orientation[0],test.carte_a_jouer.orientation[1],test.carte_a_jouer.orientation[2],test.carte_a_jouer.orientation[3]=test.carte_a_jouer.orientation[3],test.carte_a_jouer.orientation[0],test.carte_a_jouer.orientation[1],test.carte_a_jouer.orientation[2]
@@ -546,8 +561,10 @@ def game() :
             if event.type == KEYDOWN and event.key == K_SPACE :
                 pause()
                 
-            if event.type == pygame.VIDEORESIZE:
-                fenetre = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE)
+            if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                pygame.display.quit()
+                pygame.quit()
+                continuer = 0      #On arrête la boucle
                 
 def pause() :
     global fenetre,texte_sauv
@@ -562,30 +579,79 @@ def pause() :
     
         fenetre.blit(police.render("Pause",True,pygame.Color("#000000")),(600,200))
                                                              
-        button(fenetre,"Sauvegarder",550,350,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),sauvegarder)                            
+        button(fenetre,"Sauvegarder",550,350,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),sauvegarder) 
+                                                                 
+        button(fenetre,"Retour au menu",550,450,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),menu)
                                   
-        fenetre.blit(police.render(texte_sauv,True,pygame.Color("#000000")),(550,500))
+        fenetre.blit(police.render(texte_sauv,True,pygame.Color("#000000")),(550,550))
                                                                 
         pygame.display.flip() #Update l'écran
     
         for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
-            
-            if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                pygame.display.quit()
-                pygame.quit()
-                pause = 0      #On arrête la boucle
                 
             if event.type == KEYDOWN and event.key == K_SPACE :
                 game()
                 
-            if event.type == pygame.VIDEORESIZE:
-                fenetre = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE)
+            if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                pygame.display.quit()
+                pygame.quit()
+                pause = 0      #On arrête la boucle
                 
 def sauvegarder():
     global texte_sauv,num_partie
     
     pickle.dump(test,open("sauvegarde"+str(num_partie),"wb"))
     texte_sauv="Partie sauvegardee"
+
+    
+def charger_partie():
+    global fenetre,liste_sauv,num_partie,retour_partie
+    
+    charger=1
+    retour_partie=False
+        
+    while charger :
+        
+    
+        if liste_sauv!=[] :
+            
+            fenetre.blit(fond_menu,(0,0))  #On colle le fond du menu
+            
+            for i in range(len(liste_sauv)) :
+                button_charger_partie(fenetre,"Partie "+str(liste_sauv[i]),500,100+i*100,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),liste_sauv[i])
+            
+            if retour_partie==True :
+                fenetre.blit(police.render("Partie "+str(num_partie)+" selectionnee",True,pygame.Color("#000000")),(800,100))
+            
+            button(fenetre,"Lancer la partie",800,300,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),game)
+                                                                          
+        else :
+            
+            fenetre.blit(fond_menu,(0,0))  #On colle le fond du menu
+            fenetre.blit(police.render("Aucune partie sauvegardee",True,pygame.Color("#000000")),(450,100))
+            button(fenetre,"Retour au menu",500,300,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),menu)
+            
+        pygame.display.flip() #Update l'écran
+
+        for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+            
+            if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                pygame.display.quit()
+                pygame.quit()
+                charger = 0      #On arrête la boucle
+                
+def nouvelle_partie():
+    global fenetre,liste_sauv,num_partie,nouvelle
+    
+    if liste_sauv!=[]:
+        num_partie=np.max(liste_sauv)+1
+    else :
+        num_partie=1
+        
+    nouvelle=True
+        
+    game()
+    
 
 
 #-----------------------------------------Affichage graphique et début du jeu------------------------------
@@ -612,8 +678,6 @@ fond_menu = pygame.image.load("fond_menu.png").convert()
 #Création de la police du jeu
 police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
 
-#Plateau de test
-test=plateau(3,["Antoine","Christine","Michel"],[],7)
 
 #Lancement du menu
 menu()
