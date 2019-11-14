@@ -234,28 +234,9 @@ class plateau(object):
                 
                 carte_sauvegardee.id_fantome=0 #on supprime le fantôme de la carte sortie
                 
-        for i in range(len(self.dico_joueurs)) : #copié collé de deplace_joueur -> faire une méthode dans la classe joueur?
+        for i in range(len(self.dico_joueurs)) : 
             if carte_sauvegardee.id==self.dico_joueurs[i].carte_position.id :
                 self.dico_joueurs[i].carte_position=self.dico_cartes[self.position[x,y]]
-                
-                if self.dico_joueurs[i].carte_position.id_fantome==self.id_dernier_fantome+1 and self.dico_joueurs[i].capture_fantome == False :
-                    #Si le fantôme est sur l'ordre de mission, le joueur gagne 20 points
-                        if self.dico_joueurs[i].carte_position.id_fantome in self.dico_joueurs[i].fantome_target : 
-                            self.dico_joueurs[i].points += 20
-                            self.dico_joueurs[i].fantome_target.remove(self.dico_joueurs[i].carte_position.id_fantome)
-                            print("fantome sur l'ordre de mission capturé")
-                            #Si l'ordre de mission est totalement rempli, le joueur gagne 40 points
-                            if self.dico_joueurs[i].fantome_target==[]:
-                                self.dico_joueurs[i].points += 40
-                                print("ordre de mission rempli")
-                        #Si le fantôme n'est pas sur l'ordre de mission, le joueur gagne 5 points
-                        else:
-                            self.dico_joueurs[i].points += 5
-                            print("fantome capturé")
-                        
-                        self.dico_joueurs[i].capture_fantome = True
-                        self.id_dernier_fantome += 1
-                        self.dico_joueurs[i].carte_position.id_fantome = 0
                     
             
         self.carte_a_jouer=carte_sauvegardee #update la carte à jouer
