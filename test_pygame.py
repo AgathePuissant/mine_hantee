@@ -306,7 +306,8 @@ class plateau(object):
         
         #On vérifie que les coordonnées de l'endroit où le joueur veut aller ne sont pas hors plateau
         #i.e. on vérifie que le joueur ne fonce pas dans une des limites du plateau
-        if nv_coord[0]<0 or nv_coord[1]<0 or nv_coord[0]>=self.N or nv_coord[1]>=self.N:
+        #Et on vérifie que le joueur ne fonce pas dans un mur de la carte sur laquelle il est
+        if nv_coord[0]<0 or nv_coord[1]<0 or nv_coord[0]>=self.N or nv_coord[1]>=self.N or self.dico_joueurs[id_joueur].carte_position.orientation[direction]==1:
             retour.append("Vous ne pouvez pas aller dans cette direction")
         else:
             #On retrouve la carte associée aux nouvelles coordonnées
