@@ -554,7 +554,7 @@ def game() :
             
             if event.type == MOUSEBUTTONDOWN : 
                 if event.button==1: #clic gauche : insertion de la carte à jouer
-                    coord=[event.pos[0]//100,event.pos[1]//100]
+                    coord=[event.pos[1]//100,event.pos[0]//100]
                     if coord[0]>plateau_test.N-1 :
                         erreur_deplacement="Cliquez dans le plateau"
                     else :
