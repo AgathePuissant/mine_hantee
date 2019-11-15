@@ -550,10 +550,13 @@ def game() :
             if event.type == MOUSEBUTTONDOWN : 
                 if event.button==1: #clic gauche : insertion de la carte à jouer
                     coord=[event.pos[0]//100,event.pos[1]//100]
-                    if plateau_test.deplace_carte(coord)==False :
-                        erreur_deplacement="Vous ne pouvez pas insérer la carte ici!"
+                    if coord[0]>plateau_test.N-1 :
+                        erreur_deplacement="Cliquez dans le plateau"
                     else :
-                        erreur_deplacement=""
+                        if plateau_test.deplace_carte(coord)==False :
+                            erreur_deplacement="Insertion impossible"
+                        else :
+                            erreur_deplacement=""
                         
             if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
                 plateau_test.deplace_joueur(0,event.key)
@@ -623,7 +626,7 @@ def charger_partie():
             if retour_partie==True :
                 fenetre.blit(police.render("Partie "+str(num_partie)+" selectionnee",True,pygame.Color("#000000")),(800,100))
             
-            button(fenetre,"Lancer la partie",800,300,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),game)
+                button(fenetre,"Lancer la partie",800,300,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),game)
                                                                           
         else :
             
