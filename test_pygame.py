@@ -289,19 +289,19 @@ class plateau(object):
         
         #On stocke les coordonnées de la carte où on veut aller
         if key == 274: #bas
-            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0],self.dico_joueurs[id_joueur].carte_position.coord[1]+1]
+            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0]+1,self.dico_joueurs[id_joueur].carte_position.coord[1]]
             direction = 0 #rang du côté concerné dans l'attribut orientation de la nouvelle carte
         
         elif key == 276: #gauche
-            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0]-1,self.dico_joueurs[id_joueur].carte_position.coord[1]]
+            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0],self.dico_joueurs[id_joueur].carte_position.coord[1]-1]
             direction = 1
         
         elif key == 273: #haut
-            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0],self.dico_joueurs[id_joueur].carte_position.coord[1]-1]
+            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0]-1,self.dico_joueurs[id_joueur].carte_position.coord[1]]
             direction = 2
         
         elif key == 275: #droite
-            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0]+1,self.dico_joueurs[id_joueur].carte_position.coord[1]]
+            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0],self.dico_joueurs[id_joueur].carte_position.coord[1]+1]
             direction = 3
         
         #On vérifie que les coordonnées de l'endroit où le joueur veut aller ne sont pas hors plateau
@@ -315,9 +315,9 @@ class plateau(object):
                 if i.coord == nv_coord :
                     nv_carte = i
             
-            #On vérifie que le joueur ne fonce pas dans un mur
+            #On vérifie que le joueur ne fonce pas dans un mur de la carte adjacente
             if nv_carte.orientation[direction] == 1:
-                retour.append("Vous ne pouvez pas aller dans cette direction")
+                retour.append("Vous ne pouvez pas aller dans cette direction, mur adj")
             else:
                 #On vérifie que le joueur n'est pas déjà passé par cette carte pendant ce tour
                 if nv_carte in self.dico_joueurs[id_joueur].cartes_explorees:
@@ -452,24 +452,24 @@ def affiche_plateau(plat,fenetre):
             for k in range(len(plat.dico_cartes[plat.position[i,j]].orientation)) :
                if plat.dico_cartes[plat.position[i,j]].orientation[k]==1 :
                    if k==0 :
-                       fenetre.blit(mur1,(x,y))
+                       fenetre.blit(mur1,(y,x))
                    elif k==1 :
-                       fenetre.blit(mur4,(x,y))
+                       fenetre.blit(mur4,(y,x))
                    elif k==2 :
-                       fenetre.blit(mur2,(x,y))
+                       fenetre.blit(mur2,(y,x))
                    elif k==3 :
-                       fenetre.blit(mur3,(x,y))
+                       fenetre.blit(mur3,(y,x))
                        
             if plat.dico_cartes[plat.position[i,j]].presence_pepite==True:
-                fenetre.blit(pepite,(x,y))
+                fenetre.blit(pepite,(y,x))
             if plat.dico_cartes[plat.position[i,j]].id_fantome!=0 :
-                fenetre.blit(fantome,(x,y))
+                fenetre.blit(fantome,(y,x))
                 fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(x+40,y+8))
                        
     for i in range(len(plat.dico_joueurs)) :
         x=plat.dico_joueurs[i].carte_position.coord[0]*100
         y=plat.dico_joueurs[i].carte_position.coord[1]*100
-        fenetre.blit(liste_im_joueur[i],(x,y))
+        fenetre.blit(liste_im_joueur[i],(y,x))
         
     
     x=750
