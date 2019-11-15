@@ -493,13 +493,8 @@ def menu():
     
     intro = True
 
-    while intro: #Boucle infinie
-        
-        for event in pygame.event.get(): #Instructions de sortie
-            if event.type == pygame.QUIT:
-                pygame.display.quit()
-                pygame.quit()
-                intro=False
+    while intro==True: #Boucle infinie
+                
                 
         fenetre.blit(fond_menu,(0,0))  #On colle le fond du menu
         
@@ -513,6 +508,12 @@ def menu():
         button(fenetre,"Charger une partie",500,450,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),charger_partie)
                                                                      
         pygame.display.flip() #Update l'écran
+        
+        for event in pygame.event.get(): #Instructions de sortie
+            if event.type == pygame.QUIT:
+                intro=False
+                pygame.display.quit()
+                pygame.quit()
 
 def game() :
     global fenetre,num_partie,nouvelle,plateau_test
@@ -530,14 +531,21 @@ def game() :
     erreur_deplacement="" #Initialisation du texte d'erreur
     
     #Boucle infinie
-    while continuer:
+    while continuer==True:
+                
+        affiche_plateau(plateau_test,fenetre) #on re-colle le plateau
         
-        for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
-            
-            if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                pygame.display.quit()
-                pygame.quit()
-                continuer = False     #On arrête la boucle
+        
+        for i in range(len(plateau_test.dico_joueurs)) : #affichage des scores
+                x=plateau_test.dico_joueurs[i].carte_position.coord[0]*100
+                y=plateau_test.dico_joueurs[i].carte_position.coord[1]*100
+                fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(plateau_test.dico_joueurs[i].points),True,pygame.Color("#FFFFFF")),(760,300+i*100))
+                                      
+        fenetre.blit(police.render(erreur_deplacement,True,pygame.Color("#000000")),(750,250)) #affichage du message d'erreur
+                                                                        
+        pygame.display.flip() #Update l'écran
+        
+        for event in pygame.event.get():   #On parcours la liste de tous les événements reçus               
                 
             if event.type == KEYDOWN and event.key == K_r: #Si on appuie sur R, rotation de la carte à jouer
                 plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2],plateau_test.carte_a_jouer.orientation[3]=plateau_test.carte_a_jouer.orientation[3],plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2]
@@ -558,18 +566,11 @@ def game() :
                 
             if event.type == KEYDOWN and event.key == K_SPACE :
                 pause()
-                
-        affiche_plateau(plateau_test,fenetre) #on re-colle le plateau
-        
-        
-        for i in range(len(plateau_test.dico_joueurs)) : #affichage des scores
-                x=plateau_test.dico_joueurs[i].carte_position.coord[0]*100
-                y=plateau_test.dico_joueurs[i].carte_position.coord[1]*100
-                fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(plateau_test.dico_joueurs[i].points),True,pygame.Color("#FFFFFF")),(760,300+i*100))
-                                      
-        fenetre.blit(police.render(erreur_deplacement,True,pygame.Color("#000000")),(750,250)) #affichage du message d'erreur
-                                                                        
-        pygame.display.flip() #Update l'écran
+            
+            if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                continuer = False     #On arrête la boucle
+                pygame.display.quit()
+                pygame.quit()
                 
 def pause() :
     global fenetre,texte_sauv,nouvelle
@@ -580,17 +581,7 @@ def pause() :
     
     texte_sauv=""
     
-    while pause :
-    
-        for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
-            
-            if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                pygame.display.quit()
-                pygame.quit()
-                pause = False      #On arrête la boucle
-                
-            if event.type == KEYDOWN and event.key == K_SPACE :
-                game()
+    while pause==True :
                 
         fenetre.blit(fond_uni,(0,0))
     
@@ -603,6 +594,16 @@ def pause() :
         fenetre.blit(police.render(texte_sauv,True,pygame.Color("#000000")),(550,550))
                                                                 
         pygame.display.flip() #Update l'écran
+        
+        for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+                
+            if event.type == KEYDOWN and event.key == K_SPACE :
+                game()
+                
+            if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                pause = False      #On arrête la boucle
+                pygame.display.quit()
+                pygame.quit()
                 
 def sauvegarder():
     global texte_sauv,num_partie,plateau_test
@@ -614,17 +615,11 @@ def sauvegarder():
 def charger_partie():
     global fenetre,liste_sauv,num_partie,retour_partie
     
-    charger=1
+    charger=True
     retour_partie=False
         
-    while charger :
-
-        for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
-            
-            if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                pygame.display.quit()
-                pygame.quit()
-                charger = 0      #On arrête la boucle
+    while charger ==True:
+                
                 
         if liste_sauv!=[] :
             
@@ -645,6 +640,13 @@ def charger_partie():
             button(fenetre,"Retour au menu",500,300,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),menu)
             
         pygame.display.flip() #Update l'écran
+        
+        for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+            
+            if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                charger = False      #On arrête la boucle
+                pygame.display.quit()
+                pygame.quit()
                 
 def nouvelle_partie():
     global fenetre,liste_sauv,num_partie,nouvelle
@@ -688,6 +690,8 @@ police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
 
 #Lancement du menu
 menu()
+pygame.quit()
+quit()
 
 
                 
