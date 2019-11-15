@@ -514,6 +514,7 @@ def menu():
                 intro=False
                 pygame.display.quit()
                 pygame.quit()
+      
 
 def game() :
     global fenetre,num_partie,nouvelle,plateau_test
@@ -571,6 +572,7 @@ def game() :
                 continuer = False     #On arrête la boucle
                 pygame.display.quit()
                 pygame.quit()
+
                 
 def pause() :
     global fenetre,texte_sauv,nouvelle
@@ -604,6 +606,8 @@ def pause() :
                 pause = False      #On arrête la boucle
                 pygame.display.quit()
                 pygame.quit()
+                
+
                 
 def sauvegarder():
     global texte_sauv,num_partie,plateau_test
@@ -648,6 +652,8 @@ def charger_partie():
                 pygame.display.quit()
                 pygame.quit()
                 
+
+                
 def nouvelle_partie():
     global fenetre,liste_sauv,num_partie,nouvelle
     
@@ -691,7 +697,6 @@ police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
 #Lancement du menu
 menu()
 pygame.quit()
-quit()
 
 
                 
