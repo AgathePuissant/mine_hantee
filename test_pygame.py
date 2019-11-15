@@ -291,23 +291,27 @@ class plateau(object):
         if key == 274: #bas
             nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0]+1,self.dico_joueurs[id_joueur].carte_position.coord[1]]
             direction = 0 #rang du côté concerné dans l'attribut orientation de la nouvelle carte
+            direction_carte = 2 #rang du côté concerné par l'attribut orientation de la carte sur laquelle le joueur est
         
         elif key == 276: #gauche
             nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0],self.dico_joueurs[id_joueur].carte_position.coord[1]-1]
             direction = 1
+            direction_carte = 3
         
         elif key == 273: #haut
             nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0]-1,self.dico_joueurs[id_joueur].carte_position.coord[1]]
             direction = 2
+            direction_carte = 0
         
         elif key == 275: #droite
             nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0],self.dico_joueurs[id_joueur].carte_position.coord[1]+1]
             direction = 3
+            direction_carte = 1
         
         #On vérifie que les coordonnées de l'endroit où le joueur veut aller ne sont pas hors plateau
         #i.e. on vérifie que le joueur ne fonce pas dans une des limites du plateau
         #Et on vérifie que le joueur ne fonce pas dans un mur de la carte sur laquelle il est
-        if nv_coord[0]<0 or nv_coord[1]<0 or nv_coord[0]>=self.N or nv_coord[1]>=self.N or self.dico_joueurs[id_joueur].carte_position.orientation[direction]==1:
+        if nv_coord[0]<0 or nv_coord[1]<0 or nv_coord[0]>=self.N or nv_coord[1]>=self.N or self.dico_joueurs[id_joueur].carte_position.orientation[direction_carte]==1:
             retour.append("Vous ne pouvez pas aller dans cette direction")
         else:
             #On retrouve la carte associée aux nouvelles coordonnées
