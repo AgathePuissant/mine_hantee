@@ -32,7 +32,7 @@ class joueur(object):
         self.fantome_target = fantome_target
         self.carte_position = carte_position
         self.points = 0
-        self.cartes_explorees = []
+        self.cartes_explorees = [carte_position]
         self.capture_fantome = False
 
 
