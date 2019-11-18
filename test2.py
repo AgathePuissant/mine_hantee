@@ -460,6 +460,14 @@ def affiche_plateau(plat,fenetre):
                    elif k==3 :
                        fenetre.blit(mur3,(y,x))
                        
+# Si on veut ajouter un graphisme pour les cartes déplaçables et indéplaçables
+                       
+#            if plat.dico_cartes[plat.position[i,j]].deplacable==True :
+#                fenetre.blit(deplacable,(y,x))
+#            else :
+#                fenetre.blit(indeplacable,(y,x))
+                
+                       
             if plat.dico_cartes[plat.position[i,j]].presence_pepite==True:
                 fenetre.blit(pepite,(y,x))
             if plat.dico_cartes[plat.position[i,j]].id_fantome!=0 :
@@ -691,6 +699,8 @@ fantome = pygame.image.load("fantome.png").convert_alpha()
 pepite = pygame.image.load("pepite.png").convert_alpha()
 fond_menu = pygame.image.load("fond_menu.png").convert()
 fond_uni = pygame.image.load("fond_uni.png").convert()
+deplacable = pygame.image.load("deplacable.png").convert_alpha()
+indeplacable = pygame.image.load("indeplacable.png").convert_alpha()
 #Création de la police du jeu
 police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
 
