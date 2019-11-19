@@ -470,7 +470,7 @@ def affiche_plateau(plat,fenetre):
                 fenetre.blit(pepite,(y,x))
             if plat.dico_cartes[plat.position[i,j]].id_fantome!=0 :
                 fenetre.blit(fantome,(y,x))
-                fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(y+40,x+8))
+                fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(y+10,x+40))
                        
     for i in range(len(plat.dico_joueurs)) :
         x=plat.dico_joueurs[i].carte_position.coord[0]*100
