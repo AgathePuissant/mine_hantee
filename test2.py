@@ -181,77 +181,78 @@ class plateau(object):
         x=coord[0]
         y=coord[1]
         
-        """
-        pour la simplification
         if [x,y] not in self.insertions_possibles:
             out=False
         
         else:
+            
             out=True
-        """
         
-        self.dico_cartes[self.carte_a_jouer.id].coord=[x,y]
-        
-        #Traite tous les cas possible : carte insérée de chaque côté
-        
-        if x==0 : #carte insérée en haut
+            self.dico_cartes[self.carte_a_jouer.id].coord=[x,y]
             
-            carte_sauvegardee=self.dico_cartes[self.position[self.N-1,y]] #on sauvegarde la carte qui va sortir du plateau
+            #Traite tous les cas possible : carte insérée de chaque côté
             
-            for i in range(1,self.N):
+            if x==0 : #carte insérée en haut
                 
-                self.dico_cartes[self.position[self.N-i-1,y]].coord[0]+=1
-                #en partant du bas, on change la carte pour la carte d'avant jusqu'à la première carte
-                self.position[self.N-i,y]=self.position[self.N-i-1,y]
-                            
-        elif x==self.N-1: #carte insérée en bas
-            
-            carte_sauvegardee=self.dico_cartes[self.position[0,y]] #on sauvegarde la carte qui va sortir du plateau
-            
-            for i in range(1,self.N):
+                carte_sauvegardee=self.dico_cartes[self.position[self.N-1,y]] #on sauvegarde la carte qui va sortir du plateau
                 
-                self.dico_cartes[self.position[i,y]].coord[0]-=1
-                #en partant du haut, on change la carte pour la carte d'après jusqu'à la dernière carte
-                self.position[i-1,y]=self.position[i,y]
-            
-        elif y==0: #carte insérée sur le côté gauche
-            
-            carte_sauvegardee=self.dico_cartes[self.position[x,self.N-1]] #on sauvegarde la carte qui va sortir du plateau
-            
-            for i in range(1,self.N):
-                
-                self.dico_cartes[self.position[x,self.N-i-1]].coord[1]+=1
-                #en partant de la droite, on change la carte pour la carte d'avant jusqu'à la première carte
-                self.position[x,self.N-i]=self.position[x,self.N-i-1]
-            
-        elif y==self.N-1: #carte insérée sur le côté droit
-            
-            carte_sauvegardee=self.dico_cartes[self.position[x,0]] #on sauvegarde la carte qui va sortir du plateau
-            
-            for i in range(1,self.N):
-                
-                self.dico_cartes[self.position[x,i]].coord[1]-=1
-                #en partant de la gauche, on change la carte pour la carte d'après jusqu'à la dernière carte
-                self.position[x,i-1]=self.position[x,i]
-                
-        else :
-            return False
-                
-        self.position[x,y]=self.carte_a_jouer.id
-                
-        if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
-                
-                self.dico_cartes[self.position[x,y]].id_fantome=carte_sauvegardee.id_fantome #on déplace ce fantôme à l'autre bout du plateau
-                
-                carte_sauvegardee.id_fantome=0 #on supprime le fantôme de la carte sortie
-                
-        for i in range(len(self.dico_joueurs)) : 
-            if carte_sauvegardee.id==self.dico_joueurs[i].carte_position.id :
-                self.dico_joueurs[i].carte_position=self.dico_cartes[self.position[x,y]]
+                for i in range(1,self.N):
                     
+                    self.dico_cartes[self.position[self.N-i-1,y]].coord[0]+=1
+                    #en partant du bas, on change la carte pour la carte d'avant jusqu'à la première carte
+                    self.position[self.N-i,y]=self.position[self.N-i-1,y]
+                                
+            elif x==self.N-1: #carte insérée en bas
+                
+                carte_sauvegardee=self.dico_cartes[self.position[0,y]] #on sauvegarde la carte qui va sortir du plateau
+                
+                for i in range(1,self.N):
+                    
+                    self.dico_cartes[self.position[i,y]].coord[0]-=1
+                    #en partant du haut, on change la carte pour la carte d'après jusqu'à la dernière carte
+                    self.position[i-1,y]=self.position[i,y]
+                
+            elif y==0: #carte insérée sur le côté gauche
+                
+                carte_sauvegardee=self.dico_cartes[self.position[x,self.N-1]] #on sauvegarde la carte qui va sortir du plateau
+                
+                for i in range(1,self.N):
+                    
+                    self.dico_cartes[self.position[x,self.N-i-1]].coord[1]+=1
+                    #en partant de la droite, on change la carte pour la carte d'avant jusqu'à la première carte
+                    self.position[x,self.N-i]=self.position[x,self.N-i-1]
+                
+            elif y==self.N-1: #carte insérée sur le côté droit
+                
+                carte_sauvegardee=self.dico_cartes[self.position[x,0]] #on sauvegarde la carte qui va sortir du plateau
+                
+                for i in range(1,self.N):
+                    
+                    self.dico_cartes[self.position[x,i]].coord[1]-=1
+                    #en partant de la gauche, on change la carte pour la carte d'après jusqu'à la dernière carte
+                    self.position[x,i-1]=self.position[x,i]
+                    
+            else :
+                return False
+                    
+            self.position[x,y]=self.carte_a_jouer.id
+                    
+            if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
+                    
+                    self.dico_cartes[self.position[x,y]].id_fantome=carte_sauvegardee.id_fantome #on déplace ce fantôme à l'autre bout du plateau
+                    
+                    carte_sauvegardee.id_fantome=0 #on supprime le fantôme de la carte sortie
+                    
+            for i in range(len(self.dico_joueurs)) : 
+                if carte_sauvegardee.id==self.dico_joueurs[i].carte_position.id :
+                    self.dico_joueurs[i].carte_position=self.dico_cartes[self.position[x,y]]
+                        
+                
+            self.carte_a_jouer=carte_sauvegardee #update la carte à jouer
+            self.carte_a_jouer.coord=['','']
             
-        self.carte_a_jouer=carte_sauvegardee #update la carte à jouer
-        self.carte_a_jouer.coord=['','']
+        return out
+        
         
     def cartes_accessibles1(self,carte):
         """
@@ -459,11 +460,17 @@ def affiche_plateau(plat,fenetre):
                    elif k==3 :
                        fenetre.blit(mur3,(y,x))
                        
+# Si on veut ajouter un graphisme pour les cartes déplaçables et indéplaçables
+                       
+            if plat.dico_cartes[plat.position[i,j]].deplacable==False :
+                fenetre.blit(indeplacable,(y,x))
+                
+                       
             if plat.dico_cartes[plat.position[i,j]].presence_pepite==True:
                 fenetre.blit(pepite,(y,x))
             if plat.dico_cartes[plat.position[i,j]].id_fantome!=0 :
                 fenetre.blit(fantome,(y,x))
-                fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(y+40,x+8))
+                fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(y+10,x+40))
                        
     for i in range(len(plat.dico_joueurs)) :
         x=plat.dico_joueurs[i].carte_position.coord[0]*100
@@ -690,6 +697,7 @@ fantome = pygame.image.load("fantome.png").convert_alpha()
 pepite = pygame.image.load("pepite.png").convert_alpha()
 fond_menu = pygame.image.load("fond_menu.png").convert()
 fond_uni = pygame.image.load("fond_uni.png").convert()
+indeplacable = pygame.image.load("indeplacable.png").convert_alpha()
 #Création de la police du jeu
 police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
 
