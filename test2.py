@@ -405,6 +405,14 @@ def IA_simple(id_joueur,plateau_en_cours):
     #print(plateau.position)
     chemins_possibles_total = [] #Liste des listes de chemins possibles pour chaque insertion possible, donc liste de liste de liste
     
+    #On recueille les données des adversaires i.e. leurs fantomes target
+    target_adversaires = [] 
+    for i in plateau.dico_joueurs.keys():
+        if i != id_joueur : 
+            for j in plateau.dico_joueurs[i].fantome_target :
+                target_adversaires.append(j)
+        
+        
     #Pour toutes les insertions possibles, on stocke tous les chemins possibles
     #Pour le joueur donné
     for i in plateau.insertions_possibles: 
@@ -426,14 +434,19 @@ def IA_simple(id_joueur,plateau_en_cours):
             heuristique = 0
             #On examine chaque case
             for j in chemins_possibles_total[k][i]:
-                if j.presence_pepite == True : #Si il y a une pépite sur la case
-                    heuristique += 1
+                #Si il y a une pépite sur la case
+                if j.presence_pepite == True : 
+                    heuristique +=1
+                #Si il y a un de nos fantomes target attrapable
                 if j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in plateau.dico_joueurs[id_joueur].fantome_target:
                     heuristique += 20
-                    
-                elif j.id_fantome == plateau.id_dernier_fantome+1 :
+                #Si il y a un des fantomes target d'un adversaire attrapable
+                elif j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in target_adversaires:
+                    heuristique += 10
+                #Si il y a un fantome attrapable qui n'est le target de personne
+                elif j.id_fantome == plateau.id_dernier_fantome+1:
                     heuristique += 5
-          
+                    
             dico_heuristique[(k,i)] = heuristique
     
     #On trouve l'heuristique maximale
@@ -468,7 +481,7 @@ def IA_simple(id_joueur,plateau_en_cours):
 #print(IA_simple(1,plateau))
 
 
-                   
+     
     
 #---------------------------------------Définition des objets graphiques---------------------------------
  
