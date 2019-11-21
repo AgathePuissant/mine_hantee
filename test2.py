@@ -561,13 +561,10 @@ def game() :
             if event.type == MOUSEBUTTONDOWN : 
                 if event.button==1: #clic gauche : insertion de la carte à jouer
                     coord=[event.pos[1]//100,event.pos[0]//100]
-                    if coord[0]>plateau_test.N-1 :
-                        erreur_deplacement="Cliquez dans le plateau"
+                    if plateau_test.deplace_carte(coord)==False :
+                        erreur_deplacement="Insertion impossible"
                     else :
-                        if plateau_test.deplace_carte(coord)==False :
-                            erreur_deplacement="Insertion impossible"
-                        else :
-                            erreur_deplacement=""
+                        erreur_deplacement=""
                         
             if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
                 plateau_test.deplace_joueur(0,event.key)
