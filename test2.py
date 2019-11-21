@@ -391,7 +391,9 @@ class plateau(object):
                     L_chemin_possibles=L_chemin_possibles+nouveaux_chemins
             
         return L_chemin_possibles
-    
+
+
+#------------------------------------IA---------------------------------------
 
 
 def IA_simple(id_joueur,plateau_en_cours):
@@ -462,8 +464,8 @@ def IA_simple(id_joueur,plateau_en_cours):
     
 
 
-plateau = plateau(3,["Antoine","Christine","Michel"],[],7)
-print(IA_simple(1,plateau))
+#plateau = plateau(3,["Antoine","Christine","Michel"],[],7)
+#print(IA_simple(1,plateau))
 
 
                    
