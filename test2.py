@@ -82,7 +82,7 @@ class plateau(object):
                 self.position[ligne,colonne]=int(compte_id)
                 #cases indéplaçables
                 if ligne%2 ==0 and colonne%2==0:
-                    print(["indéplaçable",ligne,colonne])
+                    #print(["indéplaçable",ligne,colonne])
                     deplacable=False
                     #cases du milieu où les joueurs commencent la partie
                     if ligne==N//2-1 and colonne==N//2-1:
@@ -118,11 +118,11 @@ class plateau(object):
                         orientation=[0,0,1,0]
                     else:
                         orientation=[0,0,0,1]
-                    print(orientation)
+                    #print(orientation)
                 
                 #cases déplaçables
                 else:
-                    print("deplaçable"+str(ligne)+str(colonne))
+                    #print("deplaçable"+str(ligne)+str(colonne))
                     orientation=pool[compte_deplacable]
                     compte_deplacable+=1
                     deplacable=True
@@ -146,7 +146,6 @@ class plateau(object):
         
         #La carte qui reste dans pool est la carte à l'exterieur du plateau
         self.carte_a_jouer=carte(compte_id,pool[compte_deplacable],["",""],True)
-        print(compte_id)
         self.dico_cartes[compte_id] = self.carte_a_jouer
         
         #Initialisation des joueurs
@@ -360,7 +359,7 @@ class plateau(object):
             retour.append("Vous ne pouvez pas aller dans cette direction")
             
         retour.append(cartes_accessibles)
-        print(retour)
+        #print(retour)
 
     def chemins_possibles(self, carte_depart=0, chemin_en_cours=[]):
         """
@@ -400,9 +399,8 @@ def IA_simple(id_joueur,plateau_en_cours):
     
     #On duplique l'entité du plateau en cours pour faire des simulations de déplacement
     #de cartes sans impacter le vrai plateau
-    #POUR L'INSTANT IMPACTE LE VRAI TABLEAU
-    plateau = plateau_en_cours
-    #print(plateau.position)
+    plateau = copy.deepcopy(plateau_en_cours)
+    print(plateau.position)
     chemins_possibles_total = [] #Liste des listes de chemins possibles pour chaque insertion possible, donc liste de liste de liste
     
     #On recueille les données des adversaires i.e. leurs fantomes target
@@ -417,12 +415,12 @@ def IA_simple(id_joueur,plateau_en_cours):
     #Pour le joueur donné
     for i in plateau.insertions_possibles: 
         plateau.deplace_carte(i)
-        #print(plateau.position,"plateau")
-        #print(plateau_en_cours.position,"plateau-en-cours")
+        print(plateau.position,"plateau")
+        print(plateau_en_cours.position,"plateau-en-cours")
         chemins_possibles = plateau.chemins_possibles(plateau.dico_joueurs[id_joueur].carte_position)
         chemins_possibles_total.append(chemins_possibles)
         #On réinitialise les emplacements des cartes à celles du plateau en cours
-        plateau = plateau_en_cours
+        plateau = copy.deepcopy(plateau_en_cours)
 
 
     dico_heuristique = {} #dico avec le rang (couple) d'un chemin dans chemin_possibles_total en clé et son heuristique en valeur
@@ -451,7 +449,7 @@ def IA_simple(id_joueur,plateau_en_cours):
     
     #On trouve l'heuristique maximale
     max_heur = max(dico_heuristique.values())
-    #print(max_heur)
+    print(max_heur)
     
     chemins_opti = []
     inser_opti = []
@@ -477,11 +475,13 @@ def IA_simple(id_joueur,plateau_en_cours):
     
 
 
-#plateau = plateau(3,["Antoine","Christine","Michel"],[],7)
-#print(IA_simple(1,plateau))
+plat = plateau(3,["Antoine","Christine","Michel"],[],7)
 
 
-     
+print(IA_simple(1,plat))
+
+
+"""   
     
 #---------------------------------------Définition des objets graphiques---------------------------------
  
@@ -793,3 +793,4 @@ police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
 #Lancement du menu
 menu()
 pygame.quit()
+"""
