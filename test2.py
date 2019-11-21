@@ -469,7 +469,7 @@ def IA_simple(id_joueur,plateau_en_cours):
 
 
                    
-"""           
+    
 #---------------------------------------Définition des objets graphiques---------------------------------
  
 #code nécessaire pour créer des boutons associés à une action
@@ -780,4 +780,3 @@ police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
 #Lancement du menu
 menu()
 pygame.quit()
-"""
