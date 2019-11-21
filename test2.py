@@ -10,6 +10,7 @@ import numpy as np
 import random as rd
 import pickle
 import glob
+import copy
 
 class carte(object):
     
@@ -390,8 +391,83 @@ class plateau(object):
                     L_chemin_possibles=L_chemin_possibles+nouveaux_chemins
             
         return L_chemin_possibles
+    
+
+
+def IA_simple(id_joueur,plateau_en_cours):
+    
+    #On duplique l'entité du plateau en cours pour faire des simulations de déplacement
+    #de cartes sans impacter le vrai plateau
+    #POUR L'INSTANT IMPACTE LE VRAI TABLEAU
+    plateau = plateau_en_cours
+    #print(plateau.position)
+    chemins_possibles_total = [] #Liste des listes de chemins possibles pour chaque insertion possible, donc liste de liste de liste
+    
+    #Pour toutes les insertions possibles, on stocke tous les chemins possibles
+    #Pour le joueur donné
+    for i in plateau.insertions_possibles: 
+        plateau.deplace_carte(i)
+        #print(plateau.position,"plateau")
+        #print(plateau_en_cours.position,"plateau-en-cours")
+        chemins_possibles = plateau.chemins_possibles(plateau.dico_joueurs[id_joueur].carte_position)
+        chemins_possibles_total.append(chemins_possibles)
+        #On réinitialise les emplacements des cartes à celles du plateau en cours
+        plateau = plateau_en_cours
+
+
+    dico_heuristique = {} #dico avec le rang (couple) d'un chemin dans chemin_possibles_total en clé et son heuristique en valeur
+    
+
+    for k in range(len(chemins_possibles_total)): #Ensembles de chemins possibles
+        for i in range(len(chemins_possibles_total[k])) : #chemin possible parmi cet ensemble
+            
+            heuristique = 0
+            #On examine chaque case
+            for j in chemins_possibles_total[k][i]:
+                if j.presence_pepite == True : #Si il y a une pépite sur la case
+                    heuristique += 1
+                if j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in plateau.dico_joueurs[id_joueur].fantome_target:
+                    heuristique += 20
+                    
+                elif j.id_fantome == plateau.id_dernier_fantome+1 :
+                    heuristique += 5
+          
+            dico_heuristique[(k,i)] = heuristique
+    
+    #On trouve l'heuristique maximale
+    max_heur = max(dico_heuristique.values())
+    #print(max_heur)
+    
+    chemins_opti = []
+    inser_opti = []
+    
+    #On trouve le/les chemin(s) correspondant à l'heuristique maximale
+    for couple in dico_heuristique.keys():
+        if dico_heuristique[couple] == max_heur :
+            chemins_opti.append(chemins_possibles_total[couple[0]][couple[1]])
+            #On trouve les coordonnées de l'insertion correspondant au chemin optimal trouvé
+            inser_opti.append(plateau.insertions_possibles[couple[0]])
+    
+
+    #Si il n'y a qu'un seul chemin optimal, on le choisit
+    if len(chemins_opti) == 1:
+        return (inser_opti[0],chemins_opti[0])
+    
+    #Sinon on prend au hasard parmi les chemins optimaux
+    #On pourrait aussi faire le choix de prendre celui qui inclu la capture d'un fantôme par ex
+    else:
+        rang = rd.randint(0,len(chemins_opti))
+        return (inser_opti[rang], chemins_opti[rang])
+        
+    
+
+
+plateau = plateau(3,["Antoine","Christine","Michel"],[],7)
+print(IA_simple(1,plateau))
+
+
                    
-                   
+"""           
 #---------------------------------------Définition des objets graphiques---------------------------------
  
 #code nécessaire pour créer des boutons associés à une action
@@ -705,3 +781,4 @@ police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
 #Lancement du menu
 menu()
 pygame.quit()
+"""
