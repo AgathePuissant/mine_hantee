@@ -289,24 +289,29 @@ class plateau(object):
         
         #On stocke les coordonnées de la carte où on veut aller
         if key == 274: #bas
-            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0],self.dico_joueurs[id_joueur].carte_position.coord[1]+1]
+            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0]+1,self.dico_joueurs[id_joueur].carte_position.coord[1]]
             direction = 0 #rang du côté concerné dans l'attribut orientation de la nouvelle carte
+            direction_carte = 2 #rang du côté concerné par l'attribut orientation de la carte sur laquelle le joueur est
         
         elif key == 276: #gauche
-            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0]-1,self.dico_joueurs[id_joueur].carte_position.coord[1]]
+            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0],self.dico_joueurs[id_joueur].carte_position.coord[1]-1]
             direction = 1
+            direction_carte = 3
         
         elif key == 273: #haut
-            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0],self.dico_joueurs[id_joueur].carte_position.coord[1]-1]
+            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0]-1,self.dico_joueurs[id_joueur].carte_position.coord[1]]
             direction = 2
+            direction_carte = 0
         
         elif key == 275: #droite
-            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0]+1,self.dico_joueurs[id_joueur].carte_position.coord[1]]
+            nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0],self.dico_joueurs[id_joueur].carte_position.coord[1]+1]
             direction = 3
+            direction_carte = 1
         
         #On vérifie que les coordonnées de l'endroit où le joueur veut aller ne sont pas hors plateau
         #i.e. on vérifie que le joueur ne fonce pas dans une des limites du plateau
-        if nv_coord[0]<0 or nv_coord[1]<0 or nv_coord[0]>=self.N or nv_coord[1]>=self.N:
+        #Et on vérifie que le joueur ne fonce pas dans un mur de la carte sur laquelle il est
+        if nv_coord[0]<0 or nv_coord[1]<0 or nv_coord[0]>=self.N or nv_coord[1]>=self.N or self.dico_joueurs[id_joueur].carte_position.orientation[direction_carte]==1:
             retour.append("Vous ne pouvez pas aller dans cette direction")
         else:
             #On retrouve la carte associée aux nouvelles coordonnées
@@ -314,9 +319,9 @@ class plateau(object):
                 if i.coord == nv_coord :
                     nv_carte = i
             
-            #On vérifie que le joueur ne fonce pas dans un mur
+            #On vérifie que le joueur ne fonce pas dans un mur de la carte adjacente
             if nv_carte.orientation[direction] == 1:
-                retour.append("Vous ne pouvez pas aller dans cette direction")
+                retour.append("Vous ne pouvez pas aller dans cette direction, mur adj")
             else:
                 #On vérifie que le joueur n'est pas déjà passé par cette carte pendant ce tour
                 if nv_carte in self.dico_joueurs[id_joueur].cartes_explorees:
@@ -451,24 +456,24 @@ def affiche_plateau(plat,fenetre):
             for k in range(len(plat.dico_cartes[plat.position[i,j]].orientation)) :
                if plat.dico_cartes[plat.position[i,j]].orientation[k]==1 :
                    if k==0 :
-                       fenetre.blit(mur1,(x,y))
+                       fenetre.blit(mur1,(y,x))
                    elif k==1 :
-                       fenetre.blit(mur4,(x,y))
+                       fenetre.blit(mur4,(y,x))
                    elif k==2 :
-                       fenetre.blit(mur2,(x,y))
+                       fenetre.blit(mur2,(y,x))
                    elif k==3 :
-                       fenetre.blit(mur3,(x,y))
+                       fenetre.blit(mur3,(y,x))
                        
             if plat.dico_cartes[plat.position[i,j]].presence_pepite==True:
-                fenetre.blit(pepite,(x,y))
+                fenetre.blit(pepite,(y,x))
             if plat.dico_cartes[plat.position[i,j]].id_fantome!=0 :
-                fenetre.blit(fantome,(x,y))
-                fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(x+40,y+8))
+                fenetre.blit(fantome,(y,x))
+                fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(y+40,x+8))
                        
     for i in range(len(plat.dico_joueurs)) :
         x=plat.dico_joueurs[i].carte_position.coord[0]*100
         y=plat.dico_joueurs[i].carte_position.coord[1]*100
-        fenetre.blit(liste_im_joueur[i],(x,y))
+        fenetre.blit(liste_im_joueur[i],(y,x))
         
     
     x=750
@@ -493,8 +498,9 @@ def menu():
     
     intro = True
 
-    while intro: #Boucle infinie
-        
+    while intro==True: #Boucle infinie
+                
+                
         fenetre.blit(fond_menu,(0,0))  #On colle le fond du menu
         
         liste_sauv=glob.glob("sauvegarde*")
@@ -510,26 +516,29 @@ def menu():
         
         for event in pygame.event.get(): #Instructions de sortie
             if event.type == pygame.QUIT:
+                intro=False
                 pygame.display.quit()
                 pygame.quit()
-                intro=False
+      
 
 def game() :
     global fenetre,num_partie,nouvelle,plateau_test
     
     if nouvelle==False :
         plateau_test=pickle.load(open("sauvegarde"+str(num_partie),"rb"))
-    else :
+    elif nouvelle==True:
         #Plateau de plateau_test
         plateau_test=plateau(3,["Antoine","Christine","Michel"],[],7)
+    else :
+        pass
     
-    continuer = 1
+    continuer = True
     
     erreur_deplacement="" #Initialisation du texte d'erreur
     
     #Boucle infinie
-    while continuer:
-        
+    while continuer==True:
+                
         affiche_plateau(plateau_test,fenetre) #on re-colle le plateau
         
         
@@ -542,40 +551,46 @@ def game() :
                                                                         
         pygame.display.flip() #Update l'écran
         
-        for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+        for event in pygame.event.get():   #On parcours la liste de tous les événements reçus               
                 
             if event.type == KEYDOWN and event.key == K_r: #Si on appuie sur R, rotation de la carte à jouer
                 plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2],plateau_test.carte_a_jouer.orientation[3]=plateau_test.carte_a_jouer.orientation[3],plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2]
             
             if event.type == MOUSEBUTTONDOWN : 
                 if event.button==1: #clic gauche : insertion de la carte à jouer
-                    coord=[event.pos[0]//100,event.pos[1]//100]
-                    if plateau_test.deplace_carte(coord)==False :
-                        erreur_deplacement="Vous ne pouvez pas insérer la carte ici!"
+                    coord=[event.pos[1]//100,event.pos[0]//100]
+                    if coord[0]>plateau_test.N-1 :
+                        erreur_deplacement="Cliquez dans le plateau"
                     else :
-                        erreur_deplacement=""
+                        if plateau_test.deplace_carte(coord)==False :
+                            erreur_deplacement="Insertion impossible"
+                        else :
+                            erreur_deplacement=""
                         
             if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
                 plateau_test.deplace_joueur(0,event.key)
                 
             if event.type == KEYDOWN and event.key == K_SPACE :
                 pause()
-                
+            
             if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                continuer = False     #On arrête la boucle
                 pygame.display.quit()
                 pygame.quit()
-                continuer = 0      #On arrête la boucle
+
                 
 def pause() :
-    global fenetre,texte_sauv
+    global fenetre,texte_sauv,nouvelle
     
-    pause=1
+    nouvelle="jeu en pause"
+    
+    pause=True
     
     texte_sauv=""
     
-    while pause :
-        
-        fenetre.blit(fond_menu,(0,0))
+    while pause==True :
+                
+        fenetre.blit(fond_uni,(0,0))
     
         fenetre.blit(police.render("Pause",True,pygame.Color("#000000")),(600,200))
                                                              
@@ -586,16 +601,18 @@ def pause() :
         fenetre.blit(police.render(texte_sauv,True,pygame.Color("#000000")),(550,550))
                                                                 
         pygame.display.flip() #Update l'écran
-    
+        
         for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
                 
             if event.type == KEYDOWN and event.key == K_SPACE :
                 game()
                 
             if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                pause = False      #On arrête la boucle
                 pygame.display.quit()
                 pygame.quit()
-                pause = 0      #On arrête la boucle
+                
+
                 
 def sauvegarder():
     global texte_sauv,num_partie,plateau_test
@@ -607,15 +624,15 @@ def sauvegarder():
 def charger_partie():
     global fenetre,liste_sauv,num_partie,retour_partie
     
-    charger=1
+    charger=True
     retour_partie=False
         
-    while charger :
-        
-    
+    while charger ==True:
+                
+                
         if liste_sauv!=[] :
             
-            fenetre.blit(fond_menu,(0,0))  #On colle le fond du menu
+            fenetre.blit(fond_uni,(0,0))  #On colle le fond du menu
             
             for i in range(len(liste_sauv)) :
                 button_charger_partie(fenetre,"Partie "+str(liste_sauv[i]),500,100+i*100,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),liste_sauv[i])
@@ -623,22 +640,24 @@ def charger_partie():
             if retour_partie==True :
                 fenetre.blit(police.render("Partie "+str(num_partie)+" selectionnee",True,pygame.Color("#000000")),(800,100))
             
-            button(fenetre,"Lancer la partie",800,300,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),game)
+                button(fenetre,"Lancer la partie",800,300,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),game)
                                                                           
         else :
             
-            fenetre.blit(fond_menu,(0,0))  #On colle le fond du menu
+            fenetre.blit(fond_uni,(0,0))  #On colle le fond du menu
             fenetre.blit(police.render("Aucune partie sauvegardee",True,pygame.Color("#000000")),(450,100))
             button(fenetre,"Retour au menu",500,300,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),menu)
             
         pygame.display.flip() #Update l'écran
-
+        
         for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
             
             if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                charger = False      #On arrête la boucle
                 pygame.display.quit()
                 pygame.quit()
-                charger = 0      #On arrête la boucle
+                
+
                 
 def nouvelle_partie():
     global fenetre,liste_sauv,num_partie,nouvelle
@@ -675,12 +694,14 @@ fond_a_jouer = pygame.image.load("fond_carte_a_jouer.png").convert()
 fantome = pygame.image.load("fantome.png").convert_alpha()
 pepite = pygame.image.load("pepite.png").convert_alpha()
 fond_menu = pygame.image.load("fond_menu.png").convert()
+fond_uni = pygame.image.load("fond_uni.png").convert()
 #Création de la police du jeu
 police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
 
 
 #Lancement du menu
 menu()
+pygame.quit()
 
 
                 
