@@ -478,13 +478,6 @@ class InputBox:
         pygame.draw.rect(fenetre, self.color, self.rect, 2)
         # Blit le texte. 
         fenetre.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
-    
-    def get_text(self):
-        return self.text
-    
-    """
-    definir fonction qui écrit dans le doc
-    """
 
 #Definition des choiceboxs (boutons de sélection de valeurs prédéfinies)
 
@@ -519,14 +512,6 @@ class ChoiceBox:
         pygame.draw.rect(fenetre, self.color, self.rect, 2)
         # Blit le texte. 
         fenetre.blit(self.txt_surface, (self.rect.x+20, self.rect.y+5))
-        
-    def get_text(self):
-        if self.active==True:
-            return self.text
-    
-    """
-    definir fonction qui écrit dans le doc
-    """
 
 #lecture du fichier de paramétrage
 
