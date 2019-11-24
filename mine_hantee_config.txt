@@ -23,7 +23,7 @@ nb_fantomes=21
 #####################################
 
 #Nombre de joueurs
-nb_joueurs=3
+nb_joueurs=2
 
 #Mode de jeu des joueurs (avec 4 joueurs au maximum)
 mode_joueur_1=manuel
@@ -38,8 +38,8 @@ niveau_ia_3=2
 niveau_ia_4=2
 
 #Peudos des joueurs (4 joueurs au maximum)
-pseudo_joueur_1=Ordinateur1
-pseudo_joueur_2=Ordinateur2
+pseudo_joueur_1=Elsa
+pseudo_joueur_2=Tiana
 pseudo_joueur_3=Ordinateur3
 pseudo_joueur_4=Ordinateur4
 
