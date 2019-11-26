@@ -475,11 +475,11 @@ def IA_simple(id_joueur,plateau_en_cours):
     
 
 
-#plat = plateau(3,["Antoine","Christine","Michel"],[],7)
-#print(IA_simple(1,plat))
+plat = plateau(3,["Antoine","Christine","Michel"],[],7)
+print(IA_simple(1,plat))
 
 
- 
+"""
     
 #---------------------------------------Définition des objets graphiques---------------------------------
  
@@ -791,3 +791,4 @@ police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
 #Lancement du menu
 menu()
 pygame.quit()
+"""
