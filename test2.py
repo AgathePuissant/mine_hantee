@@ -612,9 +612,21 @@ def menu():
                 pygame.quit()
       
 
+def actualise_fenetre(plateau,fenetre,joueur):
+    """
+    fonction pour actualiser l'affichage dans la fonction jeu
+    """
+    affiche_plateau(plateau,fenetre)
+    for i in range(len(plateau.dico_joueurs)) :
+                fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(plateau.dico_joueurs[i].points),True,pygame.Color("#FFFFFF")),(760,300+i*100))
+                #test texte pour afficher le joueur qui joue
+    fenetre.blit(police.render("C'est a "+str(joueur.nom)+" de jouer",False,pygame.Color(0,0,0)),(760,250))
+    pygame.display.flip()
+      
+
 def game() :
     global fenetre,num_partie,nouvelle,plateau_test
-    
+    #Initialisation d'une nouvelle partie ou chargement d'une ancienne partie
     if nouvelle==False :
         plateau_test=pickle.load(open("sauvegarde"+str(num_partie),"rb"))
     elif nouvelle==True:
@@ -623,48 +635,106 @@ def game() :
     else :
         pass
     
-    continuer = True
+    erreur_deplacement="" #Initialisation du texte d'erreur ???
     
-    erreur_deplacement="" #Initialisation du texte d'erreur
     
-    #Boucle infinie
-    while continuer==True:
-                
-        affiche_plateau(plateau_test,fenetre) #on re-colle le plateau
+    
+    #Boucle du jeu. On joue tant qu'il reste des fantômes à attraper
+    while plateau_test.id_dernier_fantome!=21:
+        #collage du plateau
+        affiche_plateau(plateau_test,fenetre) 
         
-        
-        for i in range(len(plateau_test.dico_joueurs)) : #affichage des scores
-                x=plateau_test.dico_joueurs[i].carte_position.coord[0]*100
-                y=plateau_test.dico_joueurs[i].carte_position.coord[1]*100
+        #affichage des scores
+        for i in range(len(plateau_test.dico_joueurs)) :
                 fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(plateau_test.dico_joueurs[i].points),True,pygame.Color("#FFFFFF")),(760,300+i*100))
-                                      
-        fenetre.blit(police.render(erreur_deplacement,True,pygame.Color("#000000")),(750,250)) #affichage du message d'erreur
-                                                                        
-        pygame.display.flip() #Update l'écran
         
-        for event in pygame.event.get():   #On parcours la liste de tous les événements reçus               
-                
-            if event.type == KEYDOWN and event.key == K_r: #Si on appuie sur R, rotation de la carte à jouer
-                plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2],plateau_test.carte_a_jouer.orientation[3]=plateau_test.carte_a_jouer.orientation[3],plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2]
+        #affichage du message d'erreur ?                       
+        fenetre.blit(police.render(erreur_deplacement,True,pygame.Color("#000000")),(750,250)) 
+        #Update l'écran                                                                
+        pygame.display.flip() 
+        
+
+        #Tours de jeu
+        #on parcours chaque joueur à chaque tours.
+        for j in plateau_test.dico_joueurs :
             
-            if event.type == MOUSEBUTTONDOWN : 
-                if event.button==1: #clic gauche : insertion de la carte à jouer
-                    coord=[event.pos[1]//100,event.pos[0]//100]
-                    if plateau_test.deplace_carte(coord)==False :
-                        erreur_deplacement="Insertion impossible"
-                    else :
-                        erreur_deplacement=""
+            joueur=plateau_test.dico_joueurs[j]
+            actualise_fenetre(plateau_test,fenetre,joueur)
+            
+            
+            #premiere etape : rotation et insertion de la carte
+            #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
+            test_carte="en cours"
+            while test_carte!="fin":
+                
+                for event in pygame.event.get():   
+                    
+                    #Si on appuie sur R, rotation de la carte à jouer
+                    if event.type == KEYDOWN and event.key == K_r: 
+                        plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2],plateau_test.carte_a_jouer.orientation[3]=plateau_test.carte_a_jouer.orientation[3],plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2]
+                        #Update l'écran                                                                
+                        actualise_fenetre(plateau_test,fenetre,joueur)
+                    
+                    #ajouter la carte lorsque l'utilisateur clique dans le plateau
+                    elif event.type == MOUSEBUTTONDOWN : 
+                        #clic gauche : insertion de la carte à jouer
+                        if event.button==1: 
+                            coord=[event.pos[1]//100,event.pos[0]//100]
+                            #Si les coordonnées sont hors du plateau
+                            if coord[0]>plateau_test.N-1 :
+                                erreur_deplacement="Cliquez dans le plateau"
+                            #Sinon, on vérifie que la case cliquée est déplaçable
+                            else :
+                                test_inser=plateau_test.deplace_carte(coord)
+                                #Update l'écran                                                                
+                                actualise_fenetre(plateau_test,fenetre,joueur)
+                                #Si ce n'est pas le cas:
+                                if test_inser==False :
+                                    erreur_deplacement="Insertion impossible"
+                                #Sinon, on finit cette section du tours
+                                else :
+                                    erreur_deplacement=""
+                                    test_carte="fin"
+
+                    
+
+                    elif event.type == QUIT:
+                        pygame.display.quit()
+                        pygame.quit()
+               
+                                    
+                                    
+            #2e etape : On parcours les évènements tant que le joueur n'a pas appuyé sur entrée ou tant qu'il peut encore se déplacer
+            #initialisation à la position du joueur
+            test_entree=False
+            carte_actuelle=joueur.carte_position
+            cartes_accessibles=plateau_test.cartes_accessibles1(carte_actuelle)
+            #parcours des evenements
+            while test_entree==False and len(cartes_accessibles)>0:#La 2e condition deconne a cause de cartes_accessibles
+                for event in pygame.event.get():
+                    #deplacement
+                    if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
+                        plateau_test.deplace_joueur(j,event.key)
+                        carte_actuelle=joueur.carte_position
+                        cartes_accessibles=plateau_test.cartes_accessibles1(carte_actuelle)
                         
-            if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
-                plateau_test.deplace_joueur(0,event.key)
-                
-            if event.type == KEYDOWN and event.key == K_SPACE :
-                pause()
-            
-            if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                continuer = False     #On arrête la boucle
-                pygame.display.quit()
-                pygame.quit()
+                        #Update l'écran                                                                
+                        actualise_fenetre(plateau_test,fenetre,joueur)
+                        
+                    #fin de tour
+                    if event.type == KEYDOWN and (event.key== K_RETURN):
+                        test_entree=True
+                        #Update l'écran                                                                
+                        actualise_fenetre(plateau_test,fenetre,joueur)
+                        
+                    elif event.type == QUIT:
+                        pygame.display.quit()
+                        pygame.quit()
+
+                    
+            #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
+            joueur.cartes_explorees = [carte_actuelle]
+            joueur.capture_fantome = False
 
                 
 def pause() :
