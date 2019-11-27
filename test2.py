@@ -718,6 +718,7 @@ def game() :
                         carte_actuelle=joueur.carte_position
                         cartes_accessibles=plateau_test.cartes_accessibles1(carte_actuelle)
                         cartes_accessibles = [carte for carte in cartes_accessibles if carte!=carte_actuelle]
+                        cartes_explorees=cartes_explorees.append(carte_actuelle)
                         #Update l'écran                                                                
                         actualise_fenetre(plateau_test,fenetre,joueur)
                         
