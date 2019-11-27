@@ -59,9 +59,9 @@ class plateau(object):
         #créer une combinaison des types de cartes
         nb_deplacable=N//2*(N//2+1+N)+1
         #orientations et types de murs de chaque carte
-        pool1=[[[1,0,1,0],[0,1,0,1]][rd.randint(0,1)] for i in range(int(nb_deplacable*13/34))]
-        pool2=[[[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*15/34))]
-        pool3=[[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*6/34))]
+        pool1=[rd.choice([[1,0,1,0],[0,1,0,1]]) for i in range(int(nb_deplacable*13/34))]
+        pool2=[rd.choice([[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]]) for i in range(int(nb_deplacable*15/34))]
+        pool3=[rd.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) for i in range(int(nb_deplacable*6/34))]
         pool=pool1+pool2+pool3
         
         #Pool des id des fantômes à placer sur le plateau
@@ -110,16 +110,16 @@ class plateau(object):
                             orientation=[0,1,1,0]
                     
                     #cases qui font les bords et les autres indéplaçables
-                    elif ligne>colonne and N-ligne>N-colonne:
+                    elif ligne<colonne and N-ligne-1>colonne:
                         orientation=[1,0,0,0]
-                    elif ligne>colonne:
+                    elif ligne<colonne and N-ligne-1<colonne:
                         orientation=[0,1,0,0]
-                    elif N-ligne<N-colonne:
+                    elif ligne>colonne and N-ligne-1<colonne:
                         orientation=[0,0,1,0]
-                    else:
+                    elif ligne>colonne and N-ligne-1>colonne:
                         orientation=[0,0,0,1]
-                    #print(orientation)
-                
+                        
+                        
                 #cases déplaçables
                 else:
                     #print("deplaçable"+str(ligne)+str(colonne))
@@ -359,7 +359,7 @@ class plateau(object):
             retour.append("Vous ne pouvez pas aller dans cette direction")
             
         retour.append(cartes_accessibles)
-        #print(retour)
+
 
     def chemins_possibles(self, carte_depart=0, chemin_en_cours=[]):
         """
@@ -400,7 +400,6 @@ def IA_simple(id_joueur,plateau_en_cours):
     #On duplique l'entité du plateau en cours pour faire des simulations de déplacement
     #de cartes sans impacter le vrai plateau
     plateau = copy.deepcopy(plateau_en_cours)
-    print(plateau.position)
     chemins_possibles_total = [] #Liste des listes de chemins possibles pour chaque insertion possible, donc liste de liste de liste
     
     #On recueille les données des adversaires i.e. leurs fantomes target
@@ -415,8 +414,8 @@ def IA_simple(id_joueur,plateau_en_cours):
     #Pour le joueur donné
     for i in plateau.insertions_possibles: 
         plateau.deplace_carte(i)
-        print(plateau.position,"plateau")
-        print(plateau_en_cours.position,"plateau-en-cours")
+        #print(plateau.position,"plateau")
+        #print(plateau_en_cours.position,"plateau-en-cours")
         chemins_possibles = plateau.chemins_possibles(plateau.dico_joueurs[id_joueur].carte_position)
         chemins_possibles_total.append(chemins_possibles)
         #On réinitialise les emplacements des cartes à celles du plateau en cours
@@ -449,7 +448,7 @@ def IA_simple(id_joueur,plateau_en_cours):
     
     #On trouve l'heuristique maximale
     max_heur = max(dico_heuristique.values())
-    print(max_heur)
+    #print(max_heur)
     
     chemins_opti = []
     inser_opti = []
@@ -475,11 +474,11 @@ def IA_simple(id_joueur,plateau_en_cours):
     
 
 
-#plat = plateau(3,["Antoine","Christine","Michel"],[],7)
+plat = plateau(3,["Antoine","Christine","Michel"],[],7)
 #print(IA_simple(1,plat))
 
 
- 
+
     
 #---------------------------------------Définition des objets graphiques---------------------------------
  
@@ -709,6 +708,7 @@ def game() :
             test_entree=False
             carte_actuelle=joueur.carte_position
             cartes_accessibles=plateau_test.cartes_accessibles1(carte_actuelle)
+            cartes_accessibles = [carte for carte in cartes_accessibles if carte!=carte_actuelle]
             #parcours des evenements
             while test_entree==False and len(cartes_accessibles)>0:#La 2e condition deconne a cause de cartes_accessibles
                 for event in pygame.event.get():
@@ -717,7 +717,7 @@ def game() :
                         plateau_test.deplace_joueur(j,event.key)
                         carte_actuelle=joueur.carte_position
                         cartes_accessibles=plateau_test.cartes_accessibles1(carte_actuelle)
-                        
+                        cartes_accessibles = [carte for carte in cartes_accessibles if carte!=carte_actuelle]
                         #Update l'écran                                                                
                         actualise_fenetre(plateau_test,fenetre,joueur)
                         
