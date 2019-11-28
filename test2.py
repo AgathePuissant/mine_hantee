@@ -65,8 +65,8 @@ class plateau(object):
         pool=pool1+pool2+pool3
         
         #Pool des id des fantômes à placer sur le plateau
-        nbre_fantomes = (N-1)*(N//2)+(N//2)*(N//2-1)
-        pool_fantomes = [i for i in range(1,nbre_fantomes+1)]
+        self.nbre_fantomes = (N-2)*(N//2)+(N//2)*(N//2-1)
+        pool_fantomes = [i for i in range(1,self.nbre_fantomes+1)]
         pool_fantomes = np.random.permutation(pool_fantomes)
         
         while len(pool)<nb_deplacable:
@@ -312,52 +312,56 @@ class plateau(object):
         elif key == 275: #droite
             nv_coord = [self.dico_joueurs[id_joueur].carte_position.coord[0],self.dico_joueurs[id_joueur].carte_position.coord[1]+1]
         
-        #On retrouve la carte associée aux nouvelles coordonnées
-        for i in self.dico_cartes.values():
-            if i.coord == nv_coord :
-                nv_carte = i
-
-        #On trouve les cartes accessibles à partir de la nouvelle carte
-        cartes_accessibles = self.cartes_accessibles1(carte_depart)
-        #SI l'entrée du joueur correspond à une carte accessible
-        if nv_carte in cartes_accessibles:
-            #On vérifie que le joueur n'est pas déjà passé par cette carte pendant ce tour
-            if nv_carte in self.dico_joueurs[id_joueur].cartes_explorees:
-                retour.append("Vous avez déjà exploré cette carte")
-            
-            else:
-                self.dico_joueurs[id_joueur].carte_position = nv_carte #On déplace le joueur
-                self.dico_joueurs[id_joueur].cartes_explorees.append(nv_carte)
-                
-                #Si il y a une pépite sur la nouvelle carte, le joueur la ramasse
-                if nv_carte.presence_pepite == True : 
-                    self.dico_joueurs[id_joueur].points += 1
-                    nv_carte.presence_pepite = False
-                    retour.append("nouvelle pépite")
-                
-                #Si il y a un fantôme sur la nouvelle carte, le joueur le capture si c'est possible
-                #i.e. si c'est le fantôme à capturer et s'il n'a pas encore capturé de fantôme pendant ce tour
-                if nv_carte.id_fantome == self.id_dernier_fantome+1 and self.dico_joueurs[id_joueur].capture_fantome == False :
-                    #Si le fantôme est sur l'ordre de mission, le joueur gagne 20 points
-                    if nv_carte.id_fantome in self.dico_joueurs[id_joueur].fantome_target : 
-                        self.dico_joueurs[id_joueur].points += 20
-                        self.dico_joueurs[id_joueur].fantome_target.remove(nv_carte.id_fantome)
-                        retour.append("fantome sur l'ordre de mission capturé")
-                        #Si l'ordre de mission est totalement rempli, le joueur gagne 40 points
-                        if self.dico_joueurs[id_joueur].fantome_target==[]:
-                            self.dico_joueurs[id_joueur].points += 40
-                            retour.append("ordre de mission rempli")
-                    #Si le fantôme n'est pas sur l'ordre de mission, le joueur gagne 5 points
-                    else:
-                        self.dico_joueurs[id_joueur].points += 5
-                        retour.append("fantome capturé")
-                    
-                    self.dico_joueurs[id_joueur].capture_fantome = True
-                    self.id_dernier_fantome += 1
-                    nv_carte.id_fantome = 0
-        else:
+        #On vérifie qu'on ne fonce pas dans une extrêmité du plateau
+        if nv_coord[0]<0 or nv_coord[1]<0 or nv_coord[0]>=self.N or nv_coord[1]>=self.N :
             retour.append("Vous ne pouvez pas aller dans cette direction")
-            
+        else :
+            #On retrouve la carte associée aux nouvelles coordonnées
+            for i in self.dico_cartes.values():
+                if i.coord == nv_coord :
+                    nv_carte = i
+
+            #On trouve les cartes accessibles à partir de la nouvelle carte
+            cartes_accessibles = self.cartes_accessibles1(carte_depart)
+            #SI l'entrée du joueur correspond à une carte accessible
+            if nv_carte in cartes_accessibles:
+                #On vérifie que le joueur n'est pas déjà passé par cette carte pendant ce tour
+                if nv_carte in self.dico_joueurs[id_joueur].cartes_explorees:
+                    retour.append("Vous avez déjà exploré cette carte")
+                
+                else:
+                    self.dico_joueurs[id_joueur].carte_position = nv_carte #On déplace le joueur
+                    self.dico_joueurs[id_joueur].cartes_explorees.append(nv_carte)
+                    
+                    #Si il y a une pépite sur la nouvelle carte, le joueur la ramasse
+                    if nv_carte.presence_pepite == True : 
+                        self.dico_joueurs[id_joueur].points += 1
+                        nv_carte.presence_pepite = False
+                        retour.append("nouvelle pépite")
+                    
+                    #Si il y a un fantôme sur la nouvelle carte, le joueur le capture si c'est possible
+                    #i.e. si c'est le fantôme à capturer et s'il n'a pas encore capturé de fantôme pendant ce tour
+                    if nv_carte.id_fantome == self.id_dernier_fantome+1 and self.dico_joueurs[id_joueur].capture_fantome == False :
+                        #Si le fantôme est sur l'ordre de mission, le joueur gagne 20 points
+                        if nv_carte.id_fantome in self.dico_joueurs[id_joueur].fantome_target : 
+                            self.dico_joueurs[id_joueur].points += 20
+                            self.dico_joueurs[id_joueur].fantome_target.remove(nv_carte.id_fantome)
+                            retour.append("fantome sur l'ordre de mission capturé")
+                            #Si l'ordre de mission est totalement rempli, le joueur gagne 40 points
+                            if self.dico_joueurs[id_joueur].fantome_target==[]:
+                                self.dico_joueurs[id_joueur].points += 40
+                                retour.append("ordre de mission rempli")
+                        #Si le fantôme n'est pas sur l'ordre de mission, le joueur gagne 5 points
+                        else:
+                            self.dico_joueurs[id_joueur].points += 5
+                            retour.append("fantome capturé")
+                        
+                        self.dico_joueurs[id_joueur].capture_fantome = True
+                        self.id_dernier_fantome += 1
+                        nv_carte.id_fantome = 0
+            else:
+                retour.append("Vous ne pouvez pas aller dans cette direction")
+                
         retour.append(cartes_accessibles)
         #print(retour)
 
@@ -479,7 +483,7 @@ plat = plateau(3,["Antoine","Christine","Michel"],[],7)
 print(IA_simple(1,plat))
 
 
-"""
+
     
 #---------------------------------------Définition des objets graphiques---------------------------------
  
@@ -640,7 +644,7 @@ def game() :
     
     
     #Boucle du jeu. On joue tant qu'il reste des fantômes à attraper
-    while plateau_test.id_dernier_fantome!=21:
+    while plateau_test.id_dernier_fantome!=plateau_test.nbre_fantomes:
         #collage du plateau
         affiche_plateau(plateau_test,fenetre) 
         
@@ -861,4 +865,3 @@ police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
 #Lancement du menu
 menu()
 pygame.quit()
-"""
