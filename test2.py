@@ -492,7 +492,7 @@ def text_objects(text, font):
     textSurface = font.render(text, True, pygame.Color("#000000"))
     return textSurface, textSurface.get_rect()
       
-def button(fenetre,msg,x,y,w,h,ic,ac,action=None):
+def button(fenetre,msg,x,y,w,h,ic,ac,action=None, parametre_action=None):
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
     
@@ -500,12 +500,14 @@ def button(fenetre,msg,x,y,w,h,ic,ac,action=None):
         pygame.draw.rect(fenetre, ac,(x,y,w,h))
 
         if click[0] == 1 and action != None:
-            action()         
+            if parametre_action==None:
+                action()    
+            else:
+                action(parametre_action)
     else:
         pygame.draw.rect(fenetre, ic,(x,y,w,h))
 
-    smallText = pygame.font.SysFont("comicsansms",20)
-    textSurf, textRect = text_objects(msg, smallText)
+    textSurf, textRect = text_objects(msg, police2)
     textRect.center = ( (x+(w/2)), (y+(h/2)) )
     fenetre.blit(textSurf, textRect)
     
