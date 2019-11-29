@@ -11,10 +11,6 @@
 #Dimension du plateau (le plateau étant un carré, la longueur renseignée correspond à la fois à la longueur et à la largeur)
 dimensions_plateau=7
 
-#####################################
-#	CARACTERISTIQUES DES FANTOMES	#
-#####################################
-
 #Nombre de fantômes
 nb_fantomes=21
 
