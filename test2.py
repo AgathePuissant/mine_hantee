@@ -1018,6 +1018,9 @@ def parametrisation_simple_2(choix_final):
                     box.handle_event(event)
                     choix_final_pseudos[k-1]=box.text
                     choix_final_modes[k-1]="manuel"
+                    if input_boxes[k-1].text=="Ordinateur"+str(k):
+                        input_boxes[k-1].text="Joueur"+str(k)
+                        input_boxes[k-1].txt_surface=police2.render(input_boxes[k-1].text, True, input_boxes[k-1].color)
             
             #arrêt du jeu
             if event.type == QUIT:   
