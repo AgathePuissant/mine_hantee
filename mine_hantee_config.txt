@@ -1,0 +1,66 @@
+#############################################################################
+#	LA MINE HANTEE - FICHIER DE CONFIGURATION								#
+#	DA IODAA AGROPARISTECH - 2019/2020 - Projet de programmation en Python	#
+#	Paramètres avancés														#
+#############################################################################
+
+#####################################
+#	CARACTERISTIQUES DU PLATEAU		#
+#####################################
+
+#Dimension du plateau (le plateau étant un carré, la longueur renseignée correspond à la fois à la longueur et à la largeur)
+dimensions_plateau=8
+
+#Nombre de fantômes
+nb_fantomes=21
+
+#####################################
+#	CARACTERISTIQUES DES JOUEURS	#
+#####################################
+
+#Nombre de joueurs
+nb_joueurs=4
+
+#Mode de jeu des joueurs (avec 4 joueurs au maximum)
+mode_joueur_1=manuel
+mode_joueur_2=automatique
+mode_joueur_3=automatique
+mode_joueur_4=automatique
+
+#Niveaux des joueurs automatiques (4 joueurs automatiques au maximum)
+niveau_ia_1=2
+niveau_ia_2=1
+niveau_ia_3=2
+niveau_ia_4=1
+
+#Peudos des joueurs (4 joueurs au maximum)
+pseudo_joueur_1=Lucas
+pseudo_joueur_2=Ordinateur2
+pseudo_joueur_3=Ordinateur3
+pseudo_joueur_4=Ordinateur4
+
+#####################################
+#	CARACTERISTIQUES DES MISSIONS	#
+#####################################
+
+#Nombre de fantômes que comprend l'ordre de mission d'un joueur
+nb_fantomes_mission=3
+
+#Nombre de jokers pour chaque joueur
+nb_joker=1
+
+#########################
+#	CALCUL DES POINTS	#
+#########################
+
+#Nombre de points attribués lors de la récolte d'une pépite
+points_pepite=1
+
+#Nombre de points attribués lors de la récolte d'un fantôme
+points_fantome=5
+
+#Nombre de points attribués lors de la récolte d'un fantôme qui figure sur l'ordre de mission du joueur
+points_fantome_mission=20
+
+#Bonus attribué si l'ordre de mission est totalement rempli
+bonus_mission=40
