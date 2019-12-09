@@ -11,6 +11,7 @@ import random as rd
 import pickle
 import glob
 import copy
+import math
 
 class carte(object):
     
@@ -314,7 +315,7 @@ class plateau(object):
         
         #On vérifie qu'on ne fonce pas dans une extrêmité du plateau
         if nv_coord[0]<0 or nv_coord[1]<0 or nv_coord[0]>=self.N or nv_coord[1]>=self.N :
-            retour.append("Vous ne pouvez pas aller dans cette direction")
+            retour.append(" Déplacement impossible")
         else :
             #On retrouve la carte associée aux nouvelles coordonnées
             for i in self.dico_cartes.values():
@@ -327,7 +328,7 @@ class plateau(object):
             if nv_carte in cartes_accessibles:
                 #On vérifie que le joueur n'est pas déjà passé par cette carte pendant ce tour
                 if nv_carte in self.dico_joueurs[id_joueur].cartes_explorees:
-                    retour.append("Vous avez déjà exploré cette carte")
+                    retour.append("Case déjà explorée")
                 
                 else:
                     self.dico_joueurs[id_joueur].carte_position = nv_carte #On déplace le joueur
@@ -337,7 +338,7 @@ class plateau(object):
                     if nv_carte.presence_pepite == True : 
                         self.dico_joueurs[id_joueur].points += 1
                         nv_carte.presence_pepite = False
-                        retour.append("nouvelle pépite")
+                        retour.append("Pépite")
                     
                     #Si il y a un fantôme sur la nouvelle carte, le joueur le capture si c'est possible
                     #i.e. si c'est le fantôme à capturer et s'il n'a pas encore capturé de fantôme pendant ce tour
@@ -346,23 +347,23 @@ class plateau(object):
                         if nv_carte.id_fantome in self.dico_joueurs[id_joueur].fantome_target : 
                             self.dico_joueurs[id_joueur].points += 20
                             self.dico_joueurs[id_joueur].fantome_target.remove(nv_carte.id_fantome)
-                            retour.append("fantome sur l'ordre de mission capturé")
+                            retour.append("Fantôme sur l'ordre de mission")
                             #Si l'ordre de mission est totalement rempli, le joueur gagne 40 points
                             if self.dico_joueurs[id_joueur].fantome_target==[]:
                                 self.dico_joueurs[id_joueur].points += 40
-                                retour.append("ordre de mission rempli")
+                                retour.append("Ordre de mission rempli")
                         #Si le fantôme n'est pas sur l'ordre de mission, le joueur gagne 5 points
                         else:
                             self.dico_joueurs[id_joueur].points += 5
-                            retour.append("fantome capturé")
+                            retour.append("Fantôme capturé")
                         
                         self.dico_joueurs[id_joueur].capture_fantome = True
                         self.id_dernier_fantome += 1
                         nv_carte.id_fantome = 0
             else:
-                retour.append("Vous ne pouvez pas aller dans cette direction")
+                retour.append("Déplacement impossible")
                 
-        retour=' '.join(retour)
+        retour=' et '.join(retour)
                 
         return retour
 
@@ -708,7 +709,7 @@ def affiche_plateau(plat,fenetre):
         liste_im_joueur[i] = pygame.transform.scale(liste_im_joueur[i], (int(x_joueur*(7/N)),int(y_joueur*(7/N))))
     
     #Création de la police du jeu
-    police = pygame.font.Font("SuperMario256.ttf", int(20*7/N)) #Load font object.
+    police = pygame.font.Font("armalite_rifle.ttf", int(20*7/N)) #Load font object.
     
     for i in range(len(plat.position)) :
         for j in range(len(plat.position)) :
@@ -768,11 +769,11 @@ def actualise_fenetre(plateau,fenetre,joueur,info):
     """
     affiche_plateau(plateau,fenetre)
     for i in range(len(plateau.dico_joueurs)) :
-                fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#FFFFFF")),(760,300+i*100))
+                fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(850,360+i*80))
                 #test texte pour afficher le joueur qui joue
-    fenetre.blit(police.render("C'est a "+str(joueur.nom)+" de jouer",False,pygame.Color(0,0,0)),(760,250))
+    fenetre.blit(police.render("C'est a "+str(joueur.nom)+" de jouer",False,pygame.Color(0,0,0)),(800,240))
     #affichage du message d'erreur ?                       
-    fenetre.blit(police.render(info,False,pygame.Color("#000000")),(760,200)) 
+    fenetre.blit(police_small.render(info,False,pygame.Color("#000000")),(760,170))
                                                                         
     pygame.display.flip()
 
@@ -814,7 +815,7 @@ def game() :
         plateau_test=pickle.load(open("sauvegarde"+str(num_partie),"rb"))
     elif nouvelle==True:
         #Plateau de plateau_test
-        plateau_test=plateau(3,["Antoine","Christine","Michel"],[],15)
+        plateau_test=plateau(3,["Antoine","Christine","Michel"],[],7)
     else :
         pass
 
@@ -853,7 +854,7 @@ def game() :
                         #clic gauche : insertion de la carte à jouer
                         if event.button==1: 
 
-                            coord=[event.pos[1]//100,event.pos[0]//100]
+                            coord=[int(math.floor(event.pos[1]/700*plateau_test.N)),int(math.floor(event.pos[0]/700*plateau_test.N))]
                             
                             test_inser=plateau_test.deplace_carte(coord)
                            
@@ -1271,7 +1272,8 @@ fenetre = pygame.display.set_mode((1200, 700),pygame.RESIZABLE)
 fond_menu = pygame.image.load("fond_menu.png").convert()
 fond_uni = pygame.image.load("fond_uni.png").convert()
 #Création de la police du jeu
-police = pygame.font.Font("armalite_rifle.ttf", 20) #Load font object.
+police = pygame.font.Font("coda.ttf", 20) #Load font object.
+police_small = pygame.font.Font("coda.ttf", 17) #Load font object.
 
 COLOR_INACTIVE = pygame.Color('lightskyblue3')
 COLOR_ACTIVE = pygame.Color('dodgerblue2')
