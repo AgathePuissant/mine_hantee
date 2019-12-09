@@ -657,46 +657,97 @@ def ecriture(fichier, dico_parametres):
     f_new.close()    
     
 def affiche_plateau(plat,fenetre):
-    #Chargement et collage du fond
     
+    #Création des images nécesssaires au plateau
+    #fond = pygame.image.load("fond.jpg").convert()
+    fond_ext = pygame.image.load("fond_ext.png").convert()
+    mur1 = pygame.image.load("mur1.png").convert_alpha()
+    mur2 = pygame.image.load("mur2.png").convert_alpha()
+    mur3 = pygame.image.load("mur3.png").convert_alpha()
+    mur4 = pygame.image.load("mur4.png").convert_alpha()
+    liste_im_joueur = [pygame.image.load("joueur"+str(i)+".png").convert_alpha() for i in range(1,5)]
+    fond_a_jouer = pygame.image.load("fond_carte_a_jouer.png").convert()
+    fantome = pygame.image.load("fantome.png").convert_alpha()
+    pepite = pygame.image.load("pepite.png").convert_alpha()
+    indeplacable = pygame.image.load("indeplacable.png").convert_alpha()
+
+    
+    #Chargement du fond dans la fenetre 
     fenetre.blit(fond_ext,(0,0))
-    fenetre.blit(fond, (0,0))
+    #fenetre.blit(fond, (0,0))
+    N = plat.N #on récupère la taille du plateau
+     
+    #Mise  à jour de la taille des images en fonction du nombre de cartes du plateau
+    x_mur1 = mur1.get_width()
+    y_mur1 = mur1.get_height()
+    mur1 = pygame.transform.scale(mur1, (int(x_mur1*(7/N)),int(y_mur1*(7/N))))
+    x_mur2 = mur2.get_width()
+    y_mur2 = mur2.get_height()
+    mur2 = pygame.transform.scale(mur2, (int(x_mur2*(7/N)),int(y_mur2*(7/N))))
+    x_mur3 = mur3.get_width()
+    y_mur3 = mur3.get_height()
+    mur3 = pygame.transform.scale(mur3, (int(x_mur3*(7/N)),int(y_mur3*(7/N))))
+    x_mur4 = mur4.get_width()
+    y_mur4 = mur4.get_height()
+    mur4 = pygame.transform.scale(mur4, (int(x_mur4*(7/N)),int(y_mur4*(7/N))))
+    x_fond_a_jouer = fond_a_jouer.get_width()
+    y_fond_a_jouer = fond_a_jouer.get_height()
+    fond_a_jouer = pygame.transform.scale(fond_a_jouer,(int(x_fond_a_jouer*(7/N)),int(y_fond_a_jouer*(7/N))))
+    x_fantome = fantome.get_width()
+    y_fantome = fantome.get_height()
+    fantome = pygame.transform.scale(fantome, (int(x_fantome*(7/N)),int(y_fantome*(7/N))))
+    x_pepite = pepite.get_width()
+    y_pepite = pepite.get_height()
+    pepite  = pygame.transform.scale(pepite, (int(x_pepite *(7/N)),int(y_pepite*(7/N))))
+    x_indeplacable = indeplacable.get_width()
+    y_indeplacable = indeplacable.get_height()
+    indeplacable  = pygame.transform.scale(indeplacable, (int(x_indeplacable*(7/N)),int(y_indeplacable*(7/N))))
+    for i in range (4) :
+        x_joueur = liste_im_joueur[i].get_width()
+        y_joueur = liste_im_joueur[i].get_height()
+        liste_im_joueur[i] = pygame.transform.scale(liste_im_joueur[i], (int(x_joueur*(7/N)),int(y_joueur*(7/N))))
     
+    #Création de la police du jeu
+    police = pygame.font.Font("SuperMario256.ttf", int(20*7/N)) #Load font object.
     
     for i in range(len(plat.position)) :
         for j in range(len(plat.position)) :
-            x=plat.dico_cartes[plat.position[i,j]].coord[0]*100
-            y=plat.dico_cartes[plat.position[i,j]].coord[1]*100
-            
-            for k in range(len(plat.dico_cartes[plat.position[i,j]].orientation)) :
-               if plat.dico_cartes[plat.position[i,j]].orientation[k]==1 :
-                   if k==0 :
-                       fenetre.blit(mur1,(y,x))
-                   elif k==1 :
-                       fenetre.blit(mur4,(y,x))
-                   elif k==2 :
-                       fenetre.blit(mur2,(y,x))
-                   elif k==3 :
-                       fenetre.blit(mur3,(y,x))
-                       
+            x=plat.dico_cartes[plat.position[i,j]].coord[0]*int(100*7/N)
+            #print(plat.dico_cartes[plat.position[i,j]].coord[0]*int(100*7/N))
+            y=plat.dico_cartes[plat.position[i,j]].coord[1]*int(100*7/N)
+            #print(plat.dico_cartes[plat.position[i,j]].coord[1]*int(100*7/N))
+            fenetre.blit(fond_a_jouer,(y,x))
+
 # Si on veut ajouter un graphisme pour les cartes déplaçables et indéplaçables
                        
             if plat.dico_cartes[plat.position[i,j]].deplacable==False :
                 fenetre.blit(indeplacable,(y,x))
-                
+            
+            for k in range(len(plat.dico_cartes[plat.position[i,j]].orientation)) :
+                #fenetre.blit(fond_a_jouer,(y,x))
+                if plat.dico_cartes[plat.position[i,j]].orientation[k]==1 :
+                    if k==0 :
+                        fenetre.blit(mur1,(y,x))
+                    elif k==1 :
+                        fenetre.blit(mur4,(y,x))
+                    elif k==2 :
+                        fenetre.blit(mur2,(y,x))
+                    elif k==3 :
+                        fenetre.blit(mur3,(y,x))
+                       
                        
             if plat.dico_cartes[plat.position[i,j]].presence_pepite==True:
                 fenetre.blit(pepite,(y,x))
             if plat.dico_cartes[plat.position[i,j]].id_fantome!=0 :
                 fenetre.blit(fantome,(y,x))
-                fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(y+10,x+40))
+                fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(y+10,x+30))
                        
     for i in range(len(plat.dico_joueurs)) :
-        x=plat.dico_joueurs[i].carte_position.coord[0]*100
-        y=plat.dico_joueurs[i].carte_position.coord[1]*100
+        x=plat.dico_joueurs[i].carte_position.coord[0]*int(100*7/N)
+        y=plat.dico_joueurs[i].carte_position.coord[1]*int(100*7/N)
         fenetre.blit(liste_im_joueur[i],(y,x))
         
-    
+#on place la carte à jouer dans le coin droite haut du plateau 
     x=750
     y=50
     fenetre.blit(fond_a_jouer,(x,y))
@@ -763,10 +814,12 @@ def game() :
         plateau_test=pickle.load(open("sauvegarde"+str(num_partie),"rb"))
     elif nouvelle==True:
         #Plateau de plateau_test
-        plateau_test=plateau(3,["Antoine","Christine","Michel"],[],7)
+        plateau_test=plateau(3,["Antoine","Christine","Michel"],[],15)
     else :
         pass
-    
+
+
+    N = plateau_test.N
     information="" #Initialisation du texte d'erreur ???
     
     
@@ -778,11 +831,10 @@ def game() :
         #Tours de jeu
         #on parcours chaque joueur à chaque tours.
         for j in plateau_test.dico_joueurs :
-            
             joueur=plateau_test.dico_joueurs[j]
+
             actualise_fenetre(plateau_test,fenetre,joueur,information)
-            
-            
+
             #premiere etape : rotation et insertion de la carte
             #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
             test_carte="en cours"
@@ -800,6 +852,7 @@ def game() :
                     elif event.type == MOUSEBUTTONDOWN : 
                         #clic gauche : insertion de la carte à jouer
                         if event.button==1: 
+
                             coord=[event.pos[1]//100,event.pos[0]//100]
                             
                             test_inser=plateau_test.deplace_carte(coord)
@@ -807,6 +860,7 @@ def game() :
                             if test_inser==False :
                                 information="Insertion impossible"
                             #Sinon, on finit cette section du tour
+
                             else :
                                 information=""
                                 test_carte="fin"
@@ -1213,20 +1267,9 @@ fenetre = pygame.display.set_mode((1200, 700),pygame.RESIZABLE)
 
 
 
-#Création des images nécesssaires au jeu
-fond = pygame.image.load("fond.jpg").convert()
-fond_ext = pygame.image.load("fond_ext.png").convert()
-mur1 = pygame.image.load("mur1.png").convert_alpha()
-mur2 = pygame.image.load("mur2.png").convert_alpha()
-mur3 = pygame.image.load("mur3.png").convert_alpha()
-mur4 = pygame.image.load("mur4.png").convert_alpha()
-liste_im_joueur = [pygame.image.load("joueur"+str(i)+".png").convert_alpha() for i in range(1,5)]
-fond_a_jouer = pygame.image.load("fond_carte_a_jouer.png").convert()
-fantome = pygame.image.load("fantome.png").convert_alpha()
-pepite = pygame.image.load("pepite.png").convert_alpha()
+#Creation des images du menu
 fond_menu = pygame.image.load("fond_menu.png").convert()
 fond_uni = pygame.image.load("fond_uni.png").convert()
-indeplacable = pygame.image.load("indeplacable.png").convert_alpha()
 #Création de la police du jeu
 police = pygame.font.Font("armalite_rifle.ttf", 20) #Load font object.
 
