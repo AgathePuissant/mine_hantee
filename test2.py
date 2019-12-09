@@ -709,7 +709,7 @@ def affiche_plateau(plat,fenetre):
         liste_im_joueur[i] = pygame.transform.scale(liste_im_joueur[i], (int(x_joueur*(7/N)),int(y_joueur*(7/N))))
     
     #Création de la police du jeu
-    police = pygame.font.Font("armalite_rifle.ttf", int(20*7/N)) #Load font object.
+    police = pygame.font.Font("coda.ttf", int(20*7/N)) #Load font object.
     
     for i in range(len(plat.position)) :
         for j in range(len(plat.position)) :
