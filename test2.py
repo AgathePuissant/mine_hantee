@@ -294,7 +294,7 @@ class plateau(object):
         return cartes_accessibles
     
     def deplace_joueur(self,id_joueur,key):
-        retour = []
+
         carte_depart=self.dico_joueurs[id_joueur].carte_position
             
         #On stocke les coordonnées de la carte où on veut aller
@@ -312,7 +312,7 @@ class plateau(object):
         
         #On vérifie qu'on ne fonce pas dans une extrêmité du plateau
         if nv_coord[0]<0 or nv_coord[1]<0 or nv_coord[0]>=self.N or nv_coord[1]>=self.N :
-            retour.append(" Déplacement impossible")
+            retour = "Déplacement impossible"
         else :
             #On retrouve la carte associée aux nouvelles coordonnées
             for i in self.dico_cartes.values():
@@ -325,44 +325,53 @@ class plateau(object):
             if nv_carte in cartes_accessibles:
                 #On vérifie que le joueur n'est pas déjà passé par cette carte pendant ce tour
                 if nv_carte in self.dico_joueurs[id_joueur].cartes_explorees:
-                    retour.append("Case déjà explorée")
+                    retour = "Case déjà explorée"
                 
                 else:
                     self.dico_joueurs[id_joueur].carte_position = nv_carte #On déplace le joueur
                     self.dico_joueurs[id_joueur].cartes_explorees.append(nv_carte)
-                    
-                    #Si il y a une pépite sur la nouvelle carte, le joueur la ramasse
-                    if nv_carte.presence_pepite == True : 
-                        self.dico_joueurs[id_joueur].points += 1
-                        nv_carte.presence_pepite = False
-                        retour.append("Pépite")
-                    
-                    #Si il y a un fantôme sur la nouvelle carte, le joueur le capture si c'est possible
-                    #i.e. si c'est le fantôme à capturer et s'il n'a pas encore capturé de fantôme pendant ce tour
-                    if nv_carte.id_fantome == self.id_dernier_fantome+1 and self.dico_joueurs[id_joueur].capture_fantome == False :
-                        #Si le fantôme est sur l'ordre de mission, le joueur gagne 20 points
-                        if nv_carte.id_fantome in self.dico_joueurs[id_joueur].fantome_target : 
-                            self.dico_joueurs[id_joueur].points += 20
-                            self.dico_joueurs[id_joueur].fantome_target.remove(nv_carte.id_fantome)
-                            retour.append("Fantôme sur l'ordre de mission")
-                            #Si l'ordre de mission est totalement rempli, le joueur gagne 40 points
-                            if self.dico_joueurs[id_joueur].fantome_target==[]:
-                                self.dico_joueurs[id_joueur].points += 40
-                                retour.append("Ordre de mission rempli")
-                        #Si le fantôme n'est pas sur l'ordre de mission, le joueur gagne 5 points
-                        else:
-                            self.dico_joueurs[id_joueur].points += 5
-                            retour.append("Fantôme capturé")
-                        
-                        self.dico_joueurs[id_joueur].capture_fantome = True
-                        self.id_dernier_fantome += 1
-                        nv_carte.id_fantome = 0
+                    retour = nv_carte
             else:
-                retour.append("Déplacement impossible")
+                retour = "Déplacement impossible"
                 
-        retour=' et '.join(retour)
-                
+        #retour=' et '.join(retour)
+
         return retour
+    
+    
+    def compte_points(self,id_joueur,nv_carte):
+        
+        retour = []
+        #Si il y a une pépite sur la nouvelle carte, le joueur la ramasse
+        if nv_carte.presence_pepite == True : 
+            self.dico_joueurs[id_joueur].points += 1
+            nv_carte.presence_pepite = False
+            retour.append("Pépite")
+        
+        #Si il y a un fantôme sur la nouvelle carte, le joueur le capture si c'est possible
+        #i.e. si c'est le fantôme à capturer et s'il n'a pas encore capturé de fantôme pendant ce tour
+        if nv_carte.id_fantome == self.id_dernier_fantome+1 and self.dico_joueurs[id_joueur].capture_fantome == False :
+            #Si le fantôme est sur l'ordre de mission, le joueur gagne 20 points
+            if nv_carte.id_fantome in self.dico_joueurs[id_joueur].fantome_target : 
+                self.dico_joueurs[id_joueur].points += 20
+                self.dico_joueurs[id_joueur].fantome_target.remove(nv_carte.id_fantome)
+                retour.append("Fantôme sur l'ordre de mission")
+                #Si l'ordre de mission est totalement rempli, le joueur gagne 40 points
+                if self.dico_joueurs[id_joueur].fantome_target==[]:
+                    self.dico_joueurs[id_joueur].points += 40
+                    retour.append("Ordre de mission rempli")
+            #Si le fantôme n'est pas sur l'ordre de mission, le joueur gagne 5 points
+            else:
+                self.dico_joueurs[id_joueur].points += 5
+                retour.append("Fantôme capturé")
+            
+            self.dico_joueurs[id_joueur].capture_fantome = True
+            self.id_dernier_fantome += 1
+            nv_carte.id_fantome = 0
+
+        retour=' et '.join(retour)
+        return retour
+        
 
     def chemins_possibles(self, carte_depart=0, chemin_en_cours=[]):
         """
@@ -397,13 +406,11 @@ class plateau(object):
 
 #------------------------------------IA---------------------------------------
 
-
 def IA_simple(id_joueur,plateau_en_cours):
     
     #On duplique l'entité du plateau en cours pour faire des simulations de déplacement
     #de cartes sans impacter le vrai plateau
     plateau = copy.deepcopy(plateau_en_cours)
-#    print(plateau.position)
     chemins_possibles_total = [] #Liste des listes de chemins possibles pour chaque insertion possible, donc liste de liste de liste
     
     #On recueille les données des adversaires i.e. leurs fantomes target
@@ -414,72 +421,84 @@ def IA_simple(id_joueur,plateau_en_cours):
                 target_adversaires.append(j)
         
         
-    #Pour toutes les insertions possibles, on stocke tous les chemins possibles
-    #Pour le joueur donné
+    #Pour toutes les insertions possibles et toutes les rotations de carte possibles,
+    #on stocke tous les chemins possibles pour le joueur donné
+    orientation = plateau.carte_a_jouer.orientation
+    #On teste pour chaque emplacement où la carte est insérable
     for i in plateau.insertions_possibles: 
-        plateau.deplace_carte(i)
-#        print(plateau.position,"plateau")
-#        print(plateau_en_cours.position,"plateau-en-cours")
-        chemins_possibles = plateau.chemins_possibles(plateau.dico_joueurs[id_joueur].carte_position)
-        chemins_possibles_total.append(chemins_possibles)
-        #On réinitialise les emplacements des cartes à celles du plateau en cours
-        plateau = copy.deepcopy(plateau_en_cours)
-
-
+        j=0
+        chemins_possibles_carte = [] 
+        #On teste pour chaque orientation de la carte
+        for j in range(4):
+            plateau.carte_a_jouer.orientation = orientation
+            plateau.deplace_carte(i)
+            chemins_possibles = plateau.chemins_possibles(plateau.dico_joueurs[id_joueur].carte_position)
+            chemins_possibles_carte.append(chemins_possibles)
+            #On réinitialise les emplacements des cartes à celles du plateau en cours
+            plateau = copy.deepcopy(plateau_en_cours)
+            orientation[0],orientation[1],orientation[2],orientation[3]=orientation[3],orientation[0],orientation[1],orientation[2]
+        
+        chemins_possibles_total.append(chemins_possibles_carte)
     dico_heuristique = {} #dico avec le rang (couple) d'un chemin dans chemin_possibles_total en clé et son heuristique en valeur
     
 
-    for k in range(len(chemins_possibles_total)): #Ensembles de chemins possibles
-        for i in range(len(chemins_possibles_total[k])) : #chemin possible parmi cet ensemble
-            
-            heuristique = 0
-            #On examine chaque case
-            for j in chemins_possibles_total[k][i]:
-                #Si il y a une pépite sur la case
-                if j.presence_pepite == True : 
-                    heuristique +=1
-                #Si il y a un de nos fantomes target attrapable
-                if j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in plateau.dico_joueurs[id_joueur].fantome_target:
-                    heuristique += 20
-                #Si il y a un des fantomes target d'un adversaire attrapable
-                elif j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in target_adversaires:
-                    heuristique += 10
-                #Si il y a un fantome attrapable qui n'est le target de personne
-                elif j.id_fantome == plateau.id_dernier_fantome+1:
-                    heuristique += 5
-                    
-            dico_heuristique[(k,i)] = heuristique
+    for k in range(len(chemins_possibles_total)): #k : rang du sous-ensemble correspondant à un endroit d'insertion possible
+        for i in range(len(chemins_possibles_total[k])) : #i: rang du sous-sous ensemble corrspondant à l'orientation de la carte
+            for m in range(len(chemins_possibles_total[k][i])):#m: rang du chemin possible parmi le sous-sous-ensemble
+                heuristique = 0
+                #On examine chaque case
+                for j in chemins_possibles_total[k][i][m]:
+                    #Si il y a une pépite sur la case
+                    if j.presence_pepite == True : 
+                        heuristique +=1
+                    #Si il y a un de nos fantomes target attrapable
+                    if j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in plateau.dico_joueurs[id_joueur].fantome_target:
+                        heuristique += 20
+                    #Si il y a un des fantomes target d'un adversaire attrapable
+                    elif j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in target_adversaires:
+                        heuristique += 10
+                    #Si il y a un fantome attrapable qui n'est le target de personne
+                    elif j.id_fantome == plateau.id_dernier_fantome+1:
+                        heuristique += 5
+                        
+                dico_heuristique[(k,i,m)] = heuristique
     
     #On trouve l'heuristique maximale
     max_heur = max(dico_heuristique.values())
-#    print(max_heur)
+    print(max_heur)
     
     chemins_opti = []
     inser_opti = []
+    orientation_opti = []
     
     #On trouve le/les chemin(s) correspondant à l'heuristique maximale
-    for couple in dico_heuristique.keys():
-        if dico_heuristique[couple] == max_heur :
-            chemins_opti.append(chemins_possibles_total[couple[0]][couple[1]])
+    for triplet in dico_heuristique.keys():
+        if dico_heuristique[triplet] == max_heur :
+            chemins_opti.append(chemins_possibles_total[triplet[0]][triplet[1]][triplet[2]])
             #On trouve les coordonnées de l'insertion correspondant au chemin optimal trouvé
-            inser_opti.append(plateau.insertions_possibles[couple[0]])
+            inser_opti.append(plateau.insertions_possibles[triplet[0]])
+            orientation_opti.append(triplet[1])
     
 
     #Si il n'y a qu'un seul chemin optimal, on le choisit
     if len(chemins_opti) == 1:
-        return (inser_opti[0],chemins_opti[0])
+        return (inser_opti[0],orientation_opti[0],chemins_opti[0])
     
     #Sinon on prend au hasard parmi les chemins optimaux
     #On pourrait aussi faire le choix de prendre celui qui inclu la capture d'un fantôme par ex
     else:
         rang = rd.randint(0,len(chemins_opti))
-        return (inser_opti[rang], chemins_opti[rang])
+        return (inser_opti[rang], orientation_opti[rang],chemins_opti[rang])
         
     
 
 
 plat = plateau(3,["Antoine","Christine","Michel"],[],7)
-#print(IA_simple(1,plat))
+print(IA_simple(2,plat))
+#print(plat.position)
+#print(plat.dico_joueurs[0].carte_position.coord,plat.dico_joueurs[1].carte_position.coord,plat.dico_joueurs[2].carte_position.coord)
+
+
 
 
 
@@ -837,7 +856,8 @@ def game() :
             joueur=plateau_test.dico_joueurs[j]
 
             actualise_fenetre(plateau_test,fenetre,joueur,information)
-
+            
+            
             #premiere etape : rotation et insertion de la carte
             #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
             dico_stop["test_carte"]=True
@@ -896,7 +916,12 @@ def game() :
                 for event in pygame.event.get():
                     #deplacement
                     if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
-                        information=plateau_test.deplace_joueur(j,event.key)
+                        deplace = plateau_test.deplace_joueur(j,event.key)
+                        if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
+                            information=plateau_test.compte_points(j,deplace)
+                        else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
+                            information=deplace
+
                         carte_actuelle=joueur.carte_position
                         cartes_accessibles=plateau_test.cartes_accessibles1(carte_actuelle)
                         
