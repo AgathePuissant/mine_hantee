@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Dec 10 13:56:02 2019
-
-@author: agaca
-"""
-
-# -*- coding: utf-8 -*-
-"""
 Created on Wed Nov 13 14:35:26 2019
 @author: agaca
 """
