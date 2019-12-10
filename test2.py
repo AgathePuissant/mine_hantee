@@ -406,7 +406,6 @@ def IA_simple(id_joueur,plateau_en_cours):
     #On duplique l'entité du plateau en cours pour faire des simulations de déplacement
     #de cartes sans impacter le vrai plateau
     plateau = copy.deepcopy(plateau_en_cours)
-    print(plateau.position)
     chemins_possibles_total = [] #Liste des listes de chemins possibles pour chaque insertion possible, donc liste de liste de liste
     
     #On recueille les données des adversaires i.e. leurs fantomes target
@@ -417,41 +416,47 @@ def IA_simple(id_joueur,plateau_en_cours):
                 target_adversaires.append(j)
         
         
-    #Pour toutes les insertions possibles, on stocke tous les chemins possibles
-    #Pour le joueur donné
+    #Pour toutes les insertions possibles et toutes les rotations de carte possibles,
+    #on stocke tous les chemins possibles pour le joueur donné
+    orientation = plateau.carte_a_jouer.orientation
+    #On teste pour chaque emplacement où la carte est insérable
     for i in plateau.insertions_possibles: 
-        plateau.deplace_carte(i)
-        print(plateau.position,"plateau")
-        print(plateau_en_cours.position,"plateau-en-cours")
-        chemins_possibles = plateau.chemins_possibles(plateau.dico_joueurs[id_joueur].carte_position)
-        chemins_possibles_total.append(chemins_possibles)
-        #On réinitialise les emplacements des cartes à celles du plateau en cours
-        plateau = copy.deepcopy(plateau_en_cours)
-
-
+        j=0
+        chemins_possibles_carte = [] 
+        #On teste pour chaque orientation de la carte
+        for j in range(4):
+            plateau.carte_a_jouer.orientation = orientation
+            plateau.deplace_carte(i)
+            chemins_possibles = plateau.chemins_possibles(plateau.dico_joueurs[id_joueur].carte_position)
+            chemins_possibles_carte.append(chemins_possibles)
+            #On réinitialise les emplacements des cartes à celles du plateau en cours
+            plateau = copy.deepcopy(plateau_en_cours)
+            orientation[0],orientation[1],orientation[2],orientation[3]=orientation[3],orientation[0],orientation[1],orientation[2]
+        
+        chemins_possibles_total.append(chemins_possibles_carte)
     dico_heuristique = {} #dico avec le rang (couple) d'un chemin dans chemin_possibles_total en clé et son heuristique en valeur
     
 
-    for k in range(len(chemins_possibles_total)): #Ensembles de chemins possibles
-        for i in range(len(chemins_possibles_total[k])) : #chemin possible parmi cet ensemble
-            
-            heuristique = 0
-            #On examine chaque case
-            for j in chemins_possibles_total[k][i]:
-                #Si il y a une pépite sur la case
-                if j.presence_pepite == True : 
-                    heuristique +=1
-                #Si il y a un de nos fantomes target attrapable
-                if j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in plateau.dico_joueurs[id_joueur].fantome_target:
-                    heuristique += 20
-                #Si il y a un des fantomes target d'un adversaire attrapable
-                elif j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in target_adversaires:
-                    heuristique += 10
-                #Si il y a un fantome attrapable qui n'est le target de personne
-                elif j.id_fantome == plateau.id_dernier_fantome+1:
-                    heuristique += 5
-                    
-            dico_heuristique[(k,i)] = heuristique
+    for k in range(len(chemins_possibles_total)): #k : rang du sous-ensemble correspondant à un endroit d'insertion possible
+        for i in range(len(chemins_possibles_total[k])) : #i: rang du sous-sous ensemble corrspondant à l'orientation de la carte
+            for m in range(len(chemins_possibles_total[k][i])):#m: rang du chemin possible parmi le sous-sous-ensemble
+                heuristique = 0
+                #On examine chaque case
+                for j in chemins_possibles_total[k][i][m]:
+                    #Si il y a une pépite sur la case
+                    if j.presence_pepite == True : 
+                        heuristique +=1
+                    #Si il y a un de nos fantomes target attrapable
+                    if j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in plateau.dico_joueurs[id_joueur].fantome_target:
+                        heuristique += 20
+                    #Si il y a un des fantomes target d'un adversaire attrapable
+                    elif j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in target_adversaires:
+                        heuristique += 10
+                    #Si il y a un fantome attrapable qui n'est le target de personne
+                    elif j.id_fantome == plateau.id_dernier_fantome+1:
+                        heuristique += 5
+                        
+                dico_heuristique[(k,i,m)] = heuristique
     
     #On trouve l'heuristique maximale
     max_heur = max(dico_heuristique.values())
@@ -459,34 +464,36 @@ def IA_simple(id_joueur,plateau_en_cours):
     
     chemins_opti = []
     inser_opti = []
+    orientation_opti = []
     
     #On trouve le/les chemin(s) correspondant à l'heuristique maximale
-    for couple in dico_heuristique.keys():
-        if dico_heuristique[couple] == max_heur :
-            chemins_opti.append(chemins_possibles_total[couple[0]][couple[1]])
+    for triplet in dico_heuristique.keys():
+        if dico_heuristique[triplet] == max_heur :
+            chemins_opti.append(chemins_possibles_total[triplet[0]][triplet[1]][triplet[2]])
             #On trouve les coordonnées de l'insertion correspondant au chemin optimal trouvé
-            inser_opti.append(plateau.insertions_possibles[couple[0]])
+            inser_opti.append(plateau.insertions_possibles[triplet[0]])
+            orientation_opti.append(triplet[1])
     
 
     #Si il n'y a qu'un seul chemin optimal, on le choisit
     if len(chemins_opti) == 1:
-        return (inser_opti[0],chemins_opti[0])
+        return (inser_opti[0],orientation_opti[0],chemins_opti[0])
     
     #Sinon on prend au hasard parmi les chemins optimaux
     #On pourrait aussi faire le choix de prendre celui qui inclu la capture d'un fantôme par ex
     else:
         rang = rd.randint(0,len(chemins_opti))
-        return (inser_opti[rang], chemins_opti[rang])
+        return (inser_opti[rang], orientation_opti[rang],chemins_opti[rang])
         
     
 
 
 plat = plateau(3,["Antoine","Christine","Michel"],[],7)
-print(IA_simple(1,plat))
+print(IA_simple(2,plat))
+#print(plat.position)
+#print(plat.dico_joueurs[0].carte_position.coord,plat.dico_joueurs[1].carte_position.coord,plat.dico_joueurs[2].carte_position.coord)
 
 
-
-    
 #---------------------------------------Définition des objets graphiques---------------------------------
  
 #code nécessaire pour créer des boutons associés à une action
@@ -628,11 +635,7 @@ def lecture(fichier):
 #écriture du fichier de paramétrage
 
 def ecriture(fichier, dico_parametres):
-    """
-    fonction qui remplit le fichier de paramètres à partir du dictionnaire des nouveaux paramètres 
-    donnée en entrée dans dico_parametres. 
-    (si l'utilisateur modifie les paramètres vie l'interface de jeu (avancée ou non))
-    """
+
     f=open(fichier,"r")
     lignes=f.readlines()
     f.close()
@@ -764,9 +767,7 @@ def affiche_plateau(plat,fenetre):
                fenetre.blit(mur3,(x,y))
                
 def actualise_fenetre(plateau,fenetre,joueur,info):
-    """
-    fonction pour actualiser l'affichage dans la fonction jeu
-    """
+
     affiche_plateau(plateau,fenetre)
     for i in range(len(plateau.dico_joueurs)) :
                 fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(850,360+i*80))
@@ -842,7 +843,7 @@ def game() :
             joueur=plateau_test.dico_joueurs[j]
 
             actualise_fenetre(plateau_test,fenetre,joueur,information)
-
+            
             #premiere etape : rotation et insertion de la carte
             #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
             test_carte="en cours"
@@ -1289,7 +1290,7 @@ def enregistrement_inputs(arg):
     et qui lance le jeu
     """
     global debut
-    
+
     dico={'nb_joueurs':arg[1], 
           'mode_joueur_1':arg[3][0],'mode_joueur_2':arg[3][1],'mode_joueur_3':arg[3][2],'mode_joueur_4':arg[3][3],
           'pseudo_joueur_1':arg[2][0],'pseudo_joueur_2':arg[2][1],'pseudo_joueur_3':arg[2][2],'pseudo_joueur_4':arg[2][3],
