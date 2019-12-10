@@ -774,9 +774,13 @@ def actualise_fenetre(plateau,fenetre,joueur,info):
     fenetre.blit(police.render("C'est a "+str(joueur.nom)+" de jouer",False,pygame.Color(0,0,0)),(800,240))
     #affichage du message d'erreur ?                       
     fenetre.blit(police_small.render(info,False,pygame.Color("#000000")),(760,170))
+                                                             
+    button(fenetre,"Commandes",1000,175,150,50,pygame.Color("#b46503"),pygame.Color("#d09954"),afficher_commandes)
                                                                         
     pygame.display.flip()
-
+                
+            
+    
     
 #---------------------------------------Défintion des instructions graphiques------------------------------
     
@@ -818,6 +822,9 @@ def game() :
         plateau_test=plateau(3,["Antoine","Christine","Michel"],[],7)
     else :
         pass
+    
+    
+    button(fenetre,"Commandes",900,950,200,250,pygame.Color("#b46503"),pygame.Color("#d09954"),afficher_commandes)
 
 
     N = plateau_test.N
@@ -839,6 +846,7 @@ def game() :
             #premiere etape : rotation et insertion de la carte
             #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
             test_carte="en cours"
+            
             
             while test_carte!="fin":
                 
@@ -864,7 +872,9 @@ def game() :
 
                             else :
                                 information=""
+                               
                                 test_carte="fin"
+                                
 
                     elif event.type == KEYDOWN and event.key == K_SPACE :
                         pause()
@@ -901,6 +911,7 @@ def game() :
                     if event.type == KEYDOWN and (event.key== K_RETURN):
                         test_entree=True
                         information=""
+                    
                         
                         
                     elif event.type == KEYDOWN and event.key == K_SPACE :
@@ -918,7 +929,36 @@ def game() :
             joueur.cartes_explorees = [carte_actuelle]
             joueur.capture_fantome = False
 
+def afficher_commandes() :
+
+    comm=True
+    
+    while comm==True :
+    
+        fenetre.blit(fond_uni,(0,0))
+        
+        fenetre.blit(police.render("R : tourner la carte",False,pygame.Color("#000000")),(100,100))
+        fenetre.blit(police.render("Flèches directionnelles : déplacer le joueur",False,pygame.Color("#000000")),(100,150))
+        fenetre.blit(police.render("Entrée : finir le tour",False,pygame.Color("#000000")),(100,200))
+        fenetre.blit(police.render("Espace : mettre en pause/Retour au jeu",False,pygame.Color("#000000")),(100,250))
+        fenetre.blit(police.render("Appuyez sur espace pour revenir au jeu",False,pygame.Color("#000000")),(100,500))
+                                                                                                     
+                                                                                                    
+                                                                      
+        pygame.display.flip() 
+                                                        
+        for event in pygame.event.get() :
+            
+            if event.type == KEYDOWN and event.key == K_SPACE :
+                comm=False
+                if debut==True :
+                    game()
                 
+            if event.type == pygame.QUIT :
+                comm=False
+                pygame.display.quit()
+                pygame.quit() 
+            
 def pause() :
     global fenetre,texte_sauv,nouvelle
     
@@ -945,7 +985,7 @@ def pause() :
         for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
                 
             if event.type == KEYDOWN and event.key == K_SPACE :
-                game()
+                pause=False
                 
             if event.type == QUIT:     #Si un de ces événements est de type QUIT
                 pause = False      #On arrête la boucle
@@ -962,9 +1002,10 @@ def sauvegarder():
 
     
 def charger_partie():
-    global fenetre,liste_sauv,num_partie,retour_partie
+    global fenetre,liste_sauv,num_partie,retour_partie,debut
     
     charger=True
+    debut=True
     retour_partie=False
         
     while charger ==True:
@@ -979,8 +1020,7 @@ def charger_partie():
             
             if retour_partie==True :
                 fenetre.blit(police.render("Partie "+str(num_partie)+" selectionnee",True,pygame.Color("#000000")),(800,100))
-            
-                button(fenetre,"Lancer la partie",800,300,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),game)
+                button(fenetre,"Lancer la partie",800,300,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),afficher_commandes)
                                                                           
         else :
             
@@ -1248,13 +1288,17 @@ def enregistrement_inputs(arg):
     fonction qui enregistre dans le fichier de configuration les entrées données par l'utilisateur
     et qui lance le jeu
     """
+    global debut
+    
     dico={'nb_joueurs':arg[1], 
           'mode_joueur_1':arg[3][0],'mode_joueur_2':arg[3][1],'mode_joueur_3':arg[3][2],'mode_joueur_4':arg[3][3],
           'pseudo_joueur_1':arg[2][0],'pseudo_joueur_2':arg[2][1],'pseudo_joueur_3':arg[2][2],'pseudo_joueur_4':arg[2][3],
           'niveau_ia_1':arg[4][0],'niveau_ia_2':arg[4][1],'niveau_ia_3':arg[4][2],'niveau_ia_4':arg[4][3]}
     
     ecriture(fichier, dico)
-    game()
+    
+    debut=True
+    afficher_commandes()
     
     
 
