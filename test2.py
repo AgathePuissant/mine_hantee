@@ -27,13 +27,14 @@ class carte(object):
         
 class joueur(object):
     
-    def __init__(self, ID, nom, niveau, fantome_target, carte_position):
+    def __init__(self, ID, nom, niveau, fantome_target, carte_position,IA=False):
         self.id = ID
         self.nom = nom
         self.niveau = niveau
         self.fantome_target = fantome_target
         self.carte_position = carte_position
         self.points = 0
+        self.IA = IA
         self.cartes_explorees = [carte_position]
         self.capture_fantome = False
 
@@ -158,7 +159,7 @@ class plateau(object):
                 compte_fantomes += 1
                 
             position = positions_initiales[i]
-            self.dico_joueurs[i] = joueur(i,liste_noms[i],0,fantomes_target,position)
+            self.dico_joueurs[i] = joueur(i,liste_noms[i],0,fantomes_target,position,False)
         
         #Création des entités des joueurs IA
         compte = 0
@@ -170,7 +171,7 @@ class plateau(object):
                 
             position = positions_initiales[i]
             nom = "IA"+str(compte+1)
-            self.dico_joueurs[i] = joueur(i,nom,liste_niveaux[compte],fantomes_target,position)
+            self.dico_joueurs[i] = joueur(i,nom,liste_niveaux[compte],fantomes_target,position,True)
             compte += 1
     
         
@@ -494,7 +495,7 @@ def IA_simple(id_joueur,plateau_en_cours):
 
 
 plat = plateau(3,["Antoine","Christine","Michel"],[],7)
-print(IA_simple(2,plat))
+#print(IA_simple(2,plat))
 #print(plat.position)
 #print(plat.dico_joueurs[0].carte_position.coord,plat.dico_joueurs[1].carte_position.coord,plat.dico_joueurs[2].carte_position.coord)
 
@@ -856,8 +857,7 @@ def game() :
             joueur=plateau_test.dico_joueurs[j]
 
             actualise_fenetre(plateau_test,fenetre,joueur,information)
-            
-            
+
             #premiere etape : rotation et insertion de la carte
             #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
             dico_stop["test_carte"]=True
@@ -921,7 +921,6 @@ def game() :
                             information=plateau_test.compte_points(j,deplace)
                         else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                             information=deplace
-
                         carte_actuelle=joueur.carte_position
                         cartes_accessibles=plateau_test.cartes_accessibles1(carte_actuelle)
                         
@@ -949,6 +948,8 @@ def game() :
             
             if dico_stop["test_carte"]==False and dico_stop["test_entree"]==False :
                 break
+            
+            
 
 def afficher_commandes() :
     global dico_stop
