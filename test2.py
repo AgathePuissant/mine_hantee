@@ -90,7 +90,6 @@ class plateau(object):
                 self.position[ligne,colonne]=int(compte_id)
                 #cases indéplaçables
                 if ligne%2 ==0 and colonne%2==0:
-                    #print(["indéplaçable",ligne,colonne])
                     deplacable=False
                     #cases du milieu où les joueurs commencent la partie
                     if ligne==N//2-1 and colonne==N//2-1:
@@ -126,11 +125,9 @@ class plateau(object):
                         orientation=[0,0,1,0]
                     else:
                         orientation=[0,0,0,1]
-                    #print(orientation)
                 
                 #cases déplaçables
                 else:
-                    #print("deplaçable"+str(ligne)+str(colonne))
                     orientation=pool[compte_deplacable]
                     compte_deplacable+=1
                     deplacable=True
@@ -413,7 +410,7 @@ def IA_simple(id_joueur,plateau_en_cours):
     #On duplique l'entité du plateau en cours pour faire des simulations de déplacement
     #de cartes sans impacter le vrai plateau
     plateau = copy.deepcopy(plateau_en_cours)
-    print(plateau.position)
+#    print(plateau.position)
     chemins_possibles_total = [] #Liste des listes de chemins possibles pour chaque insertion possible, donc liste de liste de liste
     
     #On recueille les données des adversaires i.e. leurs fantomes target
@@ -428,8 +425,8 @@ def IA_simple(id_joueur,plateau_en_cours):
     #Pour le joueur donné
     for i in plateau.insertions_possibles: 
         plateau.deplace_carte(i)
-        print(plateau.position,"plateau")
-        print(plateau_en_cours.position,"plateau-en-cours")
+#        print(plateau.position,"plateau")
+#        print(plateau_en_cours.position,"plateau-en-cours")
         chemins_possibles = plateau.chemins_possibles(plateau.dico_joueurs[id_joueur].carte_position)
         chemins_possibles_total.append(chemins_possibles)
         #On réinitialise les emplacements des cartes à celles du plateau en cours
@@ -462,7 +459,7 @@ def IA_simple(id_joueur,plateau_en_cours):
     
     #On trouve l'heuristique maximale
     max_heur = max(dico_heuristique.values())
-    print(max_heur)
+#    print(max_heur)
     
     chemins_opti = []
     inser_opti = []
@@ -489,7 +486,7 @@ def IA_simple(id_joueur,plateau_en_cours):
 
 
 plat = plateau(3,["Antoine","Christine","Michel"],[],7)
-print(IA_simple(1,plat))
+#print(IA_simple(1,plat))
 
 
 
@@ -721,9 +718,7 @@ def affiche_plateau(plat,fenetre):
     for i in range(len(plat.position)) :
         for j in range(len(plat.position)) :
             x=plat.dico_cartes[plat.position[i,j]].coord[0]*int(100*7/N)
-            #print(plat.dico_cartes[plat.position[i,j]].coord[0]*int(100*7/N))
             y=plat.dico_cartes[plat.position[i,j]].coord[1]*int(100*7/N)
-            #print(plat.dico_cartes[plat.position[i,j]].coord[1]*int(100*7/N))
             fenetre.blit(fond_a_jouer,(y,x))
 
 # Si on veut ajouter un graphisme pour les cartes déplaçables et indéplaçables
@@ -1059,7 +1054,16 @@ def nouvelle_partie():
         num_partie=1
     
     while dico_stop["initialisation"]==True :
+                                                            
+        #actualisation de l'écran
+        pygame.display.flip()
         
+        for event in pygame.event.get():
+            #arrêt du jeu
+            if event.type == QUIT:   
+                idico_stop = dict.fromkeys(dico_stop, False)
+                
+                
         fenetre.blit(fond_uni,(0,0))
         fenetre.blit(police3.render("Nouvelle partie!",True,pygame.Color("#000000")),(480,100))
         fenetre.blit(police2.render("Choisissez le mode de paramétrisation",True,pygame.Color("#000000")),(400,200))
@@ -1070,14 +1074,6 @@ def nouvelle_partie():
         
         #retour au menu                                                       
         button(fenetre,"Retour",500,550,200,50,COLOR_INACTIVE,COLOR_ACTIVE,menu)
-                                                            
-        #actualisation de l'écran
-        pygame.display.flip()
-        
-        for event in pygame.event.get():
-            #arrêt du jeu
-            if event.type == QUIT:   
-                idico_stop = dict.fromkeys(dico_stop, False)
                 
 def parametrisation_simple_1():
     '''
@@ -1104,17 +1100,6 @@ def parametrisation_simple_1():
                 choix.color=COLOR_ACTIVE
     
     while dico_stop["parametrisation1"]==True :
-                
-        fenetre.blit(fond_uni,(0,0))
-        
-        #choix du nombre de joueurs 
-        fenetre.blit(police3.render("Nombre de joueurs",True,pygame.Color("#000000")),(475,200))
-        
-        #Validation et passage à la page suivante
-        button(fenetre,"Valider",500,450,200,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_simple_2, choix_final)
-        
-        #retour au menu                                                       
-        button(fenetre,"Retour",500,550,200,50,COLOR_INACTIVE,COLOR_ACTIVE,menu)
         
         #choix du nombre de joueurs
         for choix in choix_nb_joueurs:
@@ -1134,6 +1119,17 @@ def parametrisation_simple_1():
             #arrêt du jeu
             if event.type == QUIT:   
                 dico_stop = dict.fromkeys(dico_stop, False)
+                
+        fenetre.blit(fond_uni,(0,0))
+        
+        #choix du nombre de joueurs 
+        fenetre.blit(police3.render("Nombre de joueurs",True,pygame.Color("#000000")),(475,200))
+        
+        #Validation et passage à la page suivante
+        button(fenetre,"Valider",500,450,200,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_simple_2, choix_final)
+        
+        #retour au menu                                                       
+        button(fenetre,"Retour",500,550,200,50,COLOR_INACTIVE,COLOR_ACTIVE,menu)
 
 def parametrisation_simple_2(choix_final):
     
@@ -1208,11 +1204,15 @@ def parametrisation_simple_2(choix_final):
     
     while dico_stop["parametrisation2"]==True :
         
+        #actualisation de l'écran
+        pygame.display.flip()
+        
         fenetre.blit(fond_uni,(0,0))
         
         #paramètres des joueurs
         fenetre.blit(police3.render("Paramètres des joueurs",True,pygame.Color("#000000")),(100,50))
         
+                                                                             
         for k in range(1,int(choix_final)+1):
             fenetre.blit(police2.render("Joueur "+str(k)+": ",True,pygame.Color("#000000")),(100,(k*100)))
             fenetre.blit(police2.render("Pseudo",True,pygame.Color("#000000")),(250,(k*100)))
@@ -1234,14 +1234,7 @@ def parametrisation_simple_2(choix_final):
                 choix_lvl2.draw(fenetre)
                 choix_lvl3.draw(fenetre)
                                                                  
-        #retour au menu                                                       
-        button(fenetre,"Retour",500,600,200,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_simple_1)
-        
-        #validation 
-        button(fenetre,"Valider",850,600,200,50,COLOR_INACTIVE,COLOR_ACTIVE,enregistrement_inputs,[1,choix_final,choix_final_pseudos,choix_final_modes,choix_final_lvls])                                                   
-                                                            
-        #actualisation de l'écran
-        pygame.display.flip()
+                                                 
         
         for event in pygame.event.get():
             
@@ -1280,6 +1273,13 @@ def parametrisation_simple_2(choix_final):
             #arrêt du jeu
             if event.type == QUIT:   
                 dico_stop = dict.fromkeys(dico_stop, False)
+            
+                #retour au menu                                                       
+        button(fenetre,"Retour",500,600,200,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_simple_1)
+        
+        #validation 
+        button(fenetre,"Valider",850,600,200,50,COLOR_INACTIVE,COLOR_ACTIVE,enregistrement_inputs,[1,choix_final,choix_final_pseudos,choix_final_modes,choix_final_lvls])                                                   
+           
                 
 def parametrisation_avancee():
     pass
