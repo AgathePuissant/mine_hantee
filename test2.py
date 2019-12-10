@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Tue Dec 10 13:56:02 2019
+
+@author: agaca
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Wed Nov 13 14:35:26 2019
 @author: agaca
 """
@@ -406,6 +413,7 @@ def IA_simple(id_joueur,plateau_en_cours):
     #On duplique l'entité du plateau en cours pour faire des simulations de déplacement
     #de cartes sans impacter le vrai plateau
     plateau = copy.deepcopy(plateau_en_cours)
+    print(plateau.position)
     chemins_possibles_total = [] #Liste des listes de chemins possibles pour chaque insertion possible, donc liste de liste de liste
     
     #On recueille les données des adversaires i.e. leurs fantomes target
@@ -416,47 +424,41 @@ def IA_simple(id_joueur,plateau_en_cours):
                 target_adversaires.append(j)
         
         
-    #Pour toutes les insertions possibles et toutes les rotations de carte possibles,
-    #on stocke tous les chemins possibles pour le joueur donné
-    orientation = plateau.carte_a_jouer.orientation
-    #On teste pour chaque emplacement où la carte est insérable
+    #Pour toutes les insertions possibles, on stocke tous les chemins possibles
+    #Pour le joueur donné
     for i in plateau.insertions_possibles: 
-        j=0
-        chemins_possibles_carte = [] 
-        #On teste pour chaque orientation de la carte
-        for j in range(4):
-            plateau.carte_a_jouer.orientation = orientation
-            plateau.deplace_carte(i)
-            chemins_possibles = plateau.chemins_possibles(plateau.dico_joueurs[id_joueur].carte_position)
-            chemins_possibles_carte.append(chemins_possibles)
-            #On réinitialise les emplacements des cartes à celles du plateau en cours
-            plateau = copy.deepcopy(plateau_en_cours)
-            orientation[0],orientation[1],orientation[2],orientation[3]=orientation[3],orientation[0],orientation[1],orientation[2]
-        
-        chemins_possibles_total.append(chemins_possibles_carte)
+        plateau.deplace_carte(i)
+        print(plateau.position,"plateau")
+        print(plateau_en_cours.position,"plateau-en-cours")
+        chemins_possibles = plateau.chemins_possibles(plateau.dico_joueurs[id_joueur].carte_position)
+        chemins_possibles_total.append(chemins_possibles)
+        #On réinitialise les emplacements des cartes à celles du plateau en cours
+        plateau = copy.deepcopy(plateau_en_cours)
+
+
     dico_heuristique = {} #dico avec le rang (couple) d'un chemin dans chemin_possibles_total en clé et son heuristique en valeur
     
 
-    for k in range(len(chemins_possibles_total)): #k : rang du sous-ensemble correspondant à un endroit d'insertion possible
-        for i in range(len(chemins_possibles_total[k])) : #i: rang du sous-sous ensemble corrspondant à l'orientation de la carte
-            for m in range(len(chemins_possibles_total[k][i])):#m: rang du chemin possible parmi le sous-sous-ensemble
-                heuristique = 0
-                #On examine chaque case
-                for j in chemins_possibles_total[k][i][m]:
-                    #Si il y a une pépite sur la case
-                    if j.presence_pepite == True : 
-                        heuristique +=1
-                    #Si il y a un de nos fantomes target attrapable
-                    if j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in plateau.dico_joueurs[id_joueur].fantome_target:
-                        heuristique += 20
-                    #Si il y a un des fantomes target d'un adversaire attrapable
-                    elif j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in target_adversaires:
-                        heuristique += 10
-                    #Si il y a un fantome attrapable qui n'est le target de personne
-                    elif j.id_fantome == plateau.id_dernier_fantome+1:
-                        heuristique += 5
-                        
-                dico_heuristique[(k,i,m)] = heuristique
+    for k in range(len(chemins_possibles_total)): #Ensembles de chemins possibles
+        for i in range(len(chemins_possibles_total[k])) : #chemin possible parmi cet ensemble
+            
+            heuristique = 0
+            #On examine chaque case
+            for j in chemins_possibles_total[k][i]:
+                #Si il y a une pépite sur la case
+                if j.presence_pepite == True : 
+                    heuristique +=1
+                #Si il y a un de nos fantomes target attrapable
+                if j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in plateau.dico_joueurs[id_joueur].fantome_target:
+                    heuristique += 20
+                #Si il y a un des fantomes target d'un adversaire attrapable
+                elif j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in target_adversaires:
+                    heuristique += 10
+                #Si il y a un fantome attrapable qui n'est le target de personne
+                elif j.id_fantome == plateau.id_dernier_fantome+1:
+                    heuristique += 5
+                    
+            dico_heuristique[(k,i)] = heuristique
     
     #On trouve l'heuristique maximale
     max_heur = max(dico_heuristique.values())
@@ -464,36 +466,34 @@ def IA_simple(id_joueur,plateau_en_cours):
     
     chemins_opti = []
     inser_opti = []
-    orientation_opti = []
     
     #On trouve le/les chemin(s) correspondant à l'heuristique maximale
-    for triplet in dico_heuristique.keys():
-        if dico_heuristique[triplet] == max_heur :
-            chemins_opti.append(chemins_possibles_total[triplet[0]][triplet[1]][triplet[2]])
+    for couple in dico_heuristique.keys():
+        if dico_heuristique[couple] == max_heur :
+            chemins_opti.append(chemins_possibles_total[couple[0]][couple[1]])
             #On trouve les coordonnées de l'insertion correspondant au chemin optimal trouvé
-            inser_opti.append(plateau.insertions_possibles[triplet[0]])
-            orientation_opti.append(triplet[1])
+            inser_opti.append(plateau.insertions_possibles[couple[0]])
     
 
     #Si il n'y a qu'un seul chemin optimal, on le choisit
     if len(chemins_opti) == 1:
-        return (inser_opti[0],orientation_opti[0],chemins_opti[0])
+        return (inser_opti[0],chemins_opti[0])
     
     #Sinon on prend au hasard parmi les chemins optimaux
     #On pourrait aussi faire le choix de prendre celui qui inclu la capture d'un fantôme par ex
     else:
         rang = rd.randint(0,len(chemins_opti))
-        return (inser_opti[rang], orientation_opti[rang],chemins_opti[rang])
+        return (inser_opti[rang], chemins_opti[rang])
         
     
 
 
 plat = plateau(3,["Antoine","Christine","Michel"],[],7)
-print(IA_simple(2,plat))
-#print(plat.position)
-#print(plat.dico_joueurs[0].carte_position.coord,plat.dico_joueurs[1].carte_position.coord,plat.dico_joueurs[2].carte_position.coord)
+print(IA_simple(1,plat))
 
 
+
+    
 #---------------------------------------Définition des objets graphiques---------------------------------
  
 #code nécessaire pour créer des boutons associés à une action
@@ -635,7 +635,11 @@ def lecture(fichier):
 #écriture du fichier de paramétrage
 
 def ecriture(fichier, dico_parametres):
-
+    """
+    fonction qui remplit le fichier de paramètres à partir du dictionnaire des nouveaux paramètres 
+    donnée en entrée dans dico_parametres. 
+    (si l'utilisateur modifie les paramètres vie l'interface de jeu (avancée ou non))
+    """
     f=open(fichier,"r")
     lignes=f.readlines()
     f.close()
@@ -767,7 +771,9 @@ def affiche_plateau(plat,fenetre):
                fenetre.blit(mur3,(x,y))
                
 def actualise_fenetre(plateau,fenetre,joueur,info):
-
+    """
+    fonction pour actualiser l'affichage dans la fonction jeu
+    """
     affiche_plateau(plateau,fenetre)
     for i in range(len(plateau.dico_joueurs)) :
                 fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(850,360+i*80))
@@ -786,38 +792,37 @@ def actualise_fenetre(plateau,fenetre,joueur,info):
 #---------------------------------------Défintion des instructions graphiques------------------------------
     
 def menu():
-    global fenetre,liste_sauv,num_partie,nouvelle
+    global fenetre,liste_sauv,num_partie,nouvelle,dico_stop
     
-    intro = True
+    dico_stop={}
+    
+    dico_stop["intro"] = True
 
-    while intro==True: #Boucle infinie
+    while dico_stop["intro"]==True: #Boucle infinie
+        
+        for event in pygame.event.get(): #Instructions de sortie
+            if event.type == pygame.QUIT:
+                dico_stop = dict.fromkeys(dico_stop, False)
+                pygame.display.quit()
+                pygame.quit()
                 
-                
+        pygame.display.flip() #Update l'écran
         fenetre.blit(fond_menu,(0,0))  #On colle le fond du menu
         
-        liste_sauv=glob.glob("sauvegarde*")
+        liste_sauv=glob.glob("sauvegarde")
         liste_sauv=[int(liste_sauv[i][-1]) for i in range(len(liste_sauv))]
-        
-        nouvelle=False
         
         #Création du bouton qui lance le jeu
         button(fenetre,"Nouvelle partie",500,350,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),nouvelle_partie)
         button(fenetre,"Charger une partie",500,450,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),charger_partie)
-                                                                     
-        pygame.display.flip() #Update l'écran
-        
-        for event in pygame.event.get(): #Instructions de sortie
-            if event.type == pygame.QUIT:
-                intro=False
-                pygame.display.quit()
-                pygame.quit()
       
 
 def game() :
-    global fenetre,num_partie,nouvelle,plateau_test
+    global fenetre,num_partie,nouvelle,plateau_test,dico_stop
     #Initialisation d'une nouvelle partie ou chargement d'une ancienne partie
     if nouvelle==False :
         plateau_test=pickle.load(open("sauvegarde"+str(num_partie),"rb"))
+        dico_stop["charger"]=False
     elif nouvelle==True:
         #Plateau de plateau_test
         plateau_test=plateau(3,["Antoine","Christine","Michel"],[],7)
@@ -831,10 +836,11 @@ def game() :
     N = plateau_test.N
     information="" #Initialisation du texte d'erreur ???
     
+    dico_stop["rester_jeu"]=True
     
     
     #Boucle du jeu. On joue tant qu'il reste des fantômes à attraper
-    while plateau_test.id_dernier_fantome!=plateau_test.nbre_fantomes:
+    while plateau_test.id_dernier_fantome!=plateau_test.nbre_fantomes and dico_stop["rester_jeu"]==True:
         
 
         #Tours de jeu
@@ -843,13 +849,14 @@ def game() :
             joueur=plateau_test.dico_joueurs[j]
 
             actualise_fenetre(plateau_test,fenetre,joueur,information)
-            
+
             #premiere etape : rotation et insertion de la carte
             #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
-            test_carte="en cours"
+            dico_stop["test_carte"]=True
+            dico_stop["test_entree"]=True
             
             
-            while test_carte!="fin":
+            while dico_stop["test_carte"]!=False:
                 
                 for event in pygame.event.get():   
                     
@@ -874,15 +881,14 @@ def game() :
                             else :
                                 information=""
                                
-                                test_carte="fin"
+                                dico_stop["test_carte"]=False
                                 
 
                     elif event.type == KEYDOWN and event.key == K_SPACE :
                         pause()
                     
                     elif event.type == QUIT:
-                        pygame.display.quit()
-                        pygame.quit()
+                        dico_stop = dict.fromkeys(dico_stop, False)
                         
                 actualise_fenetre(plateau_test,fenetre,joueur,information)
                
@@ -890,7 +896,6 @@ def game() :
                                     
             #2e etape : On parcours les évènements tant que le joueur n'a pas appuyé sur entrée ou tant qu'il peut encore se déplacer
             #initialisation à la position du joueur
-            test_entree=False
             
             carte_actuelle=joueur.carte_position
             
@@ -899,7 +904,7 @@ def game() :
             information=""
             
             #parcours des evenements
-            while test_entree==False and len(cartes_accessibles)>0:#La 2e condition deconne a cause de cartes_accessibles
+            while dico_stop["test_entree"]==True and len(cartes_accessibles)>0:#La 2e condition deconne a cause de cartes_accessibles
                 for event in pygame.event.get():
                     #deplacement
                     if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
@@ -910,7 +915,7 @@ def game() :
                         
                     #fin de tour
                     if event.type == KEYDOWN and (event.key== K_RETURN):
-                        test_entree=True
+                        dico_stop["test_entree"]=False
                         information=""
                     
                         
@@ -919,8 +924,7 @@ def game() :
                         pause()
                         
                     elif event.type == QUIT:
-                        pygame.display.quit()
-                        pygame.quit()
+                        dico_stop = dict.fromkeys(dico_stop, False)
                         
                 #Update l'écran                                                                
                 actualise_fenetre(plateau_test,fenetre,joueur,information)
@@ -929,12 +933,16 @@ def game() :
             #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
             joueur.cartes_explorees = [carte_actuelle]
             joueur.capture_fantome = False
+            
+            if dico_stop["test_carte"]==False and dico_stop["test_entree"]==False :
+                break
 
 def afficher_commandes() :
+    global dico_stop
 
-    comm=True
+    dico_stop["comm"]=True
     
-    while comm==True :
+    while dico_stop["comm"]==True :
     
         fenetre.blit(fond_uni,(0,0))
         
@@ -951,25 +959,23 @@ def afficher_commandes() :
         for event in pygame.event.get() :
             
             if event.type == KEYDOWN and event.key == K_SPACE :
-                comm=False
+                dico_stop["comm"]=False
                 if debut==True :
                     game()
                 
             if event.type == pygame.QUIT :
-                comm=False
-                pygame.display.quit()
-                pygame.quit() 
+                dico_stop = dict.fromkeys(dico_stop, False)
             
 def pause() :
-    global fenetre,texte_sauv,nouvelle
+    global fenetre,texte_sauv,nouvelle,dico_stop
     
     nouvelle="jeu en pause"
     
-    pause=True
+    dico_stop["pause"]=True
     
     texte_sauv=""
     
-    while pause==True :
+    while dico_stop["pause"]==True :
                 
         fenetre.blit(fond_uni,(0,0))
     
@@ -986,12 +992,10 @@ def pause() :
         for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
                 
             if event.type == KEYDOWN and event.key == K_SPACE :
-                pause=False
+                dico_stop["pause"]=False
                 
             if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                pause = False      #On arrête la boucle
-                pygame.display.quit()
-                pygame.quit()
+                dico_stop = dict.fromkeys(dico_stop, False)
                 
 
                 
@@ -1003,9 +1007,9 @@ def sauvegarder():
 
     
 def charger_partie():
-    global fenetre,liste_sauv,num_partie,retour_partie,debut
+    global fenetre,liste_sauv,num_partie,retour_partie,debut,dico_stop
     
-    charger=True
+    dico_stop["charger"]=True
     debut=True
     retour_partie=False
         
@@ -1034,25 +1038,54 @@ def charger_partie():
         for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
             
             if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                charger = False      #On arrête la boucle
-                pygame.display.quit()
-                pygame.quit()
+                dico_stop = dict.fromkeys(dico_stop, False)
                 
 def nouvelle_partie():
     '''
-    Fonction qui lance la paramétrisation d'une nouvelle partie
-    demande le nombre de joueurs pour la partie (entre 2,3 et 4) 
-    '''    
-    global fenetre,liste_sauv,num_partie,nouvelle
-
+    Fonction qui lance une nouvelle partie
+    et permet de choisir entre la paramétrisation simple et la paramétrisation avancée.  
+    '''
+    global fenetre,liste_sauv,num_partie,nouvelle,dico_stop
+    
     nouvelle=True
+    dico_stop["initialisation"]=True
+    
     #attribution du numéro de la partie
     if liste_sauv!=[]:
         num_partie=np.max(liste_sauv)+1
     else :
         num_partie=1
     
-    parametrisation=True
+    while dico_stop["initialisation"]==True :
+        
+        fenetre.blit(fond_uni,(0,0))
+        fenetre.blit(police3.render("Nouvelle partie!",True,pygame.Color("#000000")),(480,100))
+        fenetre.blit(police2.render("Choisissez le mode de paramétrisation",True,pygame.Color("#000000")),(400,200))
+        
+        #Choix entre la paramétrisation simple et la paramétrisation complexe
+        button(fenetre,"Paramétrisation simple",450,300,300,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_simple_1)
+        button(fenetre,"Paramétrisation avancée",450,400,300,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_avancee)                                                     
+        
+        #retour au menu                                                       
+        button(fenetre,"Retour",500,550,200,50,COLOR_INACTIVE,COLOR_ACTIVE,menu)
+                                                            
+        #actualisation de l'écran
+        pygame.display.flip()
+        
+        for event in pygame.event.get():
+            #arrêt du jeu
+            if event.type == QUIT:   
+                idico_stop = dict.fromkeys(dico_stop, False)
+                
+def parametrisation_simple_1():
+    '''
+    Fonction de paramétrisation simple 1
+    demande le nombre de joueurs pour la partie (entre 2,3 et 4) 
+    '''
+    global fenetre,dico_stop
+    
+    dico_stop["initialisation"]=False
+    dico_stop["parametrisation1"]=True
     
     #initialisation des boxs pour le choix du nombre de joueurs
     choix_nb_joueur_2=ChoiceBox(475, 300, 50, 30, '2')
@@ -1068,7 +1101,7 @@ def nouvelle_partie():
                 choix.active=True
                 choix.color=COLOR_ACTIVE
     
-    while parametrisation==True :
+    while dico_stop["parametrisation1"]==True :
                 
         fenetre.blit(fond_uni,(0,0))
         
@@ -1099,22 +1132,22 @@ def nouvelle_partie():
             
             #arrêt du jeu
             if event.type == QUIT:   
-                parametrisation = False      
-                pygame.display.quit()
-                pygame.quit()
+                dico_stop = dict.fromkeys(dico_stop, False)
 
 def parametrisation_1(choix_final):
     """
     Fonction qui lance la paramétrisation des joueurs
     """
     
-    global fenetre
+    global fenetre,dico_stop
+    
+    dico_stop["parametrisation1"]=False
     
     #actualisation du fichier de configuration en fonction du choix du nombre de joueurs qui a été réalisé
     dico_nb_joueurs={'nb_joueurs':choix_final}
     ecriture(fichier, dico_nb_joueurs)
 
-    parametrisation1=True
+    dico_stop["parametrisation2"]=True
     
     #lecture du fichier de paramétrisation 
     dico_parametres=lecture(fichier)
@@ -1174,8 +1207,8 @@ def parametrisation_1(choix_final):
             if choix.text==choix_final_lvls[k]:
                 choix.active=True
                 choix.color=COLOR_ACTIVE
-    
-    while parametrisation1==True :
+
+    while dico_stop["parametrisation2"]==True :
         
         fenetre.blit(fond_uni,(0,0))
         
@@ -1249,17 +1282,19 @@ def parametrisation_1(choix_final):
             
             #arrêt du jeu
             if event.type == QUIT:   
-                parametrisation1 = False      
-                pygame.display.quit()
-                pygame.quit()
+                dico_stop = dict.fromkeys(dico_stop, False)
+                
+def parametrisation_avancee():
+    pass
+
 
 def parametrisation_2(L_inputs):
     '''
     Fonction qui lance la paramétrisation des paramètres avancés de la partie
     '''    
-    global fenetre
+    global fenetre,dico_stop
     
-    parametrisation2=True
+    dico_stop["parametrisation2"]=True
     
     #lecture du fichier de paramétrisation 
     dico_parametres=lecture(fichier)
@@ -1281,7 +1316,7 @@ def parametrisation_2(L_inputs):
     for k in range(0,len(input_boxes)):
         choix_final_inputs=choix_final_inputs+[input_boxes[k].text]
 
-    while parametrisation2==True :
+    while dico_stop["parametrisation2"]==True :
                 
         fenetre.blit(fond_uni,(0,0))
         
@@ -1330,17 +1365,17 @@ def parametrisation_2(L_inputs):
             
             #arrêt du jeu
             if event.type == QUIT:   
-                parametrisation2 = False      
-                pygame.display.quit()
-                pygame.quit()
-    
+                dico_stop = dict.fromkeys(dico_stop, False)
 
 def enregistrement_inputs(arg):
     """
     fonction qui enregistre dans le fichier de configuration les entrées données par l'utilisateur
     et qui lance le jeu
     """
-    global debut
+    global debut,dico_stop
+    
+    dico_stop["parametrisation2"]=False
+
     dico={'nb_joueurs':arg[1], 
           'mode_joueur_1':arg[3][0],'mode_joueur_2':arg[3][1],'mode_joueur_3':arg[3][2],'mode_joueur_4':arg[3][3],
           'pseudo_joueur_1':arg[2][0],'pseudo_joueur_2':arg[2][1],'pseudo_joueur_3':arg[2][2],'pseudo_joueur_4':arg[2][3],
