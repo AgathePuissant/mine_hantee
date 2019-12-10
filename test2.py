@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Dec 10 13:56:02 2019
-
-@author: agaca
-"""
-
-# -*- coding: utf-8 -*-
-"""
 Created on Wed Nov 13 14:35:26 2019
 @author: agaca
 """
@@ -90,7 +83,6 @@ class plateau(object):
                 self.position[ligne,colonne]=int(compte_id)
                 #cases indéplaçables
                 if ligne%2 ==0 and colonne%2==0:
-                    #print(["indéplaçable",ligne,colonne])
                     deplacable=False
                     #cases du milieu où les joueurs commencent la partie
                     if ligne==N//2-1 and colonne==N//2-1:
@@ -126,11 +118,9 @@ class plateau(object):
                         orientation=[0,0,1,0]
                     else:
                         orientation=[0,0,0,1]
-                    #print(orientation)
                 
                 #cases déplaçables
                 else:
-                    #print("deplaçable"+str(ligne)+str(colonne))
                     orientation=pool[compte_deplacable]
                     compte_deplacable+=1
                     deplacable=True
@@ -413,7 +403,7 @@ def IA_simple(id_joueur,plateau_en_cours):
     #On duplique l'entité du plateau en cours pour faire des simulations de déplacement
     #de cartes sans impacter le vrai plateau
     plateau = copy.deepcopy(plateau_en_cours)
-    print(plateau.position)
+#    print(plateau.position)
     chemins_possibles_total = [] #Liste des listes de chemins possibles pour chaque insertion possible, donc liste de liste de liste
     
     #On recueille les données des adversaires i.e. leurs fantomes target
@@ -428,8 +418,8 @@ def IA_simple(id_joueur,plateau_en_cours):
     #Pour le joueur donné
     for i in plateau.insertions_possibles: 
         plateau.deplace_carte(i)
-        print(plateau.position,"plateau")
-        print(plateau_en_cours.position,"plateau-en-cours")
+#        print(plateau.position,"plateau")
+#        print(plateau_en_cours.position,"plateau-en-cours")
         chemins_possibles = plateau.chemins_possibles(plateau.dico_joueurs[id_joueur].carte_position)
         chemins_possibles_total.append(chemins_possibles)
         #On réinitialise les emplacements des cartes à celles du plateau en cours
@@ -462,7 +452,7 @@ def IA_simple(id_joueur,plateau_en_cours):
     
     #On trouve l'heuristique maximale
     max_heur = max(dico_heuristique.values())
-    print(max_heur)
+#    print(max_heur)
     
     chemins_opti = []
     inser_opti = []
@@ -489,7 +479,7 @@ def IA_simple(id_joueur,plateau_en_cours):
 
 
 plat = plateau(3,["Antoine","Christine","Michel"],[],7)
-print(IA_simple(1,plat))
+#print(IA_simple(1,plat))
 
 
 
@@ -721,9 +711,7 @@ def affiche_plateau(plat,fenetre):
     for i in range(len(plat.position)) :
         for j in range(len(plat.position)) :
             x=plat.dico_cartes[plat.position[i,j]].coord[0]*int(100*7/N)
-            #print(plat.dico_cartes[plat.position[i,j]].coord[0]*int(100*7/N))
             y=plat.dico_cartes[plat.position[i,j]].coord[1]*int(100*7/N)
-            #print(plat.dico_cartes[plat.position[i,j]].coord[1]*int(100*7/N))
             fenetre.blit(fond_a_jouer,(y,x))
 
 # Si on veut ajouter un graphisme pour les cartes déplaçables et indéplaçables
@@ -1040,6 +1028,8 @@ def charger_partie():
             if event.type == QUIT:     #Si un de ces événements est de type QUIT
                 dico_stop = dict.fromkeys(dico_stop, False)
                 
+
+                
 def nouvelle_partie():
     '''
     Fonction qui lance une nouvelle partie
@@ -1057,7 +1047,16 @@ def nouvelle_partie():
         num_partie=1
     
     while dico_stop["initialisation"]==True :
+                                                            
+        #actualisation de l'écran
+        pygame.display.flip()
         
+        for event in pygame.event.get():
+            #arrêt du jeu
+            if event.type == QUIT:   
+                idico_stop = dict.fromkeys(dico_stop, False)
+                
+                
         fenetre.blit(fond_uni,(0,0))
         fenetre.blit(police3.render("Nouvelle partie!",True,pygame.Color("#000000")),(480,100))
         fenetre.blit(police2.render("Choisissez le mode de paramétrisation",True,pygame.Color("#000000")),(400,200))
@@ -1068,14 +1067,6 @@ def nouvelle_partie():
         
         #retour au menu                                                       
         button(fenetre,"Retour",500,550,200,50,COLOR_INACTIVE,COLOR_ACTIVE,menu)
-                                                            
-        #actualisation de l'écran
-        pygame.display.flip()
-        
-        for event in pygame.event.get():
-            #arrêt du jeu
-            if event.type == QUIT:   
-                idico_stop = dict.fromkeys(dico_stop, False)
                 
 def parametrisation_simple_1():
     '''
@@ -1102,18 +1093,6 @@ def parametrisation_simple_1():
                 choix.color=COLOR_ACTIVE
     
     while dico_stop["parametrisation1"]==True :
-                
-        fenetre.blit(fond_uni,(0,0))
-        
-        #choix du nombre de joueurs 
-        fenetre.blit(police3.render("Nouvelle partie!",True,pygame.Color("#000000")),(485,100))
-        fenetre.blit(police3.render("Nombre de joueurs",True,pygame.Color("#000000")),(465,200))
-        
-        #Validation et passage à la page suivante
-        button(fenetre,"Valider",500,450,200,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_1, choix_final)
-        
-        #retour au menu                                                       
-        button(fenetre,"Retour",500,550,200,50,COLOR_INACTIVE,COLOR_ACTIVE,menu)
         
         #choix du nombre de joueurs
         for choix in choix_nb_joueurs:
@@ -1133,11 +1112,19 @@ def parametrisation_simple_1():
             #arrêt du jeu
             if event.type == QUIT:   
                 dico_stop = dict.fromkeys(dico_stop, False)
+                
+        fenetre.blit(fond_uni,(0,0))
+        
+        #choix du nombre de joueurs 
+        fenetre.blit(police3.render("Nombre de joueurs",True,pygame.Color("#000000")),(475,200))
+        
+        #Validation et passage à la page suivante
+        button(fenetre,"Valider",500,450,200,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_simple_2, choix_final)
+        
+        #retour au menu                                                       
+        button(fenetre,"Retour",500,550,200,50,COLOR_INACTIVE,COLOR_ACTIVE,menu)
 
-def parametrisation_1(choix_final):
-    """
-    Fonction qui lance la paramétrisation des joueurs
-    """
+def parametrisation_simple_2(choix_final):
     
     global fenetre,dico_stop
     
@@ -1207,14 +1194,18 @@ def parametrisation_1(choix_final):
             if choix.text==choix_final_lvls[k]:
                 choix.active=True
                 choix.color=COLOR_ACTIVE
-
+    
     while dico_stop["parametrisation2"]==True :
+        
+        #actualisation de l'écran
+        pygame.display.flip()
         
         fenetre.blit(fond_uni,(0,0))
         
         #paramètres des joueurs
         fenetre.blit(police3.render("Paramètres des joueurs",True,pygame.Color("#000000")),(100,50))
         
+                                                                             
         for k in range(1,int(choix_final)+1):
             fenetre.blit(police2.render("Joueur "+str(k)+": ",True,pygame.Color("#000000")),(100,(k*100)))
             fenetre.blit(police2.render("Pseudo",True,pygame.Color("#000000")),(250,(k*100)))
@@ -1236,15 +1227,7 @@ def parametrisation_1(choix_final):
                 choix_lvl2.draw(fenetre)
                 choix_lvl3.draw(fenetre)
                                                                  
-        #retour au menu                                                       
-        button(fenetre,"Retour",500,600,200,50,COLOR_INACTIVE,COLOR_ACTIVE,nouvelle_partie)
-        
-        #validation 
-        #button(fenetre,"Valider",850,600,200,50,COLOR_INACTIVE,COLOR_ACTIVE,enregistrement_inputs,[1,choix_final,choix_final_pseudos,choix_final_modes,choix_final_lvls])                                                   
-        button(fenetre,"Valider",850,600,200,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_2, [1,choix_final,choix_final_pseudos,choix_final_modes,choix_final_lvls])
-                                                    
-        #actualisation de l'écran
-        pygame.display.flip()
+                                                 
         
         for event in pygame.event.get():
             
@@ -1283,89 +1266,16 @@ def parametrisation_1(choix_final):
             #arrêt du jeu
             if event.type == QUIT:   
                 dico_stop = dict.fromkeys(dico_stop, False)
+            
+                #retour au menu                                                       
+        button(fenetre,"Retour",500,600,200,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_simple_1)
+        
+        #validation 
+        button(fenetre,"Valider",850,600,200,50,COLOR_INACTIVE,COLOR_ACTIVE,enregistrement_inputs,[1,choix_final,choix_final_pseudos,choix_final_modes,choix_final_lvls])                                                   
+           
                 
 def parametrisation_avancee():
     pass
-
-
-def parametrisation_2(L_inputs):
-    '''
-    Fonction qui lance la paramétrisation des paramètres avancés de la partie
-    '''    
-    global fenetre,dico_stop
-    
-    dico_stop["parametrisation2"]=True
-    
-    #lecture du fichier de paramétrisation 
-    dico_parametres=lecture(fichier)
-    
-    #définition des inputboxs pour l'ensemble des paramètres restants
-    #en initialisant les valeurs aux paramètres du fichier de paramétrisation. 
-    ib_dimensions_plateau=InputBox(600, 110, 150, 30, text=dico_parametres['dimensions_plateau'])
-    ib_nb_fantomes=InputBox(600, 180, 150, 30, text=dico_parametres['nb_fantomes'])
-    ib_nb_fantomes_mission=InputBox(600, 250, 150, 30, text=dico_parametres['nb_fantomes_mission'])
-    ib_nb_joker=InputBox(600, 320, 150, 30, text=dico_parametres['nb_joker'])
-    ib_points_pepite=InputBox(600, 390, 150, 30, text=dico_parametres['points_pepite'])
-    ib_points_fantome=InputBox(600, 460, 150, 30, text=dico_parametres['points_fantome'])
-    ib_points_fantome_mission=InputBox(600, 530, 150, 30, text=dico_parametres['points_fantome_mission'])
-    ib_bonus_mission=InputBox(600, 630, 150, 30, text=dico_parametres['bonus_mission'])
-    input_boxes=[ib_dimensions_plateau,ib_nb_fantomes,ib_nb_fantomes_mission,ib_nb_joker,ib_points_pepite,ib_points_fantome,ib_points_fantome_mission,ib_bonus_mission]
-    
-    #Stockage des choix des inputs
-    choix_final_inputs=[]
-    for k in range(0,len(input_boxes)):
-        choix_final_inputs=choix_final_inputs+[input_boxes[k].text]
-
-    while dico_stop["parametrisation2"]==True :
-                
-        fenetre.blit(fond_uni,(0,0))
-        
-        #titre de la fenêtre
-        fenetre.blit(police3.render("Paramètres avancés",True,pygame.Color("#000000")),(100,50))
-        
-        #Validation et passage à la page suivante
-        button(fenetre,"Lancer la partie !",900,300,200,50,COLOR_INACTIVE,COLOR_ACTIVE,enregistrement_inputs,L_inputs)
-        
-        #retour au menu                                                       
-        button(fenetre,"Retour",900,400,200,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_1, L_inputs[1])
-        
-        #dessin des inputboxs
-        for box in input_boxes:
-            box.draw(fenetre)
-            
-        #Ecriture des textes associés aux boxes
-        fenetre.blit(police2.render("Dimensions du plateau: ",True,pygame.Color("#000000")),(100,110))
-        fenetre.blit(police2.render("Nombre de fantômes: ",True,pygame.Color("#000000")),(100,180))
-        fenetre.blit(police1.render("Entier positif / Maximum:"+str(input_boxes[0].text),True,pygame.Color("#000000")),(100,210))
-        fenetre.blit(police1.render("Configuration standard : 21 fantômes pour un plateau de taille "+input_boxes[0].text+"x"+input_boxes[0].text+".",True,pygame.Color("#000000")),(100,230))
-        fenetre.blit(police2.render("Nombre de fantômes par ordre de mission: ",True,pygame.Color("#000000")),(100,250))
-        fenetre.blit(police1.render("Entier positif / Configuration standard : 3 fantômes.",True,pygame.Color("#000000")),(100,280))
-        fenetre.blit(police2.render("Joker(s) par joueur: ",True,pygame.Color("#000000")),(100,320))
-        fenetre.blit(police1.render("Entier positif / Configuration standard : 1 joker.",True,pygame.Color("#000000")),(100,350))
-        fenetre.blit(police2.render("Points gagnés par pépite ramassée: ",True,pygame.Color("#000000")),(100,390))    
-        fenetre.blit(police1.render("Entier positif / Configuration standard : 1 point.",True,pygame.Color("#000000")),(100,420))                                                                                                                                                                                                                                                                                                
-        fenetre.blit(police2.render("Points gagnés par fantôme capturé: ",True,pygame.Color("#000000")),(100,460))
-        fenetre.blit(police1.render("Entier positif / Configuration standard : 5 points.",True,pygame.Color("#000000")),(100,490))
-        fenetre.blit(police2.render("Points gagnés par fantôme capturé: ",True,pygame.Color("#000000")),(100,530))  
-        fenetre.blit(police2.render("si le fantôme figure sur l'ordre de mission",True,pygame.Color("#000000")),(100,560))
-        fenetre.blit(police1.render("Entier positif / Configuration standard : 20 points pour la configuration.",True,pygame.Color("#000000")),(100,590))
-        fenetre.blit(police2.render("Bonus lors du remplissage d'une mission: ",True,pygame.Color("#000000")),(100,630))
-        fenetre.blit(police1.render("Entier positif / Configuration standard : 40 points.",True,pygame.Color("#000000")),(100,660)) 
-                                                                                                  
-        #actualisation de l'écran
-        pygame.display.flip()
-        
-        #gestion des évènements
-        for event in pygame.event.get():
-            
-            for k in range(0,len(input_boxes)):
-                box=input_boxes[k]
-                box.handle_event(event)
-                choix_final_inputs[k]=box.text
-            
-            #arrêt du jeu
-            if event.type == QUIT:   
-                dico_stop = dict.fromkeys(dico_stop, False)
 
 def enregistrement_inputs(arg):
     """
@@ -1375,7 +1285,7 @@ def enregistrement_inputs(arg):
     global debut,dico_stop
     
     dico_stop["parametrisation2"]=False
-
+    
     dico={'nb_joueurs':arg[1], 
           'mode_joueur_1':arg[3][0],'mode_joueur_2':arg[3][1],'mode_joueur_3':arg[3][2],'mode_joueur_4':arg[3][3],
           'pseudo_joueur_1':arg[2][0],'pseudo_joueur_2':arg[2][1],'pseudo_joueur_3':arg[2][2],'pseudo_joueur_4':arg[2][3],
@@ -1407,7 +1317,6 @@ police_small = pygame.font.Font("coda.ttf", 17) #Load font object.
 
 COLOR_INACTIVE = pygame.Color('lightskyblue3')
 COLOR_ACTIVE = pygame.Color('dodgerblue2')
-police1=pygame.font.SysFont('calibri', 15)
 police2=pygame.font.SysFont('calibri', 25)
 police3=pygame.font.SysFont('calibri', 35)
 fichier="mine_hantee_config.txt" 
