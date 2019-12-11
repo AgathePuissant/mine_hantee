@@ -960,37 +960,21 @@ def game() :
                 #On tourne la carte
                 for i in range(orientation+1):
                     plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2],plateau_test.carte_a_jouer.orientation[3]=plateau_test.carte_a_jouer.orientation[3],plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2]
-<<<<<<< HEAD
                     pygame.time.delay(500)
                     actualise_fenetre(plateau_test,fenetre,joueur,information)
                     
                 plateau_test.deplace_carte(coord_inser) #On l'insère
                 pygame.time.delay(500)
                 actualise_fenetre(plateau_test,fenetre,joueur,information)
-=======
-                    pygame.display.flip()
-                    pygame.time.wait(500)
-                    
-                plateau_test.deplace_carte(coord_inser) #On l'insère
-                pygame.display.flip()
-                pygame.time.wait(500)
->>>>>>> 29ae2e07e54b8e63cf031be069058a633cdf819a
-                
+
                 information=""
                 for i in chemin :
                     joueur.carte_position = i
                     information=plateau_test.compte_points(j,i)
-<<<<<<< HEAD
+
                     pygame.time.delay(500)
                     actualise_fenetre(plateau_test,fenetre,joueur,information)
-=======
-                    actualise_fenetre(plateau_test,fenetre,joueur,information)
-                    pygame.display.flip()
-                    pygame.time.wait(500)
-                    
->>>>>>> 29ae2e07e54b8e63cf031be069058a633cdf819a
-                
-            
+
             
 
 def afficher_commandes() :
