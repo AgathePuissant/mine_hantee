@@ -13,6 +13,7 @@ import glob
 import copy
 import math
 
+
 class carte(object):
     
     def __init__(self, ID, orientation, coord, deplacable=False, id_fantome = 0):
@@ -841,7 +842,7 @@ def game() :
 
 
     N = plateau_test.N
-    information="" #Initialisation du texte d'erreur ???
+    
     
     dico_stop["rester_jeu"]=True
     
@@ -853,6 +854,9 @@ def game() :
         #Tours de jeu
         #on parcours chaque joueur à chaque tours.
         for j in plateau_test.dico_joueurs :
+            
+            information="" #Initialisation du texte d'erreur ???
+            
             joueur=plateau_test.dico_joueurs[j]
 
             actualise_fenetre(plateau_test,fenetre,joueur,information)
@@ -956,15 +960,21 @@ def game() :
                 #On tourne la carte
                 for i in range(orientation+1):
                     plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2],plateau_test.carte_a_jouer.orientation[3]=plateau_test.carte_a_jouer.orientation[3],plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2]
+                    pygame.display.flip()
                     pygame.time.wait(500)
+                    
                 plateau_test.deplace_carte(coord_inser) #On l'insère
+                pygame.display.flip()
                 pygame.time.wait(500)
                 
                 information=""
                 for i in chemin :
                     joueur.carte_position = i
                     information=plateau_test.compte_points(j,i)
+                    actualise_fenetre(plateau_test,fenetre,joueur,information)
+                    pygame.display.flip()
                     pygame.time.wait(500)
+                    
                 
             
             
