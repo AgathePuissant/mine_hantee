@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 Created on Wed Nov 13 14:35:26 2019
@@ -718,7 +719,7 @@ def game() :
                         carte_actuelle=joueur.carte_position
                         cartes_accessibles=plateau_test.cartes_accessibles1(carte_actuelle)
                         cartes_accessibles = [carte for carte in cartes_accessibles if carte!=carte_actuelle]
-                        cartes_explorees=cartes_explorees.append(carte_actuelle)
+                        joueur.cartes_explorees=joueur.cartes_explorees.append(carte_actuelle)
                         #Update l'écran                                                                
                         actualise_fenetre(plateau_test,fenetre,joueur)
                         
@@ -862,3 +863,4 @@ police = pygame.font.Font("SuperMario256.ttf", 20) #Load font object.
 #Lancement du menu
 menu()
 pygame.quit()
+
