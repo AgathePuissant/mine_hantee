@@ -27,14 +27,13 @@ class carte(object):
         
 class joueur(object):
     
-    def __init__(self, ID, nom, niveau, fantome_target, carte_position,IA=False):
+    def __init__(self, ID, nom, niveau, fantome_target, carte_position):
         self.id = ID
         self.nom = nom
         self.niveau = niveau
         self.fantome_target = fantome_target
         self.carte_position = carte_position
         self.points = 0
-        self.IA = IA
         self.cartes_explorees = [carte_position]
         self.capture_fantome = False
 
@@ -159,11 +158,11 @@ class plateau(object):
                 compte_fantomes += 1
                 
             position = positions_initiales[i]
-            self.dico_joueurs[i] = joueur(i,liste_noms[i],0,fantomes_target,position,False)
+            self.dico_joueurs[i] = joueur(i,liste_noms[i],0,fantomes_target,position)
         
         #Création des entités des joueurs IA
         compte = 0
-        for i in range(len(liste_noms)+1,nb_joueurs+1):
+        for i in range(len(liste_noms),nb_joueurs):
             fantomes_target = []
             for j in range(3):
                 fantomes_target.append(pool_fantomes[compte_fantomes])
@@ -171,7 +170,7 @@ class plateau(object):
                 
             position = positions_initiales[i]
             nom = "IA"+str(compte+1)
-            self.dico_joueurs[i] = joueur(i,nom,liste_niveaux[compte],fantomes_target,position,True)
+            self.dico_joueurs[i] = joueur(i,nom,liste_niveaux[compte],fantomes_target,position)
             compte += 1
     
         
@@ -833,7 +832,7 @@ def game() :
         dico_stop["charger"]=False
     elif nouvelle==True:
         #Plateau de plateau_test
-        plateau_test=plateau(3,["Antoine","Christine","Michel"],[],7)
+        plateau_test=plateau(3,["Antoine","Christine"],[1],7)
     else :
         pass
     
@@ -858,7 +857,7 @@ def game() :
 
             actualise_fenetre(plateau_test,fenetre,joueur,information)
 
-            if joueur.IA == False :
+            if joueur.niveau == 0 :
                 #premiere etape : rotation et insertion de la carte
                 #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
                 dico_stop["test_carte"]=True
