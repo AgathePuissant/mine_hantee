@@ -946,7 +946,7 @@ def game() :
                 joueur.cartes_explorees = [carte_actuelle]
                 joueur.capture_fantome = False
                 
-                if dico_stop["test_carte"]==False and dico_stop["test_entree"]==False :
+                if dico_stop["test_carte"]==False and dico_stop["test_entree"]==False and dico_stop["rester_jeu"]==False:
                     break
             
             else:
