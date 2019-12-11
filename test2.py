@@ -60,9 +60,9 @@ class plateau(object):
         #créer une combinaison des types de cartes
         nb_deplacable=N//2*(N//2+1+N)+1
         #orientations et types de murs de chaque carte
-        pool1=[[[1,0,1,0],[0,1,0,1]][rd.randint(0,1)] for i in range(int(nb_deplacable*13/34))]
-        pool2=[[[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*15/34))]
-        pool3=[[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*6/34))]
+        pool1=[rd.choice([[1,0,1,0],[0,1,0,1]]) for i in range(int(nb_deplacable*13/34))]
+        pool2=[rd.choice([[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]]) for i in range(int(nb_deplacable*15/34))]
+        pool3=[rd.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) for i in range(int(nb_deplacable*6/34))]
         pool=pool1+pool2+pool3
         
         #Pool des id des fantômes à placer sur le plateau
@@ -110,13 +110,13 @@ class plateau(object):
                             orientation=[0,1,1,0]
                     
                     #cases qui font les bords et les autres indéplaçables
-                    elif ligne>colonne and N-ligne>N-colonne:
+                    elif ligne<colonne and N-ligne-1>colonne:
                         orientation=[1,0,0,0]
-                    elif ligne>colonne:
+                    elif ligne<colonne and N-ligne-1<colonne:
                         orientation=[0,1,0,0]
-                    elif N-ligne<N-colonne:
+                    elif ligne>colonne and N-ligne-1<colonne:
                         orientation=[0,0,1,0]
-                    else:
+                    elif ligne>colonne and N-ligne-1>colonne:
                         orientation=[0,0,0,1]
                 
                 #cases déplaçables
@@ -854,9 +854,8 @@ def game() :
         #on parcours chaque joueur à chaque tours.
         for j in plateau_test.dico_joueurs :
             joueur=plateau_test.dico_joueurs[j]
-
+            print(joueur.nom)
             actualise_fenetre(plateau_test,fenetre,joueur,information)
-
             if joueur.niveau == 0 :
                 #premiere etape : rotation et insertion de la carte
                 #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
@@ -919,7 +918,8 @@ def game() :
                             deplace = plateau_test.deplace_joueur(j,event.key)
                             if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
                                 information=plateau_test.compte_points(j,deplace)
-                            else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
+                            else: 
+                            #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                                 information=deplace
                             carte_actuelle=joueur.carte_position
                             cartes_accessibles=plateau_test.cartes_accessibles1(carte_actuelle)
@@ -928,6 +928,7 @@ def game() :
                         #fin de tour
                         if event.type == KEYDOWN and (event.key== K_RETURN):
                             dico_stop["test_entree"]=False
+                            print(dico_stop["test_entree"])
                             information=""
                         
                             
@@ -946,8 +947,7 @@ def game() :
                 joueur.cartes_explorees = [carte_actuelle]
                 joueur.capture_fantome = False
                 
-                if dico_stop["test_carte"]==False and dico_stop["test_entree"]==False :
-                    break
+
             
             else:
                 IA = IA_simple(j,plateau_test)
