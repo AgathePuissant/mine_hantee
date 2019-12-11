@@ -34,7 +34,7 @@ niveau_ia_3=1
 niveau_ia_4=1
 
 #Peudos des joueurs (4 joueurs au maximum)
-pseudo_joueur_1=Salut
+pseudo_joueur_1=Sgvfc
 pseudo_joueur_2=Ordinateur2
 pseudo_joueur_3=Ordinateur3
 pseudo_joueur_4=Julie
