@@ -487,7 +487,7 @@ def IA_simple(id_joueur,plateau_en_cours):
     #Sinon on prend au hasard parmi les chemins optimaux
     #On pourrait aussi faire le choix de prendre celui qui inclu la capture d'un fantôme par ex
     else:
-        rang = rd.randint(0,len(chemins_opti))
+        rang = rd.randint(0,len(chemins_opti)-1)
         return (inser_opti[rang], orientation_opti[rang],chemins_opti[rang])
         
     
@@ -956,15 +956,19 @@ def game() :
                 #On tourne la carte
                 for i in range(orientation+1):
                     plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2],plateau_test.carte_a_jouer.orientation[3]=plateau_test.carte_a_jouer.orientation[3],plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2]
-                    pygame.time.wait(500)
+                    pygame.time.delay(500)
+                    actualise_fenetre(plateau_test,fenetre,joueur,information)
+                    
                 plateau_test.deplace_carte(coord_inser) #On l'insère
-                pygame.time.wait(500)
+                pygame.time.delay(500)
+                actualise_fenetre(plateau_test,fenetre,joueur,information)
                 
                 information=""
                 for i in chemin :
                     joueur.carte_position = i
                     information=plateau_test.compte_points(j,i)
-                    pygame.time.wait(500)
+                    pygame.time.delay(500)
+                    actualise_fenetre(plateau_test,fenetre,joueur,information)
                 
             
             
