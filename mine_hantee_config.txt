@@ -24,25 +24,20 @@ nb_joueurs=3
 #Mode de jeu des joueurs (avec 4 joueurs au maximum)
 mode_joueur_1=manuel
 mode_joueur_2=manuel
-mode_joueur_3=automatique
+mode_joueur_3=manuel
 mode_joueur_4=manuel
 
 #Niveaux des joueurs automatiques (4 joueurs automatiques au maximum)
-niveau_ia_1=1
+niveau_ia_1=3
 niveau_ia_2=1
-niveau_ia_3=1
+niveau_ia_3=3
 niveau_ia_4=1
 
 #Peudos des joueurs (4 joueurs au maximum)
-<<<<<<< HEAD
-pseudo_joueur_1=Sgvfc
-pseudo_joueur_2=Ordinateur2
-=======
-pseudo_joueur_1=Salut
-pseudo_joueur_2=Coucou
->>>>>>> 29ae2e07e54b8e63cf031be069058a633cdf819a
-pseudo_joueur_3=Ordinateur3
-pseudo_joueur_4=Julie
+pseudo_joueur_1=Joueur1
+pseudo_joueur_2=Joueur2
+pseudo_joueur_3=Joueur3
+pseudo_joueur_4=zodj
 
 #####################################
 #	CARACTERISTIQUES DES MISSIONS	#
