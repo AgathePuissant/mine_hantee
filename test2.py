@@ -551,7 +551,47 @@ def button_charger_partie(fenetre,msg,x,y,w,h,ic,ac,i):
     textRect.center = ( (x+(w/2)), (y+(h/2)) )
     fenetre.blit(textSurf, textRect)
     
+#definition des Boutons
 
+class Bouton:
+    
+    def __init__(self, x, y, w, h, text=''):
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color = COLOR_INACTIVE
+        self.text = text
+        self.txt_surface = police2.render(text, True, pygame.Color("#000000"))
+        self.active = False
+    
+    def handle_event(self, event, action, parametre_action=None):
+        
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+        #si la souris se trouve au dessous du bouton, on l'active et on change la couleur
+        if self.rect.x+self.rect.w > mouse[0] > self.rect.x and self.rect.y+self.rect.h > mouse[1] > self.rect.y:
+            self.active=True
+            if click[0] == 1:
+                # L'action est lancée, avec ou sans paramètre
+                if parametre_action==None:
+                    action()
+                else:
+                    action(parametre_action)
+        else:
+            self.active=False
+            
+        #actualisation de la couleur du bouton
+        if self.active==True:
+            self.color=COLOR_ACTIVE
+        else:
+            self.color=COLOR_INACTIVE
+    
+    def draw(self, fenetre):
+        # Blit le rectangle. 
+        pygame.draw.rect(fenetre, self.color, self.rect)
+        # Blit le texte.
+        text_rect=self.txt_surface.get_rect()
+        text_rect.center=(self.rect.x+((self.rect.w)/2), self.rect.y+((self.rect.h)/2))
+        fenetre.blit(self.txt_surface, text_rect)
+    
 #definition des Inputboxs
     
 class InputBox:
@@ -1084,51 +1124,24 @@ def charger_partie():
                 
 def nouvelle_partie():
     '''
-    Fonction qui lance une nouvelle partie
-    et permet de choisir entre la paramétrisation simple et la paramétrisation avancée.  
+    Fonction de paramétrisation simple 1
+    demande le nombre de joueurs pour la partie (entre 2,3 et 4) 
     '''
     global fenetre,liste_sauv,num_partie,nouvelle,dico_stop
     
     nouvelle=True
-    dico_stop["initialisation"]=True
-    
     #attribution du numéro de la partie
     if liste_sauv!=[]:
         num_partie=np.max(liste_sauv)+1
     else :
         num_partie=1
     
-    while dico_stop["initialisation"]==True :
-                                                            
-        #actualisation de l'écran
-        pygame.display.flip()
-        
-        for event in pygame.event.get():
-            #arrêt du jeu
-            if event.type == QUIT:   
-                idico_stop = dict.fromkeys(dico_stop, False)
-                
-                
-        fenetre.blit(fond_uni,(0,0))
-        fenetre.blit(police3.render("Nouvelle partie!",True,pygame.Color("#000000")),(480,100))
-        fenetre.blit(police2.render("Choisissez le mode de paramétrisation",True,pygame.Color("#000000")),(400,200))
-        
-        #Choix entre la paramétrisation simple et la paramétrisation complexe
-        button(fenetre,"Paramétrisation simple",450,300,300,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_simple_1)
-        button(fenetre,"Paramétrisation avancée",450,400,300,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_avancee)                                                     
-        
-        #retour au menu                                                       
-        button(fenetre,"Retour",500,550,200,50,COLOR_INACTIVE,COLOR_ACTIVE,menu)
-                
-def parametrisation_simple_1():
-    '''
-    Fonction de paramétrisation simple 1
-    demande le nombre de joueurs pour la partie (entre 2,3 et 4) 
-    '''
-    global fenetre,dico_stop
+    dico_stop["intro"]=False
+    dico_stop["nouvellepartie"]=True
     
-    dico_stop["initialisation"]=False
-    dico_stop["parametrisation1"]=True
+    #initialisation des boutons valider et retour
+    valider=Bouton(500,450,200,50,"Valider")
+    retour=Bouton(500,550,200,50,"Retour")
     
     #initialisation des boxs pour le choix du nombre de joueurs
     choix_nb_joueur_2=ChoiceBox(475, 300, 50, 30, '2')
@@ -1136,26 +1149,46 @@ def parametrisation_simple_1():
     choix_nb_joueur_4=ChoiceBox(675, 300, 50, 30, '4')
     choix_nb_joueurs=[choix_nb_joueur_2, choix_nb_joueur_3, choix_nb_joueur_4]
     
-    #lecture du fichier de paramétrisation et initialisation du nombre de joueurs à la valeur renseignée dans le fichier
+    #lecture du fichier de paramétrisation
     dico_parametres=lecture(fichier)
-    choix_final=dico_parametres['nb_joueurs']           #on stoque le choix entre les boutons dans choix_final
+    #on stoque le choix entre les boutons dans le dictionnaire choix_final
+    choix_final={}
+    choix_final["fonction"]=parametrisation_1
+    choix_final["nb_joueurs"]=dico_parametres['nb_joueurs'] 
+    choix_final['test_null']=False
+    choix_final['test_max']=False          
+    #initialisation du nombre de joueurs à la valeur renseignée dans le fichier
     for choix in choix_nb_joueurs:
-            if choix.text==choix_final:
+            if choix.text==choix_final["nb_joueurs"]:
                 choix.active=True
                 choix.color=COLOR_ACTIVE
     
-    while dico_stop["parametrisation1"]==True :
+    while dico_stop["nouvellepartie"]==True :
+                
+        fenetre.blit(fond_uni,(0,0))
+        
+        #choix du nombre de joueurs 
+        fenetre.blit(police3.render("Nouvelle partie!",True,pygame.Color("#000000")),(485,100))
+        fenetre.blit(police3.render("Nombre de joueurs",True,pygame.Color("#000000")),(465,200))
+        
+        #dessin des boutons
+        valider.draw(fenetre)  
+        retour.draw(fenetre)
         
         #choix du nombre de joueurs
         for choix in choix_nb_joueurs:
             choix.draw(fenetre)
             if choix.active==True:
-                choix_final=choix.text
+                choix_final["nb_joueurs"]=choix.text
                                                             
         #actualisation de l'écran
         pygame.display.flip()
         
         for event in pygame.event.get():
+            
+            #gestion des boutons
+            valider.handle_event(event,action=enregistrement_inputs, parametre_action=choix_final)
+            retour.handle_event(event,action=menu)
             
             #actualisation du choix du nombre de joueurs
             for choix in choix_nb_joueurs:
@@ -1164,39 +1197,43 @@ def parametrisation_simple_1():
             #arrêt du jeu
             if event.type == QUIT:   
                 dico_stop = dict.fromkeys(dico_stop, False)
-                
-        fenetre.blit(fond_uni,(0,0))
         
-        #choix du nombre de joueurs 
-        fenetre.blit(police3.render("Nombre de joueurs",True,pygame.Color("#000000")),(475,200))
-        
-        #Validation et passage à la page suivante
-        button(fenetre,"Valider",500,450,200,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_simple_2, choix_final)
-        
-        #retour au menu                                                       
-        button(fenetre,"Retour",500,550,200,50,COLOR_INACTIVE,COLOR_ACTIVE,menu)
 
-def parametrisation_simple_2(choix_final):
+def parametrisation_1(dico_erreurs={}):
+    """
+    Fonction qui lance la paramétrisation des joueurs
+    """
+    global fenetre, dico_stop
     
-    global fenetre,dico_stop
+    dico_stop['nouvellepartie']=False
+    dico_stop['parametrisation1']=True
     
-    dico_stop["parametrisation1"]=False
-    
-    #actualisation du fichier de configuration en fonction du choix du nombre de joueurs qui a été réalisé
-    dico_nb_joueurs={'nb_joueurs':choix_final}
-    ecriture(fichier, dico_nb_joueurs)
-
-    dico_stop["parametrisation2"]=True
+    #stockage des paramètres choisis qui seront enregistrés
+    dico_choix={}
+    dico_choix['fonction']=parametrisation_2
+    dico_choix['fonction_prec']=parametrisation_1
+    #pour cette fonction, on testera la nullité des paramètres entrés. 
+    dico_choix['test_null']=True
+    #pour cette fonction, on ne testera pas le maximum des paramètres entrés. 
+    dico_choix['test_max']=False
     
     #lecture du fichier de paramétrisation 
     dico_parametres=lecture(fichier)
+    nb_joueurs=dico_parametres['nb_joueurs']
     
-    #définition des inputbox (on en définit 4 même si les 4 ne sont pas forcément utilisées)
+    #initialisation des boutons valider et retour
+    valider=Bouton(850,600,200,50,"Valider")
+    retour=Bouton(500,600,200,50,"Retour")
+    
+    #initialisation des inputbox (on en définit 4 même si les 4 ne sont pas forcément utilisées)
     input_box1=InputBox(350, 100, 150, 30, text=dico_parametres['pseudo_joueur_1'])
     input_box2=InputBox(350, 200, 150, 30, text=dico_parametres['pseudo_joueur_2'])
     input_box3=InputBox(350, 300, 150, 30, text=dico_parametres['pseudo_joueur_3'])
     input_box4=InputBox(350, 400, 150, 30, text=dico_parametres['pseudo_joueur_4'])
     input_boxes=[input_box1,input_box2,input_box3,input_box4]
+    L_pseudos=['pseudo_joueur_1','pseudo_joueur_2','pseudo_joueur_3','pseudo_joueur_4']
+    for k in range(0,len(input_boxes)):
+        dico_choix[L_pseudos[k]]=input_boxes[k].text
     
     #initialisation des boxs pour le choix des modes de jeu des joueurs
     choix_manuel_joueur_1=ChoiceBox(650, 100, 175, 30, 'manuel')
@@ -1208,6 +1245,9 @@ def parametrisation_simple_2(choix_final):
     choix_manuel_joueur_4=ChoiceBox(650, 400, 175, 30, 'manuel')
     choix_automatique_joueur_4=ChoiceBox(650, 440, 175, 30, 'automatique')
     choix_modes_joueurs=[[choix_manuel_joueur_1,choix_automatique_joueur_1],[choix_manuel_joueur_2,choix_automatique_joueur_2],[choix_manuel_joueur_3,choix_automatique_joueur_3],[choix_manuel_joueur_4,choix_automatique_joueur_4]]
+    L_modes=['mode_joueur_1','mode_joueur_2','mode_joueur_3','mode_joueur_4']
+    for k in range(0,len(L_modes)):
+        dico_choix[L_modes[k]]=dico_parametres[L_modes[k]]
     
     #initialisation des boxs pour le choix des niveaux des joueurs
     choix_lvl_j1_1=ChoiceBox(1000, 140, 50, 30, '1')
@@ -1223,31 +1263,24 @@ def parametrisation_simple_2(choix_final):
     choix_lvl_j4_2=ChoiceBox(1050, 440, 50, 30, '2')
     choix_lvl_j4_3=ChoiceBox(1100, 440, 50, 30, '3')
     choix_lvl_joueurs=[[choix_lvl_j1_1,choix_lvl_j1_2,choix_lvl_j1_3],[choix_lvl_j2_1,choix_lvl_j2_2,choix_lvl_j2_3],[choix_lvl_j3_1,choix_lvl_j3_2,choix_lvl_j3_3],[choix_lvl_j4_1,choix_lvl_j4_2,choix_lvl_j4_3]]
+    L_lvl=['niveau_ia_1','niveau_ia_2','niveau_ia_3','niveau_ia_4']
+    for k in range(0,len(L_lvl)):
+        dico_choix[L_lvl[k]]=dico_parametres[L_lvl[k]]
     
-    #initialisation des pseudos, des modes de jeu 
-    #et des éventuels niveaux de ias en fonction des valeurs renseignées dans le fichier 
+    #initialisation des boutons sélectionnés en fonction des valeurs renseignées dans le fichier 
     #de configuration
-    
-    #on stoque le choix des pseudos des joueurs manuels dans choix_final_pseudos
-    choix_final_pseudos=[input_box1.text,input_box2.text,input_box3.text,input_box4.text]
-    
-    #on stoque le choix des modes dans choix_final_modes
-    choix_final_modes=[dico_parametres['mode_joueur_1'], dico_parametres['mode_joueur_2'], dico_parametres['mode_joueur_3'], dico_parametres['mode_joueur_4']]           
     for k in range(0,len(choix_modes_joueurs)):
         for choix in choix_modes_joueurs[k]:
-            if choix.text==choix_final_modes[k]:
+            if choix.text==dico_choix[L_modes[k]]:
                 choix.active=True
-                choix.color=COLOR_ACTIVE
-    
-    #on stoque le choix des lvls des ias dans choix_lvl_joueurs
-    choix_final_lvls=[dico_parametres['niveau_ia_1'], dico_parametres['niveau_ia_2'], dico_parametres['niveau_ia_3'], dico_parametres['niveau_ia_4']]           
+                choix.color=COLOR_ACTIVE 
     for k in range(0,len(choix_lvl_joueurs)):
         for choix in choix_lvl_joueurs[k]:
-            if choix.text==choix_final_lvls[k]:
+            if choix.text==dico_choix[L_lvl[k]]:
                 choix.active=True
                 choix.color=COLOR_ACTIVE
     
-    while dico_stop["parametrisation2"]==True :
+    while dico_stop['parametrisation1']==True :
         
         #actualisation de l'écran
         pygame.display.flip()
@@ -1257,11 +1290,15 @@ def parametrisation_simple_2(choix_final):
         #paramètres des joueurs
         fenetre.blit(police3.render("Paramètres des joueurs",True,pygame.Color("#000000")),(100,50))
         
-                                                                             
-        for k in range(1,int(choix_final)+1):
+        if len(dico_erreurs)!=0:
+            fenetre.blit(police2.render("ERREUR : Renseignez tous les champs!",True,COLOR_ERROR),(550,50))
+        
+        for k in range(1,int(nb_joueurs)+1):
+
             fenetre.blit(police2.render("Joueur "+str(k)+": ",True,pygame.Color("#000000")),(100,(k*100)))
             fenetre.blit(police2.render("Pseudo",True,pygame.Color("#000000")),(250,(k*100)))
             fenetre.blit(police2.render("Mode",True,pygame.Color("#000000")),(550,(k*100)))
+                
             box=input_boxes[k-1]
             box.draw(fenetre)
             choix_manuel=choix_modes_joueurs[k-1][0]
@@ -1278,39 +1315,48 @@ def parametrisation_simple_2(choix_final):
                 choix_lvl1.draw(fenetre)
                 choix_lvl2.draw(fenetre)
                 choix_lvl3.draw(fenetre)
-                                                                 
-                                                 
+        
+        #dessin des boutons
+        valider.draw(fenetre)  
+        retour.draw(fenetre)
+                                          
+        #actualisation de l'écran
+        pygame.display.flip()
         
         for event in pygame.event.get():
             
+            #gestion des boutons
+            valider.handle_event(event,action=enregistrement_inputs, parametre_action=dico_choix)
+            retour.handle_event(event,action=nouvelle_partie)
+            
             #remplissage des inputboxs    
-            for k in range(1,int(choix_final)+1):
+            for k in range(1,int(nb_joueurs)+1):
                 choix_manuel=choix_modes_joueurs[k-1][0]
                 choix_automatique=choix_modes_joueurs[k-1][1]
                 choix_manuel.handle_event(event,choix_modes_joueurs[k-1])
                 choix_automatique.handle_event(event,choix_modes_joueurs[k-1])
                 if choix_automatique.active:
+                    choix_lvl_joueurs[k-1][0].handle_event(event,choix_lvl_joueurs[k-1])
+                    choix_lvl_joueurs[k-1][1].handle_event(event,choix_lvl_joueurs[k-1])
+                    choix_lvl_joueurs[k-1][2].handle_event(event,choix_lvl_joueurs[k-1])
                     choix_lvl1=choix_lvl_joueurs[k-1][0]
                     choix_lvl2=choix_lvl_joueurs[k-1][1]
                     choix_lvl3=choix_lvl_joueurs[k-1][2]
-                    choix_lvl1.handle_event(event,choix_lvl_joueurs[k-1])
-                    choix_lvl2.handle_event(event,choix_lvl_joueurs[k-1])
-                    choix_lvl3.handle_event(event,choix_lvl_joueurs[k-1])
                     if choix_lvl1.active:
-                        choix_final_lvls[k-1]=choix_lvl1.text
+                        dico_choix[L_lvl[k-1]]=choix_lvl1.text
                     elif choix_lvl2.active:
-                        choix_final_lvls[k-1]=choix_lvl2.text
-                    elif choix_lvl2.active:
-                        choix_final_lvls[k-1]=choix_lvl3.text
+                        dico_choix[L_lvl[k-1]]=choix_lvl2.text
+                    elif choix_lvl3.active:
+                        dico_choix[L_lvl[k-1]]=choix_lvl3.text
                     input_boxes[k-1].text="Ordinateur"+str(k)
                     input_boxes[k-1].txt_surface=police2.render(input_boxes[k-1].text, True, input_boxes[k-1].color)
-                    choix_final_pseudos[k-1]=input_boxes[k-1].text
-                    choix_final_modes[k-1]="automatique"
+                    dico_choix[L_pseudos[k-1]]=input_boxes[k-1].text
+                    dico_choix[L_modes[k-1]]="automatique"
                 else:
                     box=input_boxes[k-1]
                     box.handle_event(event)
-                    choix_final_pseudos[k-1]=box.text
-                    choix_final_modes[k-1]="manuel"
+                    dico_choix[L_pseudos[k-1]]=input_boxes[k-1].text
+                    dico_choix[L_modes[k-1]]="manuel"
                     if input_boxes[k-1].text=="Ordinateur"+str(k):
                         input_boxes[k-1].text="Joueur"+str(k)
                         input_boxes[k-1].txt_surface=police2.render(input_boxes[k-1].text, True, input_boxes[k-1].color)
@@ -1318,35 +1364,232 @@ def parametrisation_simple_2(choix_final):
             #arrêt du jeu
             if event.type == QUIT:   
                 dico_stop = dict.fromkeys(dico_stop, False)
-            
-                #retour au menu                                                       
-        button(fenetre,"Retour",500,600,200,50,COLOR_INACTIVE,COLOR_ACTIVE,parametrisation_simple_1)
-        
-        #validation 
-        button(fenetre,"Valider",850,600,200,50,COLOR_INACTIVE,COLOR_ACTIVE,enregistrement_inputs,[1,choix_final,choix_final_pseudos,choix_final_modes,choix_final_lvls])                                                   
-           
-                
-def parametrisation_avancee():
-    pass
 
-def enregistrement_inputs(arg):
+def parametrisation_2(dico_erreurs={}):
+    '''
+    Fonction qui lance la paramétrisation des paramètres avancés de la partie
+    '''    
+    
+    global fenetre, dico_stop
+    
+    dico_stop['parametrisation1']=False
+    dico_stop['parametrisation2']=True
+    
+    #lecture du fichier de paramétrisation 
+    dico_parametres=lecture(fichier)
+    
+    #stockage des choix
+    dico_choix={}
+    dico_choix['fonction']=game
+    dico_choix['fonction_prec']=parametrisation_2
+    dico_choix['nb_joueurs']=dico_parametres['nb_joueurs']
+    #pour cette fonction, on testera la nullité des paramètres entrés. 
+    dico_choix['test_null']=True
+    #pour cette fonction, on testera aussi le maximum des paramètres entrés. 
+    dico_choix['test_max']=True
+    
+    #initialisation des boutons valider et retour
+    valider=Bouton(900,300,200,50,"Lancer la partie !")
+    retour=Bouton(900,400,200,50,"Retour")
+    
+    #définition des choicebox pour la taille du plateau
+    taille_7=ChoiceBox(600, 110, 50, 30, '7')
+    taille_11=ChoiceBox(650, 110, 50, 30, '11')
+    taille_15=ChoiceBox(700, 110, 50, 30, '15')
+    taille_19=ChoiceBox(750, 110, 50, 30, '19')
+    taille_23=ChoiceBox(800, 110, 50, 30, '23')
+    choix_taille=[taille_7, taille_11, taille_15, taille_19, taille_23]
+    dico_choix['dimensions_plateau']=dico_parametres['dimensions_plateau']
+    
+    #initialisation des boutons sélectionnés en fonction des valeurs renseignées dans le fichier 
+    #de configuration
+    for choix in choix_taille:
+        if choix.text==dico_choix['dimensions_plateau']:
+            choix.active=True
+            choix.color=COLOR_ACTIVE 
+    
+    #définition des inputboxs pour l'ensemble des paramètres restants
+    #en initialisant les valeurs aux paramètres du fichier de paramétrisation. 
+    ib_nb_fantomes=InputBox(600, 180, 150, 30, text=dico_parametres['nb_fantomes'], contenu='num')
+    ib_nb_fantomes_mission=InputBox(600, 250, 150, 30, text=dico_parametres['nb_fantomes_mission'], contenu='num')
+    ib_nb_joker=InputBox(600, 320, 150, 30, text=dico_parametres['nb_joker'], contenu='num')
+    ib_points_pepite=InputBox(600, 390, 150, 30, text=dico_parametres['points_pepite'], contenu='num')
+    ib_points_fantome=InputBox(600, 460, 150, 30, text=dico_parametres['points_fantome'], contenu='num')
+    ib_points_fantome_mission=InputBox(600, 530, 150, 30, text=dico_parametres['points_fantome_mission'], contenu='num')
+    ib_bonus_mission=InputBox(600, 630, 150, 30, text=dico_parametres['bonus_mission'], contenu='num')
+    input_boxes=[ib_nb_fantomes,ib_nb_fantomes_mission,ib_nb_joker,ib_points_pepite,ib_points_fantome,ib_points_fantome_mission,ib_bonus_mission]
+    
+    #Stockage des choix des inputs
+    L_parametres=['nb_fantomes','nb_fantomes_mission','nb_joker','points_pepite','points_fantome','points_fantome_mission','bonus_mission']
+    for k in range(0,len(input_boxes)):
+        dico_choix[L_parametres[k]]=input_boxes[k].text
+
+    while dico_stop['parametrisation2']==True :
+                
+        fenetre.blit(fond_uni,(0,0))
+        
+        #titre de la fenêtre
+        fenetre.blit(police3.render("Paramètres avancés",True,pygame.Color("#000000")),(100,50))
+        
+        #affichage de l'éventuel message d'erreur 
+        if len(dico_erreurs)!=0:
+            if dico_erreurs['type']=='null':
+                fenetre.blit(police2.render("ERREUR : Renseignez tous les champs!",True,COLOR_ERROR),(550,50))
+            elif dico_erreurs['type']=='max':
+                fenetre.blit(police2.render("ERREUR : Renseignez une valeur plus petite",True,COLOR_ERROR),(550,50))
+        
+        #dessin des boutons
+        valider.draw(fenetre)  
+        retour.draw(fenetre)
+        
+        #dessin des choicebox
+        for choicebox in choix_taille:
+            choicebox.draw(fenetre)
+        
+        #dessin des inputboxs
+        for box in input_boxes:
+            box.draw(fenetre)
+            
+        #Ecriture des textes associés aux boxes
+        fenetre.blit(police2.render("Dimensions du plateau: ",True,pygame.Color("#000000")),(100,110))
+        fenetre.blit(police2.render("Nombre de fantômes: ",True,pygame.Color("#000000")),(100,180))
+        nb_fant=(((int(dico_choix['dimensions_plateau']))-2)**2)-4
+        fenetre.blit(police1.render("Entier positif / Maximum:"+str(nb_fant),True,pygame.Color("#000000")),(100,210))
+        fenetre.blit(police1.render("Configuration standard : "+str(nb_fant)+" fantômes pour un plateau de taille "+str(dico_choix['dimensions_plateau'])+"x"+str(dico_choix['dimensions_plateau'])+".",True,pygame.Color("#000000")),(100,230))
+        fenetre.blit(police2.render("Nombre de fantômes par ordre de mission: ",True,pygame.Color("#000000")),(100,250))
+        fenetre.blit(police1.render("Entier positif / Configuration standard : 3 fantômes.",True,pygame.Color("#000000")),(100,280))
+        fenetre.blit(police2.render("Joker(s) par joueur: ",True,pygame.Color("#000000")),(100,320))
+        fenetre.blit(police1.render("Entier positif / Configuration standard : 1 joker.",True,pygame.Color("#000000")),(100,350))
+        fenetre.blit(police2.render("Points gagnés par pépite ramassée: ",True,pygame.Color("#000000")),(100,390))    
+        fenetre.blit(police1.render("Entier positif / Configuration standard : 1 point.",True,pygame.Color("#000000")),(100,420))                                                                                                                                                                                                                                                                                                
+        fenetre.blit(police2.render("Points gagnés par fantôme capturé: ",True,pygame.Color("#000000")),(100,460))
+        fenetre.blit(police1.render("Entier positif / Configuration standard : 5 points.",True,pygame.Color("#000000")),(100,490))
+        fenetre.blit(police2.render("Points gagnés par fantôme capturé: ",True,pygame.Color("#000000")),(100,530))  
+        fenetre.blit(police2.render("si le fantôme figure sur l'ordre de mission",True,pygame.Color("#000000")),(100,560))
+        fenetre.blit(police1.render("Entier positif / Configuration standard : 20 points pour la configuration.",True,pygame.Color("#000000")),(100,590))
+        fenetre.blit(police2.render("Bonus lors du remplissage d'une mission: ",True,pygame.Color("#000000")),(100,630))
+        fenetre.blit(police1.render("Entier positif / Configuration standard : 40 points.",True,pygame.Color("#000000")),(100,660)) 
+                                                                               
+        #actualisation de l'écran
+        pygame.display.flip()
+        
+        #gestion des évènements
+        for event in pygame.event.get():
+            
+            #gestion des boutons
+            valider.handle_event(event,action=enregistrement_inputs, parametre_action=dico_choix)
+            retour.handle_event(event,action=parametrisation_1)
+            
+            #gestion des inputboxs
+            for k in range(0,len(input_boxes)):
+                box=input_boxes[k]
+                box.handle_event(event)
+                dico_choix[L_parametres[k]]=box.text
+            
+            #gestion des choiceboxs
+            for choix in choix_taille:
+                choix.handle_event(event,choix_taille)
+                if choix.active:
+                    dico_choix['dimensions_plateau']=choix.text
+            
+            #arrêt du jeu
+            if event.type == QUIT:   
+                dico_stop = dict.fromkeys(dico_stop, False)
+    
+
+def enregistrement_inputs(dico):
+    global fichier
     """
-    fonction qui enregistre dans le fichier de configuration les entrées données par l'utilisateur
-    et qui lance le jeu
+    fonction d'enregistrement des paramètres inputs
+    dico : dictionnaire avec les paramètres, 
+    dont un paramètre (fonction) correspond à la fonction suivante appelée. 
     """
-    global debut,dico_stop
-    
-    dico_stop["parametrisation2"]=False
-    
-    dico={'nb_joueurs':arg[1], 
-          'mode_joueur_1':arg[3][0],'mode_joueur_2':arg[3][1],'mode_joueur_3':arg[3][2],'mode_joueur_4':arg[3][3],
-          'pseudo_joueur_1':arg[2][0],'pseudo_joueur_2':arg[2][1],'pseudo_joueur_3':arg[2][2],'pseudo_joueur_4':arg[2][3],
-          'niveau_ia_1':arg[4][0],'niveau_ia_2':arg[4][1],'niveau_ia_3':arg[4][2],'niveau_ia_4':arg[4][3]}
-    
     ecriture(fichier, dico)
     
-    debut=True
-    afficher_commandes()
+    if dico['test_null']==True:
+        tests_null_inputs(dico)
+    elif dico['test_max']==True:
+        tests_max_inputs(dico)
+    else:
+        fonction_suivante=dico['fonction']
+        fonction_suivante()
+
+def tests_max_inputs(dico):
+    """
+    fonction qui teste la conformité des paramètres  renseignés par les joueurs. 
+    dico : dictionnaire avec les paramètres, 
+    dont un paramètre (fonction) correspond à la fonction suivante appelée.
+    dont un paramètre (fonction_prec) correspond à la fonction d'origine. 
+    Les types ne sont pas testés car ils sont forcés lors de l'entrée de l'utilisateur.
+    La fonction vérifie si les valeurs maximale ne sont pas dépassées. 
+    """
+    
+    #dictionnaire des maximums autorisés pour chaque paramètre (s'il y en a).
+    nb_fant=(((int(dico['dimensions_plateau']))-2)**2)-4
+    dico_max={'nb_fantomes': nb_fant, 'nb_fantomes_mission': nb_fant//int(dico['nb_joueurs']), 
+                'nb_joker': 10, 'points_pepite': 50, 'points_fantome': 200, 
+                'points_fantome_mission': 200, 'bonus_mission': 500}
+    
+    dico_erreurs={}
+    
+    for cle_input in dico.keys():
+        
+        #on vérifie si les valeurs renseignées ne dépassent pas le maximum autorisé
+        for cle_max in dico_max:
+            if cle_input==cle_max:
+                if int(dico[cle_input])>dico_max[cle_max]:
+                    dico_erreurs[cle_input]='max'
+                    
+    if len(dico_erreurs)==0:
+        dico['test_max']=False
+        fonction_suivante=dico['fonction']
+        if fonction_suivante==game:
+            fonction_suivante()
+        else:
+            fonction_suivante(dico)
+    else:
+        dico_erreurs['type']='max'
+        fonction_prec=dico['fonction_prec']
+        fonction_prec(dico_erreurs)
+                        
+def tests_null_inputs(dico):
+    """
+    fonction qui teste la conformité des paramètres  renseignés par les joueurs. 
+    dico : dictionnaire avec les paramètres, 
+    dont un paramètre (fonction) correspond à la fonction suivante appelée.
+    dont un paramètre (fonction_prec) correspond à la fonction d'origine. 
+    Les types ne sont pas testés car ils sont forcés lors de l'entrée de l'utilisateur.
+    La fonction vérifie que les inputsboxs ne sont pas vide et renvoie un message d'erreur si c'est le cas. 
+    """
+    
+    #liste qui renseigne les paramètres ne pouvant être nulls. 
+    #(seulement ceux pour lesquels il est possible que l'utilisateur entre une valeur nulle).
+    L_null=['pseudo_joueur_1', 'pseudo_joueur_2','pseudo_joueur_3','pseudo_joueur_4',
+            'nb_fantomes', 'nb_fantomes_mission','nb_joker', 'points_pepite', 
+            'points_fantome', 'points_fantome_mission', 'bonus_mission']
+    
+    dico_erreurs={}
+    
+    for cle_input in dico.keys():
+        
+        #on vérifie que l'utilisateur a bien renseigné les valeurs
+        for cle_null in L_null:
+            if cle_null==cle_input:
+                if len(dico[cle_input])==0:
+                    dico_erreurs[cle_null]='null'
+                    
+    if len(dico_erreurs)==0:
+        dico['test_null']=False
+        if dico['test_max']==True:
+            fonction_suite=tests_max_inputs
+            fonction_suite(dico)
+        else:
+            fonction_suite=dico['fonction']
+            fonction_suite()
+    else:
+        dico_erreurs['type']='null'
+        fonction_prec=dico['fonction_prec']
+        fonction_prec(dico_erreurs)
     
     
 
@@ -1369,6 +1612,7 @@ police_small = pygame.font.Font("coda.ttf", 17) #Load font object.
 
 COLOR_INACTIVE = pygame.Color('lightskyblue3')
 COLOR_ACTIVE = pygame.Color('dodgerblue2')
+COLOR_ERROR = pygame.Color('tomato2')
 police2=pygame.font.SysFont('calibri', 25)
 police3=pygame.font.SysFont('calibri', 35)
 fichier="mine_hantee_config.txt" 
