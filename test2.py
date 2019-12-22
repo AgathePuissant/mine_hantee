@@ -510,25 +510,6 @@ plat = plateau(3,["Antoine","Christine","Michel"],[],7)
 def text_objects(text, font):
     textSurface = font.render(text, True, pygame.Color("#000000"))
     return textSurface, textSurface.get_rect()
-      
-def button(fenetre,msg,x,y,w,h,ic,ac,action=None, parametre_action=None):
-    mouse = pygame.mouse.get_pos()
-    click = pygame.mouse.get_pressed()
-    
-    if x+w > mouse[0] > x and y+h > mouse[1] > y:
-        pygame.draw.rect(fenetre, ac,(x,y,w,h))
-
-        if click[0] == 1 and action != None:
-            if parametre_action==None:
-                action()    
-            else:
-                action(parametre_action)
-    else:
-        pygame.draw.rect(fenetre, ic,(x,y,w,h))
-
-    textSurf, textRect = text_objects(msg, police2)
-    textRect.center = ( (x+(w/2)), (y+(h/2)) )
-    fenetre.blit(textSurf, textRect)
     
 def button_charger_partie(fenetre,msg,x,y,w,h,ic,ac,i):
     global num_partie,retour_partie
@@ -821,7 +802,7 @@ def affiche_plateau(plat,fenetre):
             elif k==3 :
                fenetre.blit(mur3,(x,y))
                
-def actualise_fenetre(plateau,fenetre,joueur,info):
+def actualise_fenetre(plateau,fenetre,joueur,info,bouton):
     """
     fonction pour actualiser l'affichage dans la fonction jeu
     """
@@ -833,8 +814,9 @@ def actualise_fenetre(plateau,fenetre,joueur,info):
     #affichage du message d'erreur ?                       
     fenetre.blit(police_small.render(info,False,pygame.Color("#000000")),(760,170))
                                                              
-    button(fenetre,"Commandes",1000,175,150,50,pygame.Color("#b46503"),pygame.Color("#d09954"),afficher_commandes)
-                                                                        
+                                                             
+    bouton.draw(fenetre)
+                                                             
     pygame.display.flip()
                 
             
@@ -845,13 +827,23 @@ def actualise_fenetre(plateau,fenetre,joueur,info):
 def menu():
     global fenetre,liste_sauv,num_partie,nouvelle,dico_stop
     
-    dico_stop={}
     
-    dico_stop["intro"] = True
+    dico_stop={"intro" : True} #Il faut trouver un moyen de ne pas réinitialiser le dico à chaque fois qu'on passe par la fonction, sinon ça bug à la fermeture
+    
+    nouvelle_partie_button=Bouton(500,350,200,50,"Nouvelle partie")
+    charger_partie_button=Bouton(500,450,200,50,"Charger une partie")
+    
+    nouvelle=False
+    
 
     while dico_stop["intro"]==True: #Boucle infinie
         
         for event in pygame.event.get(): #Instructions de sortie
+            
+            nouvelle_partie_button.handle_event(event,nouvelle_partie)
+            charger_partie_button.handle_event(event,charger_partie)
+            
+            
             if event.type == pygame.QUIT:
                 dico_stop = dict.fromkeys(dico_stop, False)
                 pygame.display.quit()
@@ -860,19 +852,17 @@ def menu():
         pygame.display.flip() #Update l'écran
         fenetre.blit(fond_menu,(0,0))  #On colle le fond du menu
         
-        liste_sauv=glob.glob("sauvegarde")
+        liste_sauv=glob.glob("sauvegarde*")
         liste_sauv=[int(liste_sauv[i][-1]) for i in range(len(liste_sauv))]
+        nouvelle_partie_button.draw(fenetre)
+        charger_partie_button.draw(fenetre)
         
-        #Création du bouton qui lance le jeu
-        button(fenetre,"Nouvelle partie",500,350,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),nouvelle_partie)
-        button(fenetre,"Charger une partie",500,450,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),charger_partie)
-      
 
 def game() :
     global fenetre,num_partie,nouvelle,plateau_test,dico_stop
     #Initialisation d'une nouvelle partie ou chargement d'une ancienne partie
     if nouvelle==False :
-        plateau_test=pickle.load(open("sauvegarde"+str(num_partie),"rb"))
+        plateau_test=pickle.load(open("sauvegarde "+str(num_partie),"rb"))
         dico_stop["charger"]=False
     elif nouvelle==True:
         #Plateau de plateau_test
@@ -881,8 +871,7 @@ def game() :
         pass
     
     
-    button(fenetre,"Commandes",900,950,200,250,pygame.Color("#b46503"),pygame.Color("#d09954"),afficher_commandes)
-
+    afficher_commandes_button=Bouton(700,0,200,50,"Commandes")
 
     N = plateau_test.N
     
@@ -892,7 +881,6 @@ def game() :
     
     #Boucle du jeu. On joue tant qu'il reste des fantômes à attraper
     while plateau_test.id_dernier_fantome!=plateau_test.nbre_fantomes and dico_stop["rester_jeu"]==True:
-        
 
         #Tours de jeu
         #on parcours chaque joueur à chaque tours.
@@ -902,7 +890,7 @@ def game() :
             
             joueur=plateau_test.dico_joueurs[j]
 
-            actualise_fenetre(plateau_test,fenetre,joueur,information)
+            actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button)
 
             if joueur.niveau == 0 :
                 #premiere etape : rotation et insertion de la carte
@@ -914,6 +902,8 @@ def game() :
                 while dico_stop["test_carte"]!=False:
                     
                     for event in pygame.event.get():   
+                        
+                        afficher_commandes_button.handle_event(event,afficher_commandes)
                         
                         #Si on appuie sur R, rotation de la carte à jouer
                         if event.type == KEYDOWN and event.key == K_r: 
@@ -945,7 +935,7 @@ def game() :
                         elif event.type == QUIT:
                             dico_stop = dict.fromkeys(dico_stop, False)
                             
-                    actualise_fenetre(plateau_test,fenetre,joueur,information)
+                    actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button)
                    
                                         
                                         
@@ -960,7 +950,12 @@ def game() :
                 
                 #parcours des evenements
                 while dico_stop["test_entree"]==True and len(cartes_accessibles)>0:#La 2e condition deconne a cause de cartes_accessibles
+                    
+                    
                     for event in pygame.event.get():
+                        
+                        afficher_commandes_button.handle_event(event,afficher_commandes)
+                        
                         #deplacement
                         if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
                             deplace = plateau_test.deplace_joueur(j,event.key)
@@ -986,7 +981,7 @@ def game() :
                             dico_stop = dict.fromkeys(dico_stop, False)
                             
                     #Update l'écran                                                                
-                    actualise_fenetre(plateau_test,fenetre,joueur,information)
+                    actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button)
     
                         
                 #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
@@ -1004,11 +999,12 @@ def game() :
                 for i in range(orientation+1):
                     plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2],plateau_test.carte_a_jouer.orientation[3]=plateau_test.carte_a_jouer.orientation[3],plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2]
                     pygame.time.delay(500)
-                    actualise_fenetre(plateau_test,fenetre,joueur,information)
+                    actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button)
                     
                 plateau_test.deplace_carte(coord_inser) #On l'insère
                 pygame.time.delay(500)
-                actualise_fenetre(plateau_test,fenetre,joueur,information)
+                actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button)
+                
 
                 information=""
                 for i in chemin :
@@ -1016,7 +1012,8 @@ def game() :
                     information=plateau_test.compte_points(j,i)
 
                     pygame.time.delay(500)
-                    actualise_fenetre(plateau_test,fenetre,joueur,information)
+                    actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button)
+                
 
             
 
@@ -1043,8 +1040,6 @@ def afficher_commandes() :
             
             if event.type == KEYDOWN and event.key == K_SPACE :
                 dico_stop["comm"]=False
-                if debut==True :
-                    game()
                 
             if event.type == pygame.QUIT :
                 dico_stop = dict.fromkeys(dico_stop, False)
@@ -1058,21 +1053,26 @@ def pause() :
     
     texte_sauv=""
     
+    sauvegarder_button=Bouton(550,350,200,50,"Sauvegarder")
+    retour_menu_button=Bouton(550,450,200,50,"Retour au menu")
+    
     while dico_stop["pause"]==True :
                 
         fenetre.blit(fond_uni,(0,0))
     
         fenetre.blit(police.render("Pause",True,pygame.Color("#000000")),(600,200))
                                                              
-        button(fenetre,"Sauvegarder",550,350,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),sauvegarder) 
-                                                                 
-        button(fenetre,"Retour au menu",550,450,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),menu)
+        sauvegarder_button.draw(fenetre)
+        retour_menu_button.draw(fenetre)
                                   
         fenetre.blit(police.render(texte_sauv,True,pygame.Color("#000000")),(550,550))
                                                                 
         pygame.display.flip() #Update l'écran
         
         for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+            
+            sauvegarder_button.handle_event(event,sauvegarder)
+            retour_menu_button.handle_event(event,menu)
                 
             if event.type == KEYDOWN and event.key == K_SPACE :
                 dico_stop["pause"]=False
@@ -1085,18 +1085,19 @@ def pause() :
 def sauvegarder():
     global texte_sauv,num_partie,plateau_test
     
-    pickle.dump(plateau_test,open("sauvegarde"+str(num_partie),"wb"))
-    texte_sauv="Partie sauvegardee"
+    pickle.dump(plateau_test,open("sauvegarde "+str(num_partie),"wb"))
+    texte_sauv="Partie sauvegardée"
 
     
 def charger_partie():
-    global fenetre,liste_sauv,num_partie,retour_partie,debut,dico_stop
+    global fenetre,liste_sauv,num_partie,retour_partie,dico_stop
     
     dico_stop["charger"]=True
-    debut=True
     retour_partie=False
+    lancer_partie_button=Bouton(800,300,200,50,"Lancer la partie")
+    retour_menu_button=Bouton(500,300,200,50,"Retour au menu")
         
-    while charger ==True:
+    while dico_stop["charger"] ==True:
                 
                 
         if liste_sauv!=[] :
@@ -1108,17 +1109,21 @@ def charger_partie():
             
             if retour_partie==True :
                 fenetre.blit(police.render("Partie "+str(num_partie)+" selectionnee",True,pygame.Color("#000000")),(800,100))
-                button(fenetre,"Lancer la partie",800,300,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),afficher_commandes)
-                                                                          
+                lancer_partie_button.draw(fenetre)                                                    
         else :
             
             fenetre.blit(fond_uni,(0,0))  #On colle le fond du menu
             fenetre.blit(police.render("Aucune partie sauvegardee",True,pygame.Color("#000000")),(450,100))
-            button(fenetre,"Retour au menu",500,300,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),menu)
+            retour_menu_button.draw(fenetre)
             
         pygame.display.flip() #Update l'écran
         
         for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+            
+            if retour_partie==True :
+                lancer_partie_button.handle_event(event,game)
+            else :
+                retour_menu_button.handle_event(event,menu)
             
             if event.type == QUIT:     #Si un de ces événements est de type QUIT
                 dico_stop = dict.fromkeys(dico_stop, False)
