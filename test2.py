@@ -804,7 +804,7 @@ def affiche_plateau(plat,fenetre):
                
                
                
-def actualise_fenetre(plateau,fenetre,joueur,info,bouton):
+def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte):
     """
     fonction pour actualiser l'affichage dans la fonction jeu
     """
@@ -817,7 +817,8 @@ def actualise_fenetre(plateau,fenetre,joueur,info,bouton):
                 #test texte pour afficher le joueur qui joue
     fenetre.blit(police.render("C'est a "+str(joueur.nom)+" de jouer",False,pygame.Color(0,0,0)),(800,240))
     #affichage du message d'erreur ?                       
-    fenetre.blit(police_small.render(info,False,pygame.Color("#000000")),(760,170))
+    fenetre.blit(police.render(info,False,pygame.Color("#000000")),(760,180))
+    fenetre.blit(police.render(etape_texte,False,pygame.Color("#000000")),(760,160))
                                                              
                                                              
     bouton.draw(fenetre)
@@ -887,7 +888,7 @@ def game() :
         pass
     
     
-    afficher_commandes_button=Bouton(700,0,200,50,"Commandes")
+    afficher_commandes_button=Bouton(725,5,150,40,"Commandes")
 
     N = plateau_test.N
     
@@ -902,11 +903,12 @@ def game() :
         #on parcours chaque joueur à chaque tours.
         for j in plateau_test.dico_joueurs :
             
-            information="" #Initialisation du texte d'erreur ???
+            information="" #Initialisation du texte d'erreur
+            etape=""
             
             joueur=plateau_test.dico_joueurs[j]
 
-            actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button)
+            actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button,etape)
 
             if joueur.niveau == 0 :
                 #premiere etape : rotation et insertion de la carte
@@ -916,6 +918,8 @@ def game() :
                 
                 
                 while dico_stop["test_carte"]!=False:
+                    
+                    etape="Tourner la carte avec R, cliquer pour insérer"
                     
                     for event in pygame.event.get():   
                         
@@ -951,7 +955,7 @@ def game() :
                         elif event.type == QUIT:
                             dico_stop = dict.fromkeys(dico_stop, False)
                             
-                    actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button)
+                    actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button,etape)
                    
                                         
                                         
@@ -967,6 +971,7 @@ def game() :
                 #parcours des evenements
                 while dico_stop["test_entree"]==True and len(cartes_accessibles)>0:#La 2e condition deconne a cause de cartes_accessibles
                     
+                    etape="Déplacer avec les flèches, entrée pour finir"
                     
                     for event in pygame.event.get():
                         
@@ -997,7 +1002,7 @@ def game() :
                             dico_stop = dict.fromkeys(dico_stop, False)
                             
                     #Update l'écran                                                                
-                    actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button)
+                    actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button,etape)
     
                         
                 #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
@@ -1015,11 +1020,11 @@ def game() :
                 for i in range(orientation+1):
                     plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2],plateau_test.carte_a_jouer.orientation[3]=plateau_test.carte_a_jouer.orientation[3],plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2]
                     pygame.time.delay(500)
-                    actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button)
+                    actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button,etape)
                     
                 plateau_test.deplace_carte(coord_inser) #On l'insère
                 pygame.time.delay(500)
-                actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button)
+                actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button,etape)
                 
 
                 information=""
@@ -1028,7 +1033,7 @@ def game() :
                     information=plateau_test.compte_points(j,i)
 
                     pygame.time.delay(500)
-                    actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button)
+                    actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button,etape)
                 
 
             
@@ -1125,7 +1130,7 @@ def charger_partie():
                 button_charger_partie(fenetre,"Partie "+str(liste_sauv[i]),500,100+i*100,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),liste_sauv[i])
             
             if retour_partie==True :
-                fenetre.blit(police.render("Partie "+str(num_partie)+" selectionnee",True,pygame.Color("#000000")),(800,100))
+                fenetre.blit(police.render("Partie "+str(num_partie)+" sélectionnée",True,pygame.Color("#000000")),(800,100))
                 lancer_partie_button.draw(fenetre)                                                    
         else :
             
