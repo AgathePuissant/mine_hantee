@@ -1032,9 +1032,10 @@ def afficher_commandes() :
         fenetre.blit(fond_uni,(0,0))
         
         fenetre.blit(police.render("R : tourner la carte",False,pygame.Color("#000000")),(100,100))
-        fenetre.blit(police.render("Flèches directionnelles : déplacer le joueur",False,pygame.Color("#000000")),(100,150))
-        fenetre.blit(police.render("Entrée : finir le tour",False,pygame.Color("#000000")),(100,200))
-        fenetre.blit(police.render("Espace : mettre en pause/Retour au jeu",False,pygame.Color("#000000")),(100,250))
+        fenetre.blit(police.render("Clic sur une carte déplaçable en périphérie du plateau : insère la carte extérieure",False,pygame.Color("#000000")),(100,150))
+        fenetre.blit(police.render("Flèches directionnelles : déplacer le joueur",False,pygame.Color("#000000")),(100,200))
+        fenetre.blit(police.render("Entrée : finir le tour",False,pygame.Color("#000000")),(100,250))
+        fenetre.blit(police.render("Espace : mettre en pause/Retour au jeu",False,pygame.Color("#000000")),(100,300))
         fenetre.blit(police.render("Appuyez sur espace pour revenir au jeu",False,pygame.Color("#000000")),(100,500))
                                                                                                      
                                                                                                     
