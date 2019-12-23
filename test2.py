@@ -750,7 +750,7 @@ def affiche_plateau(plat,fenetre):
         liste_im_joueur[i] = pygame.transform.scale(liste_im_joueur[i], (int(x_joueur*(7/N)),int(y_joueur*(7/N))))
     
     #Création de la police du jeu
-    police = pygame.font.Font("coda.ttf", int(20*7/N)) #Load font object.
+    police = pygame.font.SysFont("calibri", int(20*7/N), bold=True) #Load font object.
     
     for i in range(len(plat.position)) :
         for j in range(len(plat.position)) :
@@ -828,8 +828,14 @@ def menu():
     global fenetre,liste_sauv,num_partie,nouvelle,dico_stop
     
     
-    dico_stop={"intro" : True} #Il faut trouver un moyen de ne pas réinitialiser le dico à chaque fois qu'on passe par la fonction, sinon ça bug à la fermeture
-    
+    #en cours de modification
+    if 'dico_stop' not in globals() :
+        dico_stop={"intro" : True}
+    elif any(value == True for value in dico_stop.values()):
+        dico_stop["intro"]=True
+    else :
+        dico_stop = dict.fromkeys(dico_stop, False)
+
     nouvelle_partie_button=Bouton(500,350,200,50,"Nouvelle partie")
     charger_partie_button=Bouton(500,450,200,50,"Charger une partie")
     
@@ -837,17 +843,6 @@ def menu():
     
 
     while dico_stop["intro"]==True: #Boucle infinie
-        
-        for event in pygame.event.get(): #Instructions de sortie
-            
-            nouvelle_partie_button.handle_event(event,nouvelle_partie)
-            charger_partie_button.handle_event(event,charger_partie)
-            
-            
-            if event.type == pygame.QUIT:
-                dico_stop = dict.fromkeys(dico_stop, False)
-                pygame.display.quit()
-                pygame.quit()
                 
         pygame.display.flip() #Update l'écran
         fenetre.blit(fond_menu,(0,0))  #On colle le fond du menu
@@ -856,6 +851,22 @@ def menu():
         liste_sauv=[int(liste_sauv[i][-1]) for i in range(len(liste_sauv))]
         nouvelle_partie_button.draw(fenetre)
         charger_partie_button.draw(fenetre)
+        
+        for event in pygame.event.get(): #Instructions de sortie
+            
+            nouvelle_partie_button.handle_event(event,nouvelle_partie)
+            charger_partie_button.handle_event(event,charger_partie)
+            
+            if event.type == pygame.QUIT:
+                dico_stop = dict.fromkeys(dico_stop, False)
+                pygame.display.quit()
+                pygame.quit()
+                
+                
+        
+                
+        
+    
         
 
 def game() :
@@ -1615,8 +1626,8 @@ fenetre = pygame.display.set_mode((1200, 700),pygame.RESIZABLE)
 fond_menu = pygame.image.load("fond_menu.png").convert()
 fond_uni = pygame.image.load("fond_uni.png").convert()
 #Création de la police du jeu
-police = pygame.font.Font("coda.ttf", 20) #Load font object.
-police_small = pygame.font.Font("coda.ttf", 17) #Load font object.
+police = pygame.font.SysFont("calibri", 20, bold=True) #Load font object.
+police_small = pygame.font.SysFont("calibri", 17, bold=True) #Load font object.
 
 COLOR_INACTIVE = pygame.Color('lightskyblue3')
 COLOR_ACTIVE = pygame.Color('dodgerblue2')
