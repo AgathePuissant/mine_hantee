@@ -802,13 +802,18 @@ def affiche_plateau(plat,fenetre):
             elif k==3 :
                fenetre.blit(mur3,(x,y))
                
+               
+               
 def actualise_fenetre(plateau,fenetre,joueur,info,bouton):
     """
     fonction pour actualiser l'affichage dans la fonction jeu
     """
     affiche_plateau(plateau,fenetre)
     for i in range(len(plateau.dico_joueurs)) :
-                fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(850,360+i*80))
+                fenetre.blit(police.render(str(plateau.dico_joueurs[i].nom) + " : ",False,pygame.Color("#000000")),(800,360+i*80))
+                fenetre.blit(police.render("Score : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(800,360+i*80+20))
+                fenetre.blit(police.render("Ordre de mission : "+str(plateau.dico_joueurs[i].fantome_target),False,pygame.Color("#000000")),(800,360+i*80+40))
+
                 #test texte pour afficher le joueur qui joue
     fenetre.blit(police.render("C'est a "+str(joueur.nom)+" de jouer",False,pygame.Color(0,0,0)),(800,240))
     #affichage du message d'erreur ?                       
@@ -1038,9 +1043,10 @@ def afficher_commandes() :
         fenetre.blit(fond_uni,(0,0))
         
         fenetre.blit(police.render("R : tourner la carte",False,pygame.Color("#000000")),(100,100))
-        fenetre.blit(police.render("Flèches directionnelles : déplacer le joueur",False,pygame.Color("#000000")),(100,150))
-        fenetre.blit(police.render("Entrée : finir le tour",False,pygame.Color("#000000")),(100,200))
-        fenetre.blit(police.render("Espace : mettre en pause/Retour au jeu",False,pygame.Color("#000000")),(100,250))
+        fenetre.blit(police.render("Clic sur une carte déplaçable en périphérie du plateau : insère la carte extérieure",False,pygame.Color("#000000")),(100,150))
+        fenetre.blit(police.render("Flèches directionnelles : déplacer le joueur",False,pygame.Color("#000000")),(100,200))
+        fenetre.blit(police.render("Entrée : finir le tour",False,pygame.Color("#000000")),(100,250))
+        fenetre.blit(police.render("Espace : mettre en pause/Retour au jeu",False,pygame.Color("#000000")),(100,300))
         fenetre.blit(police.render("Appuyez sur espace pour revenir au jeu",False,pygame.Color("#000000")),(100,500))
                                                                                                      
                                                                                                     
