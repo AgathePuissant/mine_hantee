@@ -494,7 +494,7 @@ def IA_simple(id_joueur,plateau_en_cours):
     
 
 
-plat = plateau(3,["Antoine","Christine","Michel"],[],7)
+#plat = plateau(3,["Antoine","Christine","Michel"],[],7)
 #print(IA_simple(2,plat))
 #print(plat.position)
 #print(plat.dico_joueurs[0].carte_position.coord,plat.dico_joueurs[1].carte_position.coord,plat.dico_joueurs[2].carte_position.coord)
