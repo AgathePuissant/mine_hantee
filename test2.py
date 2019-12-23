@@ -802,13 +802,18 @@ def affiche_plateau(plat,fenetre):
             elif k==3 :
                fenetre.blit(mur3,(x,y))
                
+               
+               
 def actualise_fenetre(plateau,fenetre,joueur,info,bouton):
     """
     fonction pour actualiser l'affichage dans la fonction jeu
     """
     affiche_plateau(plateau,fenetre)
     for i in range(len(plateau.dico_joueurs)) :
-                fenetre.blit(police.render("Score joueur "+str(i+1)+" : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(850,360+i*80))
+                fenetre.blit(police.render(str(plateau.dico_joueurs[i].nom) + " : ",False,pygame.Color("#000000")),(800,360+i*80))
+                fenetre.blit(police.render("Score : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(800,360+i*80+20))
+                fenetre.blit(police.render("Ordre de mission : "+str(plateau.dico_joueurs[i].fantome_target),False,pygame.Color("#000000")),(800,360+i*80+40))
+
                 #test texte pour afficher le joueur qui joue
     fenetre.blit(police.render("C'est a "+str(joueur.nom)+" de jouer",False,pygame.Color(0,0,0)),(800,240))
     #affichage du message d'erreur ?                       
