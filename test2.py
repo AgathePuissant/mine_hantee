@@ -62,9 +62,9 @@ class plateau(object):
         #créer une combinaison des types de cartes
         nb_deplacable=N//2*(N//2+1+N)+1
         #orientations et types de murs de chaque carte
-        pool1=[[[1,0,1,0],[0,1,0,1]][rd.randint(0,1)] for i in range(int(nb_deplacable*13/34))]
-        pool2=[[[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*15/34))]
-        pool3=[[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*6/34))]
+        pool1=[rd.choice([[1,0,1,0],[0,1,0,1]]) for i in range(int(nb_deplacable*13/34))]
+        pool2=[rd.choice([[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]]) for i in range(int(nb_deplacable*15/34))]
+        pool3=[rd.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) for i in range(int(nb_deplacable*6/34))]
         pool=pool1+pool2+pool3
         
         #Pool des id des fantômes à placer sur le plateau
@@ -112,13 +112,13 @@ class plateau(object):
                             orientation=[0,1,1,0]
                     
                     #cases qui font les bords et les autres indéplaçables
-                    elif ligne>colonne and N-ligne>N-colonne:
+                    elif ligne<colonne and N-ligne-1>colonne:
                         orientation=[1,0,0,0]
-                    elif ligne>colonne:
+                    elif ligne<colonne and N-ligne-1<colonne:
                         orientation=[0,1,0,0]
-                    elif N-ligne<N-colonne:
+                    elif ligne>colonne and N-ligne-1<colonne:
                         orientation=[0,0,1,0]
-                    else:
+                    elif ligne>colonne and N-ligne-1>colonne:
                         orientation=[0,0,0,1]
                 
                 #cases déplaçables
