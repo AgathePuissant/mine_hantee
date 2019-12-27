@@ -28,7 +28,7 @@ class carte(object):
         
 class joueur(object):
     
-    def __init__(self, ID, nom, niveau, fantome_target, carte_position):
+    def __init__(self, ID, nom, niveau, fantome_target, carte_position, nb_joker):
         self.id = ID
         self.nom = nom
         self.niveau = niveau
@@ -37,13 +37,14 @@ class joueur(object):
         self.points = 0
         self.cartes_explorees = [carte_position]
         self.capture_fantome = False
+        self.nb_joker=nb_joker
 
 
 class plateau(object):
     """
     - seuls les N impairs sont acceptés
     """
-    def __init__(self, nb_joueurs, liste_noms, liste_niveaux=[], N=7):
+    def __init__(self, nb_joueurs, liste_noms, liste_niveaux, N, dico_parametres):
         
         self.N = N
         self.position=np.zeros([N,N])
@@ -51,6 +52,12 @@ class plateau(object):
         self.dico_cartes={}
         self.dico_joueurs = {}
         self.insertions_possibles=[] #liste des coordonnees des insertiones possible des cartes sur le plateau. 
+        #attributs plateau liés aux points
+        self.points_pepite=int(dico_parametres['points_pepite'])
+        self.points_fantome=int(dico_parametres['points_fantome'])
+        self.points_fantome_mission=int(dico_parametres['points_fantome_mission'])
+        self.bonus_mission=int(dico_parametres['bonus_mission'])
+        
         positions_initiales = [] #cartes du milieu où se placent les joueurs en début de partie
         
         compte_id=0
@@ -59,13 +66,17 @@ class plateau(object):
         #créer une combinaison des types de cartes
         nb_deplacable=N//2*(N//2+1+N)+1
         #orientations et types de murs de chaque carte
-        pool1=[rd.choice([[1,0,1,0],[0,1,0,1]]) for i in range(int(nb_deplacable*13/34))]
-        pool2=[rd.choice([[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]]) for i in range(int(nb_deplacable*15/34))]
-        pool3=[rd.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) for i in range(int(nb_deplacable*6/34))]
+        pool1=[[[1,0,1,0],[0,1,0,1]][rd.randint(0,1)] for i in range(int(nb_deplacable*13/34))]
+        pool2=[[[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*15/34))]
+        pool3=[[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*6/34))]
         pool=pool1+pool2+pool3
         
         #Pool des id des fantômes à placer sur le plateau
-        self.nbre_fantomes = (N-2)*(N//2)+(N//2)*(N//2-1)
+        self.nbre_fantomes = int(dico_parametres['nb_fantomes'])
+        nb_max_fant=(N-2)*(N//2)+(N//2)*(N//2-1)
+        pas_fant=nb_max_fant//self.nbre_fantomes
+        print('pas_fant',pas_fant)
+        compte_pas=1
         pool_fantomes = [i for i in range(1,self.nbre_fantomes+1)]
         pool_fantomes = np.random.permutation(pool_fantomes)
         
@@ -109,13 +120,13 @@ class plateau(object):
                             orientation=[0,1,1,0]
                     
                     #cases qui font les bords et les autres indéplaçables
-                    elif ligne<colonne and N-ligne-1>colonne:
+                    elif ligne>colonne and N-ligne>N-colonne:
                         orientation=[1,0,0,0]
-                    elif ligne<colonne and N-ligne-1<colonne:
+                    elif ligne>colonne:
                         orientation=[0,1,0,0]
-                    elif ligne>colonne and N-ligne-1<colonne:
+                    elif N-ligne<N-colonne:
                         orientation=[0,0,1,0]
-                    elif ligne>colonne and N-ligne-1>colonne:
+                    else:
                         orientation=[0,0,0,1]
                 
                 #cases déplaçables
@@ -126,8 +137,13 @@ class plateau(object):
                     #Si la carte déplaçable ne fait pas partie de la couronne extérieure
                     #Elle accueille un fantome
                     if ligne>0 and ligne<N-1 and colonne>0 and colonne<N-1:
-                        id_fantome=pool_fantomes[compte_fantomes]
-                        compte_fantomes += 1
+                        if compte_fantomes<self.nbre_fantomes:
+                            if compte_pas==pas_fant:
+                                id_fantome=pool_fantomes[compte_fantomes]
+                                compte_fantomes += 1
+                                compte_pas=1
+                            else:
+                                compte_pas+=1
                     #si la carte fait partie de la couronne extérieure et qu'elle est déplaçable, 
                     #on ajoute ses coordonnées aux coordonnées à la liste des insertions possibles. 
                     elif ligne==0 or ligne==N-1 or colonne==0 or colonne==N-1:
@@ -143,35 +159,24 @@ class plateau(object):
         
         #La carte qui reste dans pool est la carte à l'exterieur du plateau
         self.carte_a_jouer=carte(compte_id,pool[compte_deplacable],["",""],True)
-        print(compte_id)
         self.dico_cartes[compte_id] = self.carte_a_jouer
         
         #Initialisation des joueurs
-        #Création des entités de joueurs réels
+        #Création des entités de joueurs
         pool_fantomes = np.random.permutation(pool_fantomes)   #On remélange les fantômes
+        
+        nb_fantomes_mission=int(dico_parametres['nb_fantomes_mission'])
+        nb_joker=int(dico_parametres['nb_joker'])
         compte_fantomes = 0
-        for i in range(len(liste_noms)):
+        for i in range(nb_joueurs):
             
             fantomes_target = []
-            for j in range(3):
+            for j in range(nb_fantomes_mission):
                 fantomes_target.append(pool_fantomes[compte_fantomes])
                 compte_fantomes += 1
                 
             position = positions_initiales[i]
-            self.dico_joueurs[i] = joueur(i,liste_noms[i],0,fantomes_target,position)
-        
-        #Création des entités des joueurs IA
-        compte = 0
-        for i in range(len(liste_noms),nb_joueurs):
-            fantomes_target = []
-            for j in range(3):
-                fantomes_target.append(pool_fantomes[compte_fantomes])
-                compte_fantomes += 1
-                
-            position = positions_initiales[i]
-            nom = "IA"+str(compte+1)
-            self.dico_joueurs[i] = joueur(i,nom,liste_niveaux[compte],fantomes_target,position)
-            compte += 1
+            self.dico_joueurs[i] = joueur(i,liste_noms[i],liste_niveaux[i],fantomes_target,position,nb_joker)
     
     
         
@@ -347,7 +352,7 @@ class plateau(object):
         retour = []
         #Si il y a une pépite sur la nouvelle carte, le joueur la ramasse
         if nv_carte.presence_pepite == True : 
-            self.dico_joueurs[id_joueur].points += 1
+            self.dico_joueurs[id_joueur].points += self.points_pepite
             nv_carte.presence_pepite = False
             retour.append("Vous avez trouvé une pépite !")
         
@@ -356,16 +361,16 @@ class plateau(object):
         if nv_carte.id_fantome == self.id_dernier_fantome+1 and self.dico_joueurs[id_joueur].capture_fantome == False :
             #Si le fantôme est sur l'ordre de mission, le joueur gagne 20 points
             if nv_carte.id_fantome in self.dico_joueurs[id_joueur].fantome_target : 
-                self.dico_joueurs[id_joueur].points += 20
+                self.dico_joueurs[id_joueur].points += self.points_fantome_mission
                 self.dico_joueurs[id_joueur].fantome_target.remove(nv_carte.id_fantome)
                 retour.append("Vous avez capturé un fantôme sur votre ordre de mission !")
                 #Si l'ordre de mission est totalement rempli, le joueur gagne 40 points
                 if self.dico_joueurs[id_joueur].fantome_target==[]:
-                    self.dico_joueurs[id_joueur].points += 40
+                    self.dico_joueurs[id_joueur].points += self.bonus_mission
                     retour.append("Vous avez rempli votre ordre de mission !")
             #Si le fantôme n'est pas sur l'ordre de mission, le joueur gagne 5 points
             else:
-                self.dico_joueurs[id_joueur].points += 5
+                self.dico_joueurs[id_joueur].points += self.points_fantome
                 retour.append("Vous avez capturé un fantôme !")
             
             self.dico_joueurs[id_joueur].capture_fantome = True
@@ -902,9 +907,28 @@ def game() :
     if nouvelle==False :
         plateau_test=pickle.load(open("sauvegarde "+str(num_partie),"rb"))
         dico_stop["charger"]=False
-    elif nouvelle==True:
-        #Plateau de plateau_test
-        plateau_test=plateau(3,["Antoine","Christine"],[1],7)
+    elif nouvelle==True :
+        #Création d'un nouveau plateau
+        #Lecture du fichier de paramétrage et initialisation des paramètres
+        dico_parametres=lecture(fichier)
+        nb_joueurs=int(dico_parametres['nb_joueurs'])
+        dimensions_plateau=int(dico_parametres['dimensions_plateau'])
+        liste_noms=[dico_parametres['pseudo_joueur_1'],dico_parametres['pseudo_joueur_2'],dico_parametres['pseudo_joueur_3'],dico_parametres['pseudo_joueur_4']]
+        
+        #liste des niveaux
+        liste_niveaux=[]
+        for joueur in range(1,nb_joueurs+1):
+            mode='mode_joueur_'+str(joueur)
+            #si c'est un joueur normal, alors le niveau est de 0. 
+            if dico_parametres[mode]=='manuel':
+                liste_niveaux=liste_niveaux+[0]
+            #sinon on prend le niveau rentré par l'utilisateur
+            else:
+                niveau='niveau_ia_'+str(joueur)
+                liste_niveaux=liste_niveaux+[int(dico_parametres[niveau])]
+                
+        plateau_test=plateau(nb_joueurs,liste_noms,liste_niveaux,dimensions_plateau,dico_parametres)
+        
     else :
         pass
     
