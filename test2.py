@@ -294,6 +294,8 @@ class plateau(object):
         
         return cartes_accessibles
     
+    
+    
     def deplace_joueur(self,id_joueur,key):
 
         carte_depart=self.dico_joueurs[id_joueur].carte_position
@@ -495,7 +497,7 @@ def IA_simple(id_joueur,plateau_en_cours):
 
 
 plat = plateau(3,["Antoine","Christine","Michel"],[],7)
-#print(IA_simple(2,plat))
+print(IA_simple(2,plat))
 #print(plat.position)
 #print(plat.dico_joueurs[0].carte_position.coord,plat.dico_joueurs[1].carte_position.coord,plat.dico_joueurs[2].carte_position.coord)
 
@@ -871,7 +873,7 @@ def game() :
         dico_stop["charger"]=False
     elif nouvelle==True:
         #Plateau de plateau_test
-        plateau_test=plateau(3,["Antoine","Christine"],[1],7)
+        plateau_test=plateau(3,["Michel","Christine"],[1],7)
     else :
         pass
     
