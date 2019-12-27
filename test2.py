@@ -1308,7 +1308,12 @@ def parametrisation_1(dico_erreurs={}):
     input_boxes=[input_box1,input_box2,input_box3,input_box4]
     L_pseudos=['pseudo_joueur_1','pseudo_joueur_2','pseudo_joueur_3','pseudo_joueur_4']
     for k in range(0,len(input_boxes)):
+        #remplissage du dictionnaire des choix
         dico_choix[L_pseudos[k]]=input_boxes[k].text
+        #vérification des erreurs
+        for erreur in dico_erreurs.keys():
+            if L_pseudos[k]==erreur:
+                input_boxes[k].color=COLOR_ERROR
     
     #initialisation des boxs pour le choix des modes de jeu des joueurs
     choix_manuel_joueur_1=ChoiceBox(650, 100, 175, 30, 'manuel')
@@ -1498,6 +1503,10 @@ def parametrisation_2(dico_erreurs={}):
     L_parametres=['nb_fantomes','nb_fantomes_mission','nb_joker','points_pepite','points_fantome','points_fantome_mission','bonus_mission']
     for k in range(0,len(input_boxes)):
         dico_choix[L_parametres[k]]=input_boxes[k].text
+        #vérification des erreurs
+        for erreur in dico_erreurs.keys():
+            if L_parametres[k]==erreur:
+                input_boxes[k].color=COLOR_ERROR
 
     while dico_stop['parametrisation2']==True :
                 
@@ -1580,6 +1589,7 @@ def enregistrement_inputs(dico):
     dico : dictionnaire avec les paramètres, 
     dont un paramètre (fonction) correspond à la fonction suivante appelée. 
     """
+    
     ecriture(fichier, dico)
     
     if dico['test_null']==True:
