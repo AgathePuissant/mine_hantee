@@ -468,7 +468,7 @@ def IA_simple(id_joueur,plateau_en_cours):
     
     #On trouve l'heuristique maximale
     max_heur = max(dico_heuristique.values())
-    print(max_heur)
+    #print(max_heur)
     
     chemins_opti = []
     inser_opti = []
@@ -481,20 +481,27 @@ def IA_simple(id_joueur,plateau_en_cours):
             #On trouve les coordonnées de l'insertion correspondant au chemin optimal trouvé
             inser_opti.append(plateau.insertions_possibles[triplet[0]])
             orientation_opti.append(triplet[1])
-    
-
+            
+    #Les instances de cartes stockées dans les chemins possibles correspondent
+    #aux instances du plateau dupliqué, il faut donc retrouver les instances qui
+    #correspondent au vrai plateau utilisé
+    chemin_plateau = []
     #Si il n'y a qu'un seul chemin optimal, on le choisit
     if len(chemins_opti) == 1:
-        return (inser_opti[0],orientation_opti[0],chemins_opti[0])
+        #On ne prend pas la première carte du chemin, qui correspond à la carte
+        #où on se trouve actuellement
+        for j in range(1,len(chemins_opti[0])):
+            chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[0][j].id])
+        return (inser_opti[0],orientation_opti[0],chemin_plateau)
     
     #Sinon on prend au hasard parmi les chemins optimaux
     #On pourrait aussi faire le choix de prendre celui qui inclu la capture d'un fantôme par ex
     else:
         rang = rd.randint(0,len(chemins_opti)-1)
-        return (inser_opti[rang], orientation_opti[rang],chemins_opti[rang])
+        for j in range(1,len(chemins_opti[rang])):
+            chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[rang][j].id])
+        return (inser_opti[rang], orientation_opti[rang],chemin_plateau)
         
-    
-
 
 #plat = plateau(3,["Antoine","Christine","Michel"],[],7)
 #print(IA_simple(2,plat))
@@ -698,7 +705,10 @@ def ecriture(fichier, dico_parametres):
                 f_new.write(ligne)
         else:
             f_new.write(ligne)
-    f_new.close()    
+    f_new.close()  
+    
+    
+    
     
 def affiche_plateau(plat,fenetre):
     
@@ -1036,6 +1046,7 @@ def game() :
                 for i in chemin :
                     joueur.carte_position = i
                     information=plateau_test.compte_points(j,i)
+                    print(i.id,i.presence_pepite)
 
                     pygame.time.delay(500)
                     actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button,etape)
