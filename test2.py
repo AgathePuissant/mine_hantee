@@ -1504,7 +1504,8 @@ def parametrisation_2(dico_erreurs={}):
         #Ecriture des textes associés aux boxes
         fenetre.blit(police2.render("Dimensions du plateau: ",True,pygame.Color("#000000")),(100,110))
         fenetre.blit(police2.render("Nombre de fantômes: ",True,pygame.Color("#000000")),(100,180))
-        nb_fant=(((int(dico_choix['dimensions_plateau']))-2)**2)-4
+        n=int(dico_choix['dimensions_plateau'])
+        nb_fant=(n-2)*(n//2)+(n//2)*(n//2-1)
         fenetre.blit(police1.render("Entier positif / Maximum:"+str(nb_fant),True,pygame.Color("#000000")),(100,210))
         fenetre.blit(police1.render("Configuration standard : "+str(nb_fant)+" fantômes pour un plateau de taille "+str(dico_choix['dimensions_plateau'])+"x"+str(dico_choix['dimensions_plateau'])+".",True,pygame.Color("#000000")),(100,230))
         fenetre.blit(police2.render("Nombre de fantômes par ordre de mission: ",True,pygame.Color("#000000")),(100,250))
@@ -1517,7 +1518,7 @@ def parametrisation_2(dico_erreurs={}):
         fenetre.blit(police1.render("Entier positif / Configuration standard : 5 points.",True,pygame.Color("#000000")),(100,490))
         fenetre.blit(police2.render("Points gagnés par fantôme capturé: ",True,pygame.Color("#000000")),(100,530))  
         fenetre.blit(police2.render("si le fantôme figure sur l'ordre de mission",True,pygame.Color("#000000")),(100,560))
-        fenetre.blit(police1.render("Entier positif / Configuration standard : 20 points pour la configuration.",True,pygame.Color("#000000")),(100,590))
+        fenetre.blit(police1.render("Entier positif / Configuration standard : 20 points.",True,pygame.Color("#000000")),(100,590))
         fenetre.blit(police2.render("Bonus lors du remplissage d'une mission: ",True,pygame.Color("#000000")),(100,630))
         fenetre.blit(police1.render("Entier positif / Configuration standard : 40 points.",True,pygame.Color("#000000")),(100,660)) 
                                                                                
@@ -1576,7 +1577,8 @@ def tests_max_inputs(dico):
     """
     
     #dictionnaire des maximums autorisés pour chaque paramètre (s'il y en a).
-    nb_fant=(((int(dico['dimensions_plateau']))-2)**2)-4
+    n=int(dico['dimensions_plateau'])
+    nb_fant=(n-2)*(n//2)+(n//2)*(n//2-1)
     dico_max={'nb_fantomes': nb_fant, 'nb_fantomes_mission': nb_fant//int(dico['nb_joueurs']), 
                 'nb_joker': 10, 'points_pepite': 50, 'points_fantome': 200, 
                 'points_fantome_mission': 200, 'bonus_mission': 500}
@@ -1641,9 +1643,6 @@ def tests_null_inputs(dico):
         dico_erreurs['type']='null'
         fonction_prec=dico['fonction_prec']
         fonction_prec(dico_erreurs)
-    
-    
-
 
 #-----------------------------------------Affichage graphique et début du jeu------------------------------
 
