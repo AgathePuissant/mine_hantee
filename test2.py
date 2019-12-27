@@ -39,13 +39,11 @@ class joueur(object):
         self.capture_fantome = False
 
 
-
-            
 class plateau(object):
     """
     - seuls les N impairs sont acceptés
     """
-    def __init__(self, nb_joueurs, liste_noms, liste_niveaux, N):
+    def __init__(self, nb_joueurs, liste_noms, liste_niveaux=[], N=7):
         
         self.N = N
         self.position=np.zeros([N,N])
@@ -61,9 +59,9 @@ class plateau(object):
         #créer une combinaison des types de cartes
         nb_deplacable=N//2*(N//2+1+N)+1
         #orientations et types de murs de chaque carte
-        pool1=[[[1,0,1,0],[0,1,0,1]][rd.randint(0,1)] for i in range(int(nb_deplacable*13/34))]
-        pool2=[[[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*15/34))]
-        pool3=[[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*6/34))]
+        pool1=[rd.choice([[1,0,1,0],[0,1,0,1]]) for i in range(int(nb_deplacable*13/34))]
+        pool2=[rd.choice([[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]]) for i in range(int(nb_deplacable*15/34))]
+        pool3=[rd.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) for i in range(int(nb_deplacable*6/34))]
         pool=pool1+pool2+pool3
         
         #Pool des id des fantômes à placer sur le plateau
@@ -111,13 +109,13 @@ class plateau(object):
                             orientation=[0,1,1,0]
                     
                     #cases qui font les bords et les autres indéplaçables
-                    elif ligne>colonne and N-ligne>N-colonne:
+                    elif ligne<colonne and N-ligne-1>colonne:
                         orientation=[1,0,0,0]
-                    elif ligne>colonne:
+                    elif ligne<colonne and N-ligne-1<colonne:
                         orientation=[0,1,0,0]
-                    elif N-ligne<N-colonne:
+                    elif ligne>colonne and N-ligne-1<colonne:
                         orientation=[0,0,1,0]
-                    else:
+                    elif ligne>colonne and N-ligne-1>colonne:
                         orientation=[0,0,0,1]
                 
                 #cases déplaçables
@@ -145,6 +143,7 @@ class plateau(object):
         
         #La carte qui reste dans pool est la carte à l'exterieur du plateau
         self.carte_a_jouer=carte(compte_id,pool[compte_deplacable],["",""],True)
+        print(compte_id)
         self.dico_cartes[compte_id] = self.carte_a_jouer
         
         #Initialisation des joueurs
@@ -173,6 +172,7 @@ class plateau(object):
             nom = "IA"+str(compte+1)
             self.dico_joueurs[i] = joueur(i,nom,liste_niveaux[compte],fantomes_target,position)
             compte += 1
+    
     
         
     def deplace_carte(self,coord) :
@@ -446,7 +446,7 @@ def IA_simple(id_joueur,plateau_en_cours):
     
 
     for k in range(len(chemins_possibles_total)): #k : rang du sous-ensemble correspondant à un endroit d'insertion possible
-        for i in range(len(chemins_possibles_total[k])) : #i: rang du sous-sous ensemble corrspondant à l'orientation de la carte
+        for i in range(len(chemins_possibles_total[k])) : #i: rang du sous-sous ensemble correspondant à l'orientation de la carte
             for m in range(len(chemins_possibles_total[k][i])):#m: rang du chemin possible parmi le sous-sous-ensemble
                 heuristique = 0
                 #On examine chaque case
@@ -492,6 +492,8 @@ def IA_simple(id_joueur,plateau_en_cours):
         #où on se trouve actuellement
         for j in range(1,len(chemins_opti[0])):
             chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[0][j].id])
+            print("idcarte ", chemins_opti[0][j].id)
+        print("1option",inser_opti[0], orientation_opti[0])
         return (inser_opti[0],orientation_opti[0],chemin_plateau)
     
     #Sinon on prend au hasard parmi les chemins optimaux
@@ -500,6 +502,8 @@ def IA_simple(id_joueur,plateau_en_cours):
         rang = rd.randint(0,len(chemins_opti)-1)
         for j in range(1,len(chemins_opti[rang])):
             chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[rang][j].id])
+            print("idcarte ", chemins_opti[rang][j].id)
+        print(inser_opti[rang], orientation_opti[rang])
         return (inser_opti[rang], orientation_opti[rang],chemin_plateau)
         
 
@@ -813,7 +817,9 @@ def affiche_plateau(plat,fenetre):
                fenetre.blit(mur2,(x,y))
             elif k==3 :
                fenetre.blit(mur3,(x,y))
-               
+    
+    if plat.carte_a_jouer.presence_pepite==True:
+        fenetre.blit(pepite,(x,y))
                
                
 def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte):
@@ -1034,21 +1040,21 @@ def game() :
                 #On tourne la carte
                 for i in range(orientation+1):
                     plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2],plateau_test.carte_a_jouer.orientation[3]=plateau_test.carte_a_jouer.orientation[3],plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2]
-                    pygame.time.delay(500)
+                    pygame.time.wait(200)
                     actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button,etape)
                     
                 plateau_test.deplace_carte(coord_inser) #On l'insère
-                pygame.time.delay(500)
+                pygame.time.wait(200)
                 actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button,etape)
                 
 
                 information=""
                 for i in chemin :
+                    print(i.id)
                     joueur.carte_position = i
                     information=plateau_test.compte_points(j,i)
-                    print(i.id,i.presence_pepite)
 
-                    pygame.time.delay(500)
+                    pygame.time.wait(200)
                     actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button,etape)
                 
 
