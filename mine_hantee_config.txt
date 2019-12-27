@@ -34,17 +34,11 @@ niveau_ia_3=3
 niveau_ia_4=1
 
 #Peudos des joueurs (4 joueurs au maximum)
-<<<<<<< Updated upstream
+
 pseudo_joueur_1=Joueur1
 pseudo_joueur_2=Joueur2
 pseudo_joueur_3=Joueur3
 pseudo_joueur_4=zodj
-=======
-pseudo_joueur_1=Salut
-pseudo_joueur_2=Joueur2
-pseudo_joueur_3=Joueur3
-pseudo_joueur_4=Julie
->>>>>>> Stashed changes
 
 #####################################
 #	CARACTERISTIQUES DES MISSIONS	#
