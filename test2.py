@@ -492,8 +492,8 @@ def IA_simple(id_joueur,plateau_en_cours):
         #où on se trouve actuellement
         for j in range(1,len(chemins_opti[0])):
             chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[0][j].id])
-            print("idcarte ", chemins_opti[0][j].id)
-        print("1option",inser_opti[0], orientation_opti[0])
+            #print("idcarte ", chemins_opti[0][j].id)
+        #print("1option",inser_opti[0], orientation_opti[0])
         return (inser_opti[0],orientation_opti[0],chemin_plateau)
     
     #Sinon on prend au hasard parmi les chemins optimaux
@@ -502,8 +502,8 @@ def IA_simple(id_joueur,plateau_en_cours):
         rang = rd.randint(0,len(chemins_opti)-1)
         for j in range(1,len(chemins_opti[rang])):
             chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[rang][j].id])
-            print("idcarte ", chemins_opti[rang][j].id)
-        print(inser_opti[rang], orientation_opti[rang])
+            #print("idcarte ", chemins_opti[rang][j].id)
+        #print(inser_opti[rang], orientation_opti[rang])
         return (inser_opti[rang], orientation_opti[rang],chemin_plateau)
         
 
@@ -830,7 +830,7 @@ def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte):
     liste_im_joueur = [pygame.image.load("joueur"+str(i)+".png").convert_alpha() for i in range(1,5)]
 
     for i in range(len(plateau.dico_joueurs)) :
-                fenetre.blit(liste_im_joueur[i],(1020,320+i*80))
+                fenetre.blit(liste_im_joueur[i],(1030,320+i*80))
                 fenetre.blit(police.render(str(plateau.dico_joueurs[i].nom) + " : ",False,pygame.Color("#000000")),(800,340+i*80))
                 fenetre.blit(police.render("Score : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(800,340+i*80+20))
                 fenetre.blit(police.render("Ordre de mission : "+str(sorted(plateau.dico_joueurs[i].fantome_target)),False,pygame.Color("#000000")),(800,340+i*80+40))
@@ -1050,7 +1050,6 @@ def game() :
 
                 information=""
                 for i in chemin :
-                    print(i.id)
                     joueur.carte_position = i
                     information=plateau_test.compte_points(j,i)
 
