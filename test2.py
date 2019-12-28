@@ -66,9 +66,9 @@ class plateau(object):
         #créer une combinaison des types de cartes
         nb_deplacable=N//2*(N//2+1+N)+1
         #orientations et types de murs de chaque carte
-        pool1=[[[1,0,1,0],[0,1,0,1]][rd.randint(0,1)] for i in range(int(nb_deplacable*13/34))]
-        pool2=[[[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*15/34))]
-        pool3=[[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]][rd.randint(0,3)] for i in range(int(nb_deplacable*6/34))]
+        pool1=[rd.choice([[1,0,1,0],[0,1,0,1]]) for i in range(int(nb_deplacable*13/34))]
+        pool2=[rd.choice([[1,1,0,0],[0,1,1,0],[0,0,1,1],[1,0,0,1]]) for i in range(int(nb_deplacable*15/34))]
+        pool3=[rd.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) for i in range(int(nb_deplacable*6/34))]
         pool=pool1+pool2+pool3
         
         #Pool des id des fantômes à placer sur le plateau
@@ -120,16 +120,16 @@ class plateau(object):
                             orientation=[0,1,1,0]
                     
                     #cases qui font les bords et les autres indéplaçables
-                    elif ligne>colonne and N-ligne>N-colonne:
+                    elif ligne<colonne and N-ligne-1>colonne:
                         orientation=[1,0,0,0]
-                    elif ligne>colonne:
+                    elif ligne<colonne and N-ligne-1<colonne:
                         orientation=[0,1,0,0]
-                    elif N-ligne<N-colonne:
+                    elif ligne>colonne and N-ligne-1<colonne:
                         orientation=[0,0,1,0]
-                    else:
+                    elif ligne>colonne and N-ligne-1>colonne:
                         orientation=[0,0,0,1]
-                
-                #cases déplaçables
+
+               #cases déplaçables
                 else:
                     orientation=pool[compte_deplacable]
                     compte_deplacable+=1
@@ -434,9 +434,10 @@ def IA_simple(id_joueur,plateau_en_cours):
     orientation = plateau.carte_a_jouer.orientation
     #On teste pour chaque emplacement où la carte est insérable
     for i in plateau.insertions_possibles: 
+        
         j=0
         chemins_possibles_carte = [] 
-        #On teste pour chaque orientation de la carte
+        
         for j in range(4):
             plateau.carte_a_jouer.orientation = orientation
             plateau.deplace_carte(i)
@@ -497,8 +498,6 @@ def IA_simple(id_joueur,plateau_en_cours):
         #où on se trouve actuellement
         for j in range(1,len(chemins_opti[0])):
             chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[0][j].id])
-            #print("idcarte ", chemins_opti[0][j].id)
-        #print("1option",inser_opti[0], orientation_opti[0])
         return (inser_opti[0],orientation_opti[0],chemin_plateau)
     
     #Sinon on prend au hasard parmi les chemins optimaux
@@ -507,8 +506,6 @@ def IA_simple(id_joueur,plateau_en_cours):
         rang = rd.randint(0,len(chemins_opti)-1)
         for j in range(1,len(chemins_opti[rang])):
             chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[rang][j].id])
-            #print("idcarte ", chemins_opti[rang][j].id)
-        #print(inser_opti[rang], orientation_opti[rang])
         return (inser_opti[rang], orientation_opti[rang],chemin_plateau)
         
 
@@ -1062,11 +1059,11 @@ def game() :
                 coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
 
                 #On tourne la carte
-                for i in range(orientation+1):
+                for i in range(orientation):
                     plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2],plateau_test.carte_a_jouer.orientation[3]=plateau_test.carte_a_jouer.orientation[3],plateau_test.carte_a_jouer.orientation[0],plateau_test.carte_a_jouer.orientation[1],plateau_test.carte_a_jouer.orientation[2]
                     pygame.time.wait(200)
                     actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button,etape)
-                    
+                 
                 plateau_test.deplace_carte(coord_inser) #On l'insère
                 pygame.time.wait(200)
                 actualise_fenetre(plateau_test,fenetre,joueur,information,afficher_commandes_button,etape)
