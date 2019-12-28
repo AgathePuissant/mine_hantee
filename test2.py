@@ -71,12 +71,14 @@ class plateau(object):
         pool3=[rd.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) for i in range(int(nb_deplacable*6/34))]
         pool=pool1+pool2+pool3
         
-        #Pool des id des fantômes à placer sur le plateau
+        #Pool du placement des fantomes 
         self.nbre_fantomes = int(dico_parametres['nb_fantomes'])
         nb_max_fant=(N-2)*(N//2)+(N//2)*(N//2-1)
-        pas_fant=nb_max_fant//self.nbre_fantomes
-        print('pas_fant',pas_fant)
-        compte_pas=1
+        pos_fant=range(nb_max_fant)
+        pool_pos_fant=rd.sample(pos_fant,self.nbre_fantomes)
+        compt=0
+        
+        #Pool des id des fantômes à placer sur le plateau
         pool_fantomes = [i for i in range(1,self.nbre_fantomes+1)]
         pool_fantomes = np.random.permutation(pool_fantomes)
         
@@ -138,12 +140,10 @@ class plateau(object):
                     #Elle accueille un fantome
                     if ligne>0 and ligne<N-1 and colonne>0 and colonne<N-1:
                         if compte_fantomes<self.nbre_fantomes:
-                            if compte_pas==pas_fant:
+                            if compt in pool_pos_fant:
                                 id_fantome=pool_fantomes[compte_fantomes]
                                 compte_fantomes += 1
-                                compte_pas=1
-                            else:
-                                compte_pas+=1
+                            compt += 1
                     #si la carte fait partie de la couronne extérieure et qu'elle est déplaçable, 
                     #on ajoute ses coordonnées aux coordonnées à la liste des insertions possibles. 
                     elif ligne==0 or ligne==N-1 or colonne==0 or colonne==N-1:
