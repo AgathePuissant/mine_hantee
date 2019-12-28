@@ -1173,7 +1173,7 @@ def game() :
                                 test_inser=plateau_test.deplace_carte(coord)
                                
                                 if test_inser==False :
-                                    information="Insertion impossible"
+                                    information=["Insertion impossible"]
                                 #Sinon, on finit cette section du tour
     
                                 else :
