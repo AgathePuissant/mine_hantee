@@ -377,7 +377,6 @@ class plateau(object):
             self.id_dernier_fantome += 1
             nv_carte.id_fantome = 0
 
-        retour=' et '.join(retour)
         return retour
         
 
@@ -839,8 +838,10 @@ def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte):
 
                 #test texte pour afficher le joueur qui joue
     fenetre.blit(police.render("C'est a "+str(joueur.nom)+" de jouer",False,pygame.Color(0,0,0)),(800,240))
-    #affichage du message d'erreur ?                       
-    fenetre.blit(police.render(info,False,pygame.Color("#000000")),(760,180))
+    #affichage du message d'erreur
+    for i in range(len(info)) :                       
+        fenetre.blit(police.render(info[i],False,pygame.Color("#000000")),(760,180+i*20))
+                                   
     fenetre.blit(police.render(etape_texte,False,pygame.Color("#000000")),(760,160))
                                                              
                                                              
