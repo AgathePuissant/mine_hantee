@@ -12,7 +12,7 @@ import pickle
 import glob
 import copy
 import math
-
+from moviepy.editor import *
 
 class carte(object):
     
@@ -725,7 +725,7 @@ def affiche_plateau(plat,fenetre):
     mur3 = pygame.image.load("mur3.png").convert_alpha()
     mur4 = pygame.image.load("mur4.png").convert_alpha()
     liste_im_joueur = [pygame.image.load("joueur"+str(i)+".png").convert_alpha() for i in range(1,5)]
-    fond_a_jouer = pygame.image.load("fond_carte_a_jouer.png").convert()
+    fond_a_jouer = pygame.image.load("fond_carte_a_jouer.jpg").convert()
     fantome = pygame.image.load("fantome.png").convert_alpha()
     pepite = pygame.image.load("pepite.png").convert_alpha()
     indeplacable = pygame.image.load("indeplacable.png").convert_alpha()
@@ -737,20 +737,20 @@ def affiche_plateau(plat,fenetre):
     N = plat.N #on récupère la taille du plateau
      
     #Mise  à jour de la taille des images en fonction du nombre de cartes du plateau
-    x_mur1 = mur1.get_width()
-    y_mur1 = mur1.get_height()
+    x_mur1 = 100
+    y_mur1 = 100
     mur1 = pygame.transform.scale(mur1, (int(x_mur1*(7/N)),int(y_mur1*(7/N))))
-    x_mur2 = mur2.get_width()
-    y_mur2 = mur2.get_height()
+    x_mur2 = 100
+    y_mur2 = 100
     mur2 = pygame.transform.scale(mur2, (int(x_mur2*(7/N)),int(y_mur2*(7/N))))
-    x_mur3 = mur3.get_width()
-    y_mur3 = mur3.get_height()
+    x_mur3 = 100
+    y_mur3 = 100
     mur3 = pygame.transform.scale(mur3, (int(x_mur3*(7/N)),int(y_mur3*(7/N))))
-    x_mur4 = mur4.get_width()
-    y_mur4 = mur4.get_height()
+    x_mur4 = 100
+    y_mur4 = 100
     mur4 = pygame.transform.scale(mur4, (int(x_mur4*(7/N)),int(y_mur4*(7/N))))
-    x_fond_a_jouer = fond_a_jouer.get_width()
-    y_fond_a_jouer = fond_a_jouer.get_height()
+    x_fond_a_jouer = 100
+    y_fond_a_jouer = 100
     fond_a_jouer = pygame.transform.scale(fond_a_jouer,(int(x_fond_a_jouer*(7/N)),int(y_fond_a_jouer*(7/N))))
     x_fantome = fantome.get_width()
     y_fantome = fantome.get_height()
@@ -762,8 +762,8 @@ def affiche_plateau(plat,fenetre):
     y_indeplacable = indeplacable.get_height()
     indeplacable  = pygame.transform.scale(indeplacable, (int(x_indeplacable*(7/N)),int(y_indeplacable*(7/N))))
     for i in range (4) :
-        x_joueur = liste_im_joueur[i].get_width()
-        y_joueur = liste_im_joueur[i].get_height()
+        x_joueur = 60
+        y_joueur = 60
         liste_im_joueur[i] = pygame.transform.scale(liste_im_joueur[i], (int(x_joueur*(7/N)),int(y_joueur*(7/N))))
     
     #Création de la police du jeu
@@ -937,6 +937,8 @@ def game() :
     
     
     dico_stop["rester_jeu"]=True
+    #in charge l'animation en cas de capture de fantome
+    clip = VideoFileClip('animation.mp4')
     
     
     #Boucle du jeu. On joue tant qu'il reste des fantômes à attraper
@@ -1025,6 +1027,9 @@ def game() :
                             deplace = plateau_test.deplace_joueur(j,event.key)
                             if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
                                 information=plateau_test.compte_points(j,deplace)
+                                #si le joueur capture un fantome, on lance l'animation de capture
+                                if joueur.capture_fantome == True :
+                                    clip.preview()
                             else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                                 information=deplace
                             carte_actuelle=joueur.carte_position
