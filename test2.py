@@ -1026,6 +1026,7 @@ def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte):
 
                 #test texte pour afficher le joueur qui joue
     fenetre.blit(police.render("C'est a "+str(joueur.nom)+" de jouer",False,pygame.Color(0,0,0)),(800,240))
+ 
     #affichage du message d'erreur
     for i in range(len(info)) :                       
         fenetre.blit(police.render(info[i],False,pygame.Color("#000000")),(760,180+i*20))
