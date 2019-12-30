@@ -787,4 +787,4 @@ class mine_hantee():
 mn = mine_hantee()
 print(mn.menu())
 
-#pygame.quit()
+pygame.quit()
