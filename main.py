@@ -97,6 +97,7 @@ def game() :
     else :
         pass
     
+    afficher_commandes(debut=True)
     
     afficher_commandes_button=Bouton(725,5,150,40,"Commandes")
 
@@ -253,7 +254,7 @@ def game() :
 
             
 
-def afficher_commandes() :
+def afficher_commandes(debut=False) :
     global dico_stop
 
     dico_stop["comm"]=True
@@ -262,15 +263,19 @@ def afficher_commandes() :
     
         fenetre.blit(fond_uni,(0,0))
         
-        fenetre.blit(police.render("R : tourner la carte",False,pygame.Color("#000000")),(100,100))
-        fenetre.blit(police.render("Clic sur une carte déplaçable en périphérie du plateau : insère la carte extérieure",False,pygame.Color("#000000")),(100,150))
-        fenetre.blit(police.render("Flèches directionnelles : déplacer le joueur",False,pygame.Color("#000000")),(100,200))
-        fenetre.blit(police.render("Entrée : finir le tour",False,pygame.Color("#000000")),(100,250))
-        fenetre.blit(police.render("Espace : mettre en pause/Retour au jeu",False,pygame.Color("#000000")),(100,300))
-        fenetre.blit(police.render("Appuyez sur espace pour revenir au jeu",False,pygame.Color("#000000")),(100,500))
-                                                                                                     
-                                                                                                    
-                                                                      
+        fenetre.blit(police3.render("Commandes",True,pygame.Color("#000000")),(100,100))
+        
+        fenetre.blit(police2.render("R : tourner la carte.",False,pygame.Color("#000000")),(100,200))
+        fenetre.blit(police2.render("Clic sur une carte déplaçable en périphérie du plateau : insérer la carte extérieure.",False,pygame.Color("#000000")),(100,250))
+        fenetre.blit(police2.render("Flèches directionnelles : déplacer le joueur.",False,pygame.Color("#000000")),(100,300))
+        fenetre.blit(police2.render("Entrée : finir le tour.",False,pygame.Color("#000000")),(100,350))
+        fenetre.blit(police2.render("Espace : mettre en pause/Retour au jeu.",False,pygame.Color("#000000")),(100,400))
+        
+        if debut==False:                                                                                         
+            fenetre.blit(police2.render("Appuyez sur espace pour revenir au jeu.",False,pygame.Color("#000000")),(100,500))
+        else:
+            fenetre.blit(police2.render("Appuyez sur espace pour commencer le jeu.",False,pygame.Color("#000000")),(100,500))                                                                                             
+        
         pygame.display.flip() 
                                                         
         for event in pygame.event.get() :
