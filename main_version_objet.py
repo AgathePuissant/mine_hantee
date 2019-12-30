@@ -117,7 +117,6 @@ class mine_hantee():
                     niveau='niveau_ia_'+str(joueur)
                     liste_niveaux=liste_niveaux+[int(dico_parametres[niveau])]
             
-            print(nb_joueurs,liste_noms,liste_niveaux,dimensions_plateau,dico_parametres)
             self.plateau_test=plateau(nb_joueurs,liste_noms,liste_niveaux,dimensions_plateau,dico_parametres)
             
         else :
@@ -255,7 +254,10 @@ class mine_hantee():
                         break
                 
                 else:
-                    IA = IA_simple(j,self.plateau_test)
+                    if joueur.niveau == 1:
+                        IA = IA_debutant(j,plateau_test)
+                    elif joueur.niveau == 2:
+                        IA = IA_simple(j,plateau_test)
                     coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
     
                     #On tourne la carte
