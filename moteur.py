@@ -479,7 +479,7 @@ class plateau(object):
                 retour = "Ce déplacement est impossible."
                 
 
-        return [retour]
+        return retour
     
     
     def compte_points(self,id_joueur,nv_carte):
