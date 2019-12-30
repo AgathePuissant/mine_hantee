@@ -14,6 +14,8 @@ import glob
 import copy
 import math
 from moviepy.editor import *
+from PodSixNet.Connection import ConnectionListener, connection
+from time import sleep
 
 from moteur import *
 from objets_graphiques import *
@@ -49,11 +51,9 @@ class mine_hantee():
         self.police2=pygame.font.SysFont('calibri', 25)
         self.police3=pygame.font.SysFont('calibri', 35)
         
-
             
     
     def menu(self):
-        #global fenetre,liste_sauv,num_partie,nouvelle,dico_stop
         
         #en cours de modification
         if hasattr(mine_hantee, 'dico_stop') == False: 
@@ -92,7 +92,7 @@ class mine_hantee():
             
     
     def game(self) :
-        #global fenetre,num_partie,nouvelle,plateau_test,dico_stop
+
         #Initialisation d'une nouvelle partie ou chargement d'une ancienne partie
         if self.nouvelle==False :
             self.plateau_test=pickle.load(open("sauvegarde "+str(self.num_partie),"rb"))
@@ -116,7 +116,8 @@ class mine_hantee():
                 else:
                     niveau='niveau_ia_'+str(joueur)
                     liste_niveaux=liste_niveaux+[int(dico_parametres[niveau])]
-                    
+            
+            print(nb_joueurs,liste_noms,liste_niveaux,dimensions_plateau,dico_parametres)
             self.plateau_test=plateau(nb_joueurs,liste_noms,liste_niveaux,dimensions_plateau,dico_parametres)
             
         else :
@@ -280,7 +281,6 @@ class mine_hantee():
                 
     
     def afficher_commandes(self,debut=False) :
-        #global dico_stop
     
         self.dico_stop["comm"]=True
         
@@ -312,7 +312,6 @@ class mine_hantee():
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
                 
     def pause(self) :
-        #global fenetre,texte_sauv,nouvelle,dico_stop
         
         self.nouvelle="jeu en pause"
         
@@ -350,8 +349,7 @@ class mine_hantee():
     
                     
     def sauvegarder(self):
-        #global texte_sauv,num_partie,plateau_test
-        
+
         pickle.dump(plateau_test,open("sauvegarde "+str(self.num_partie),"wb"))
         texte_sauv="Partie sauvegardée"
     
@@ -402,7 +400,6 @@ class mine_hantee():
         Fonction de paramétrisation simple 1
         demande le nombre de joueurs pour la partie (entre 2,3 et 4) 
         '''
-        #global fenetre,liste_sauv,num_partie,nouvelle,dico_stop
         
         self.nouvelle=True
         #attribution du numéro de la partie
@@ -478,7 +475,6 @@ class mine_hantee():
         """
         Fonction qui lance la paramétrisation des joueurs
         """
-        #global fenetre, dico_stop
         
         self.dico_stop['nouvellepartie']=False
         self.dico_stop['parametrisation1']=True
@@ -649,8 +645,7 @@ class mine_hantee():
         '''
         Fonction qui lance la paramétrisation des paramètres avancés de la partie
         '''    
-        
-        #global fenetre, dico_stop
+
         
         self.dico_stop['parametrisation1']=False
         self.dico_stop['parametrisation2']=True
