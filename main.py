@@ -229,7 +229,10 @@ def game() :
                     break
             
             else:
-                IA = IA_simple(j,plateau_test)
+                if joueur.niveau == 1:
+                    IA = IA_debutant(j,plateau_test)
+                elif joueur.niveau == 2:
+                    IA = IA_simple(j,plateau_test)
                 coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
 
                 #On tourne la carte
