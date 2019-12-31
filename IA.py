@@ -2,6 +2,10 @@
 """
 FICHIER DEFINISSANT LES INTELLIGENCES ARTIFICIELLES
 """
+import time as time
+import copy as copy
+import random as rd
+
 def IA_monte_carlo(plateau_en_cours,joueur_id, reps, liste_coups=[], profondeur="fin"):
     """
     evalue les coups possibles d'un joueur et renvoie le meilleur coup à une profondeur de donnée,
