@@ -278,10 +278,12 @@ class mine_hantee():
                     for i in range(orientation):
                         self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
                         pygame.time.wait(200)
+                        pygame.event.pump()
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                      
                     self.plateau_jeu.deplace_carte(coord_inser) #On l'insère
                     pygame.time.wait(200)
+                    pygame.event.pump()
                     actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                     
     
@@ -291,6 +293,7 @@ class mine_hantee():
                         information=self.plateau_jeu.compte_points(j,i)
     
                         pygame.time.wait(200)
+                        pygame.event.pump()
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                     
     
