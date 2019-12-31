@@ -207,6 +207,8 @@ class mine_hantee():
                     self.etape_jeu=joueur.nom+"_"+"deplacement"
                     information=""
                     
+                    #initialiser un marqueur pour l'animation de capture du fantôme
+                    premiere_capture=True
                     #parcours des evenements
                     #Tant que le joueur ne passe pas son tour et peut encore se deplacer
                     while self.dico_stop["test_entree"]==True and len(cartes_accessibles)>0:
@@ -228,8 +230,9 @@ class mine_hantee():
                                 if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
                                     information=self.plateau_jeu.compte_points(j,deplace)
                                     #si le joueur capture un fantome, on lance l'animation de capture
-                                    if joueur.capture_fantome == True :
+                                    if joueur.capture_fantome == True and premiere_capture==True:
                                         clip.preview()
+                                        premiere_capture=False
                                 else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                                     information=deplace
                                 
