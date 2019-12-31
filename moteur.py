@@ -5,6 +5,7 @@ FICHIER DE DEFINITION DES CLASSES DU MOTEUR DU JEU
 
 import numpy as np
 import random as rd
+import copy as copy
 
 class carte(object):
     """
