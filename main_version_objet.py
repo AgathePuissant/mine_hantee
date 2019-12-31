@@ -372,7 +372,7 @@ class mine_hantee():
                 self.fenetre.blit(self.fond_uni,(0,0))  #On colle le fond du menu
                 
                 for i in range(len(self.liste_sauv)) :
-                    button_charger_partie(self.fenetre,"Partie "+str(self.liste_sauv[i]),500,100+i*100,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),liste_sauv[i])
+                    button_charger_partie(self.fenetre,"Partie "+str(self.liste_sauv[i]),500,100+i*100,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),self.liste_sauv[i])
                 
                 if retour_partie==True :
                     self.fenetre.blit(police.render("Partie "+str(self.num_partie)+" sélectionnée",True,pygame.Color("#000000")),(800,100))
