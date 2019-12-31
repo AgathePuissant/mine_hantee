@@ -188,7 +188,7 @@ class mine_hantee():
                                         
         
                             elif event.type == KEYDOWN and event.key == K_SPACE :
-                                pause()
+                                self.pause()
                             
                             elif event.type == QUIT:
                                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
@@ -255,9 +255,9 @@ class mine_hantee():
                 
                 else:
                     if joueur.niveau == 1:
-                        IA = IA_debutant(j,plateau_test)
+                        IA = IA_debutant(j,self.plateau_test)
                     elif joueur.niveau == 2:
-                        IA = IA_simple(j,plateau_test)
+                        IA = IA_simple(j,self.plateau_test)
                     coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
     
                     #On tourne la carte
@@ -339,8 +339,8 @@ class mine_hantee():
             
             for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
                 
-                sauvegarder_button.handle_event(event,sauvegarder)
-                retour_menu_button.handle_event(event,menu)
+                sauvegarder_button.handle_event(event,self.sauvegarder)
+                retour_menu_button.handle_event(event,self.menu)
                     
                 if event.type == KEYDOWN and event.key == K_SPACE :
                     self.dico_stop["pause"]=False
@@ -388,9 +388,9 @@ class mine_hantee():
             for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
                 
                 if retour_partie==True :
-                    lancer_partie_button.handle_event(event,game)
+                    lancer_partie_button.handle_event(event,self.game)
                 else :
-                    retour_menu_button.handle_event(event,menu)
+                    retour_menu_button.handle_event(event,self.menu)
                 
                 if event.type == QUIT:     #Si un de ces événements est de type QUIT
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
