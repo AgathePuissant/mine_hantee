@@ -45,7 +45,7 @@ class Bouton:
     
     Comprend les méthodes :
         - initialisation : permet d'attribuer aux boutons de la classe leurs 
-        caractéristiques graphiques.
+        caractéristiques (graphiques ou non).
         - handle_event : prend en entrée un évènement pyGame, une action et son éventuel paramètre.
         Traite l'évènement donné en entrée, actualise les caractéristiques graphiques du bouton,
         et déclenche l'action si nécessaire.
@@ -66,7 +66,7 @@ class Bouton:
             - color : couleur (color, objet graphique pyGame). 
             - text : texte du bouton (string).
             - txt_surface : surface graphique du texte du bouton (surface, objet graphique pyGame).
-            - active : état d'activité du bouton (booléen).
+            - active : état d'activité du bouton, non-actif par défaut (booléen).
         """
         
         self.rect = pygame.Rect(x, y, w, h)
@@ -93,7 +93,7 @@ class Bouton:
         
         mouse = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
-        #si la souris se trouve au dessous du bouton, on l'active et on change la couleur
+        #si la souris se trouve au dessous du bouton, on l'active.
         if self.rect.x+self.rect.w > mouse[0] > self.rect.x and self.rect.y+self.rect.h > mouse[1] > self.rect.y:
             self.active=True
             if click[0] == 1:
@@ -128,11 +128,41 @@ class Bouton:
         text_rect.center=(self.rect.x+((self.rect.w)/2), self.rect.y+((self.rect.h)/2))
         fenetre.blit(self.txt_surface, text_rect)
     
-#definition des Inputboxs
     
 class InputBox:
-
+    """
+    Classe d'objets graphiques définissant les inputboxs dans pyGame. 
+    Permet à l'utilisateur de saisir des textes ou des chiffres dans des cases dédiées.  
+    
+    Comprend les méthodes :
+        - initialisation : permet d'attribuer aux inputsboxs de la classe leurs 
+        différentes caractéristiques (graphiques ou non).
+        - handle_event : prend en entrée un évènement pyGame, traite cet évènement et 
+        actualise les caractéristiques de l'inputbox.
+        - draw : prend en entrée la fenêtre pyGame et dessine l'inputbox dans la fenêtre. 
+    """
+    
     def __init__(self, x, y, w, h, text='', max_caract=10, contenu='texte'):
+        """
+        Prend en entrée : 
+            - x : abscisse du coin en haut à gauche du rectangle de l'inputbox (float).
+            - y : ordonnée du coin en haut à gauche du rectangle de l'inputbox (float).
+            - w : largeur du rectangle de l'inputbox (float).
+            - h : hauteur du rectangle de l'inputbox (float).
+            - text : texte de l'inputbox lors de sa création (string). 
+            - max_caract : nombre maximal de caractères pouvant être contenus dans l'inputbox (entier). 
+            - contenu : type de contenu dans l'inputbox (string, 
+            'texte' par défaut, correspondant à tout type de texte entré à l'aide du clavier
+            'num' si l'utilisateur ne peut rentrer que des caractères numériques dans l'inputbox).
+        
+        Initialise les attributs correspondant à ces éléments d'entrées ainsi que 
+        les attributs :
+            - rect : rectangle de l'inputbox (rectangle, objet graphique pyGame).
+            - color : couleur (color, objet graphique pyGame). 
+            - txt_surface : surface graphique du texte de l'inputbox (surface, objet graphique pyGame).
+            - active : état d'activité de l'inputbox, non-actif par défaut (booléen). 
+        """
+        
         self.rect = pygame.Rect(x, y, w, h)
         self.color = COLOR_INACTIVE
         self.text = text
@@ -142,6 +172,21 @@ class InputBox:
         self.contenu=contenu
 
     def handle_event(self, event):
+        """
+        Méthode permettant de gérer, pour l'inputbox, les évenements pyGame 
+        associés à l'utilisation de l'ordinateur par l'utilisateur. 
+        
+        Prend en entrée : 
+            - event : évènement pyGame (event).
+        
+        Actualise, en fonction de l'évènement d'entrée, l'état d'activité du bouton, sa couleur et son texte.
+        
+        Lorsque que la souris de l'utilisateur se trouve au-dessus du bouton
+        et que l'utilisateur clique sur le rectangle, l'inputbox est actif et son cadre change de couleur.
+        Lorsque l'inputbox est actif et que l'utilisateur utilise le clavier, le texte de l'inputbox est actualisé
+        en fonction des entrées de l'utilisateur. 
+        """
+        
         if event.type == pygame.MOUSEBUTTONDOWN:
                         
             # si l'utilisateur clique sur le rectangle de inputbox.
@@ -164,6 +209,15 @@ class InputBox:
                 self.txt_surface = police2.render(self.text, True, self.color)
 
     def draw(self, fenetre):
+        """
+        Méthode permettant de dessiner l'inputbox dans la fenêtre. 
+        
+        Prend en entrée : 
+            - fenetre : fenetre dans laquelle l'inputbox est dessiné (fenetre pyGame).
+        
+        Dessine le rectangle associé à l'inputbox ainsi que son texte dans la fenêtre. 
+        """
+
         # Blit le rectangle. 
         pygame.draw.rect(fenetre, self.color, self.rect, 2)
         # Blit le texte. 
