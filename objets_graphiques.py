@@ -26,27 +26,6 @@ def text_objects(text, font):
     textSurface = font.render(text, True, pygame.Color("#000000"))
     return textSurface, textSurface.get_rect()
     
-def button_charger_partie(fenetre,msg,x,y,w,h,ic,ac,i):
-    global num_partie,retour_partie
-    
-    mouse = pygame.mouse.get_pos()
-    click = pygame.mouse.get_pressed()
-    
-    if x+w > mouse[0] > x and y+h > mouse[1] > y:
-        pygame.draw.rect(fenetre, ac,(x,y,w,h))
-
-        if click[0] == 1 and i != None:
-            num_partie=i
-            retour_partie=True
-            
-    else:
-        pygame.draw.rect(fenetre, ic,(x,y,w,h))   
-
-    smallText = pygame.font.SysFont("comicsansms",20)
-    textSurf, textRect = text_objects(msg, smallText)
-    textRect.center = ( (x+(w/2)), (y+(h/2)) )
-    fenetre.blit(textSurf, textRect)
-    
 #definition des Boutons
 
 class Bouton:
