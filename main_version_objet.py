@@ -328,12 +328,12 @@ class mine_hantee():
                     
             self.fenetre.blit(self.fond_uni,(0,0))
         
-            self.fenetre.blit(police.render("Pause",True,pygame.Color("#000000")),(600,200))
+            self.fenetre.blit(self.police.render("Pause",True,pygame.Color("#000000")),(600,200))
                                                                  
             sauvegarder_button.draw(self.fenetre)
             retour_menu_button.draw(self.fenetre)
                                       
-            self.fenetre.blit(police.render(texte_sauv,True,pygame.Color("#000000")),(550,550))
+            self.fenetre.blit(self.police.render(texte_sauv,True,pygame.Color("#000000")),(550,550))
                                                                     
             pygame.display.flip() #Update l'écran
             
@@ -351,8 +351,8 @@ class mine_hantee():
     
                     
     def sauvegarder(self):
-
-        pickle.dump(plateau_test,open("sauvegarde "+str(self.num_partie),"wb"))
+        
+        pickle.dump(self.plateau_test,open("sauvegarde "+str(self.num_partie),"wb"))
         texte_sauv="Partie sauvegardée"
     
         
@@ -375,12 +375,12 @@ class mine_hantee():
                     button_charger_partie(self.fenetre,"Partie "+str(self.liste_sauv[i]),500,100+i*100,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),self.liste_sauv[i])
                 
                 if retour_partie==True :
-                    self.fenetre.blit(police.render("Partie "+str(self.num_partie)+" sélectionnée",True,pygame.Color("#000000")),(800,100))
+                    self.fenetre.blit(self.police.render("Partie "+str(self.num_partie)+" sélectionnée",True,pygame.Color("#000000")),(800,100))
                     lancer_partie_button.draw(self.fenetre)                                                    
             else :
                 
                 self.fenetre.blit(self.fond_uni,(0,0))  #On colle le fond du menu
-                self.fenetre.blit(police.render("Aucune partie sauvegardee",True,pygame.Color("#000000")),(450,100))
+                self.fenetre.blit(self.police.render("Aucune partie sauvegardee",True,pygame.Color("#000000")),(450,100))
                 retour_menu_button.draw(self.fenetre)
                 
             pygame.display.flip() #Update l'écran
@@ -442,8 +442,8 @@ class mine_hantee():
             self.fenetre.blit(self.fond_uni,(0,0))
             
             #choix du nombre de joueurs 
-            self.fenetre.blit(police3.render("Nouvelle partie!",True,pygame.Color("#000000")),(485,100))
-            self.fenetre.blit(police3.render("Nombre de joueurs",True,pygame.Color("#000000")),(465,200))
+            self.fenetre.blit(self.police3.render("Nouvelle partie!",True,pygame.Color("#000000")),(485,100))
+            self.fenetre.blit(self.police3.render("Nombre de joueurs",True,pygame.Color("#000000")),(465,200))
             
             #dessin des boutons
             valider.draw(self.fenetre)  
@@ -566,7 +566,7 @@ class mine_hantee():
             self.fenetre.blit(self.fond_uni,(0,0))
             
             #paramètres des joueurs
-            self.fenetre.blit(police3.render("Paramètres des joueurs",True,pygame.Color("#000000")),(100,50))
+            self.fenetre.blit(self.police3.render("Paramètres des joueurs",True,pygame.Color("#000000")),(100,50))
             
             if len(dico_erreurs)!=0:
                 self.fenetre.blit(self.police2.render("ERREUR : Renseignez tous les champs!",True,self.COLOR_ERROR),(550,50))
@@ -711,7 +711,7 @@ class mine_hantee():
             self.fenetre.blit(self.fond_uni,(0,0))
             
             #titre de la fenêtre
-            self.fenetre.blit(police3.render("Paramètres avancés",True,pygame.Color("#000000")),(100,50))
+            self.fenetre.blit(self.police3.render("Paramètres avancés",True,pygame.Color("#000000")),(100,50))
             
             #affichage de l'éventuel message d'erreur 
             if len(dico_erreurs)!=0:
