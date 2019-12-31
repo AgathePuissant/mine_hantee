@@ -7,7 +7,7 @@ import pygame
 
 pygame.init()
 
-#Création de la police du jeu
+#définition de la police du jeu
 police = pygame.font.SysFont("calibri", 20, bold=True) #Load font object.
 police_small = pygame.font.SysFont("calibri", 17, bold=True) #Load font object.
 
@@ -21,16 +21,41 @@ police1=pygame.font.SysFont('calibri', 15)
 police2=pygame.font.SysFont('calibri', 25)
 police3=pygame.font.SysFont('calibri', 35)
 
-#code nécessaire pour créer des boutons associés à une action
 def text_objects(text, font):
     textSurface = font.render(text, True, pygame.Color("#000000"))
     return textSurface, textSurface.get_rect()
-    
-#definition des Boutons
 
 class Bouton:
+    """
+    Classe d'objets graphiques définissant les boutons d'action dans pyGame. 
+    Si l'utilisateur clique sur un bouton, alors l'action associée à ce bouton est déclenchée. 
+    
+    Comprend les méthodes :
+        - initialisation : permet d'attribuer aux boutons de la classe leurs 
+        caractéristiques graphiques.
+        - handle_event : prend en entrée un évènement pyGame, une action et son éventuel paramètre.
+        Traite l'évènement donné en entrée, actualise les caractéristiques graphiques du bouton,
+        et déclenche l'action si nécessaire.
+        - draw : prend en entrée la fenêtre pyGame et dessine le bouton dans la fenêtre. 
+    """
     
     def __init__(self, x, y, w, h, text=''):
+        """
+        Prend en entrée : 
+            - x : abscisse du coin en haut à gauche du rectangle du bouton (float).
+            - y : ordonnée du coin en haut à gauche du rectangle du bouton (float).
+            - w : largeur du rectangle du bouton (float).
+            - h : hauteur du rectangle du bouton (float).
+            - text : texte du bouton (string). 
+        
+        Initialise les attributs suivants :
+            - rect : rectangle du bouton (rectangle, objet graphique pyGame).
+            - color : couleur (color, objet graphique pyGame). 
+            - text : texte du bouton (string).
+            - txt_surface : surface graphique du texte du bouton (surface, objet graphique pyGame).
+            - active : état d'activité du bouton (booléen).
+        """
+        
         self.rect = pygame.Rect(x, y, w, h)
         self.color = COLOR_INACTIVE
         self.text = text
@@ -38,7 +63,18 @@ class Bouton:
         self.active = False
     
     def handle_event(self, event, action, parametre_action=None):
+        """
+        Méthode permettant de gérer, pour le bouton, les évenements pyGame 
+        lors de l'utilisation de l'ordinateur par l'utilisateur. 
         
+        Prend en entrée : 
+            - event : 
+            - action : 
+            - parametre_action : 
+        
+        Renvoie :
+        
+        """
         mouse = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
         #si la souris se trouve au dessous du bouton, on l'active et on change la couleur
