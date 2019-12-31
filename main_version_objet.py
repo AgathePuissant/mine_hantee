@@ -260,18 +260,12 @@ class mine_hantee():
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
         
                             
-                    #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
-                    joueur.cartes_explorees = [carte_actuelle]
-                    joueur.capture_fantome = False
-                    
-                    if self.dico_stop["test_carte"]==False and self.dico_stop["test_entree"]==False and self.dico_stop["rester_jeu"]==False:
-                        break
-                
                 else:
                     if joueur.niveau == 1:
                         IA = IA_simple(j,self.plateau_jeu, output_type="alea")
                     elif joueur.niveau == 2:
                         IA = IA_simple(j,self.plateau_jeu, output_type="single")
+                        
                     coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
     
                     #On tourne la carte
@@ -298,7 +292,15 @@ class mine_hantee():
                         pygame.event.pump()
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                     
-    
+         
+                #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
+                joueur.cartes_explorees = [carte_actuelle]
+                joueur.capture_fantome = False
+                
+                if self.dico_stop["test_carte"]==False and self.dico_stop["test_entree"]==False and self.dico_stop["rester_jeu"]==False:
+                    break
+            
+
                 
     
     def afficher_commandes(self,debut=False) :
