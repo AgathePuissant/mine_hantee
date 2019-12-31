@@ -30,7 +30,7 @@ mode_joueur_4=manuel
 #Niveaux des joueurs automatiques (4 joueurs automatiques au maximum)
 niveau_ia_1=3
 niveau_ia_2=1
-niveau_ia_3=1
+niveau_ia_3=2
 niveau_ia_4=1
 
 #Peudos des joueurs (4 joueurs au maximum)
