@@ -440,6 +440,7 @@ class plateau(object):
         """
 
         carte_depart=self.dico_joueurs[id_joueur].carte_position
+        retour=[]
             
         #On stocke les coordonnées de la carte où on veut aller
         if key == 274: #bas
@@ -456,7 +457,7 @@ class plateau(object):
         
         #On vérifie qu'on ne fonce pas dans une extrêmité du plateau
         if nv_coord[0]<0 or nv_coord[1]<0 or nv_coord[0]>=self.N or nv_coord[1]>=self.N :
-            retour = "Ce déplacement est impossible."
+            retour.append("Ce déplacement est impossible.")
         else :
             #On retrouve la carte associée aux nouvelles coordonnées
             for i in self.dico_cartes.values():
@@ -469,17 +470,17 @@ class plateau(object):
             if nv_carte in cartes_accessibles:
                 #On vérifie que le joueur n'est pas déjà passé par cette carte pendant ce tour
                 if nv_carte in self.dico_joueurs[id_joueur].cartes_explorees:
-                    retour = "Cette case a déjà été explorée."
+                    retour.append("Cette case a déjà été explorée.")
                 
                 else:
                     self.dico_joueurs[id_joueur].carte_position = nv_carte #On déplace le joueur
                     self.dico_joueurs[id_joueur].cartes_explorees.append(nv_carte)
                     retour = nv_carte
             else:
-                retour = "Ce déplacement est impossible."
+                retour.append("Ce déplacement est impossible.")
                 
 
-        return [retour]
+        return retour
     
     
     def compte_points(self,id_joueur,nv_carte):
