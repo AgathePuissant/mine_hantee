@@ -188,7 +188,7 @@ class mine_hantee():
                                         
         
                             elif event.type == KEYDOWN and event.key == K_SPACE :
-                                pause()
+                                self.pause()
                             
                             elif event.type == QUIT:
                                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
@@ -255,9 +255,9 @@ class mine_hantee():
                 
                 else:
                     if joueur.niveau == 1:
-                        IA = IA_debutant(j,plateau_test)
+                        IA = IA_debutant(j,self.plateau_test)
                     elif joueur.niveau == 2:
-                        IA = IA_simple(j,plateau_test)
+                        IA = IA_simple(j,self.plateau_test)
                     coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
     
                     #On tourne la carte
@@ -328,19 +328,19 @@ class mine_hantee():
                     
             self.fenetre.blit(self.fond_uni,(0,0))
         
-            self.fenetre.blit(police.render("Pause",True,pygame.Color("#000000")),(600,200))
+            self.fenetre.blit(self.police.render("Pause",True,pygame.Color("#000000")),(600,200))
                                                                  
             sauvegarder_button.draw(self.fenetre)
             retour_menu_button.draw(self.fenetre)
                                       
-            self.fenetre.blit(police.render(texte_sauv,True,pygame.Color("#000000")),(550,550))
+            self.fenetre.blit(self.police.render(texte_sauv,True,pygame.Color("#000000")),(550,550))
                                                                     
             pygame.display.flip() #Update l'écran
             
             for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
                 
-                sauvegarder_button.handle_event(event,sauvegarder)
-                retour_menu_button.handle_event(event,menu)
+                sauvegarder_button.handle_event(event,self.sauvegarder)
+                retour_menu_button.handle_event(event,self.menu)
                     
                 if event.type == KEYDOWN and event.key == K_SPACE :
                     self.dico_stop["pause"]=False
@@ -351,9 +351,41 @@ class mine_hantee():
     
                     
     def sauvegarder(self):
-
-        pickle.dump(plateau_test,open("sauvegarde "+str(self.num_partie),"wb"))
+        
+        pickle.dump(self.plateau_test,open("sauvegarde "+str(self.num_partie),"wb"))
         texte_sauv="Partie sauvegardée"
+        
+    def afficher_partie(self,num) :
+        
+        self.num_partie=num
+        
+        self.dico_stop["charger"]=False
+        self.dico_stop["aff_partie"]=True
+        
+        lancer_partie_button=Bouton(800,300,200,50,"Lancer la partie")
+        retour_menu_button=Bouton(500,300,200,50,"Retour au menu")
+        
+        self.fenetre.blit(police.render("Partie "+str(self.num_partie)+" sélectionnée",True,pygame.Color("#000000")),(800,100))
+        
+        pygame.display.flip() #Update l'écran                                
+                                        
+        while self.dico_stop["aff_partie"]==True :
+            
+            lancer_partie_button.draw(self.fenetre) 
+            retour_menu_button.draw(self.fenetre)
+            
+            pygame.display.flip() #Update l'écran
+            
+            for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+                
+                lancer_partie_button.handle_event(event,self.game)
+                
+                retour_menu_button.handle_event(event,self.menu)
+                
+                if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
+            
+    
         
     def afficher_partie(self,num) :
         
@@ -475,8 +507,8 @@ class mine_hantee():
             self.fenetre.blit(self.fond_uni,(0,0))
             
             #choix du nombre de joueurs 
-            self.fenetre.blit(police3.render("Nouvelle partie!",True,pygame.Color("#000000")),(485,100))
-            self.fenetre.blit(police3.render("Nombre de joueurs",True,pygame.Color("#000000")),(465,200))
+            self.fenetre.blit(self.police3.render("Nouvelle partie!",True,pygame.Color("#000000")),(485,100))
+            self.fenetre.blit(self.police3.render("Nombre de joueurs",True,pygame.Color("#000000")),(465,200))
             
             #dessin des boutons
             valider.draw(self.fenetre)  
@@ -599,7 +631,7 @@ class mine_hantee():
             self.fenetre.blit(self.fond_uni,(0,0))
             
             #paramètres des joueurs
-            self.fenetre.blit(police3.render("Paramètres des joueurs",True,pygame.Color("#000000")),(100,50))
+            self.fenetre.blit(self.police3.render("Paramètres des joueurs",True,pygame.Color("#000000")),(100,50))
             
             if len(dico_erreurs)!=0:
                 self.fenetre.blit(self.police2.render("ERREUR : Renseignez tous les champs!",True,self.COLOR_ERROR),(550,50))
@@ -744,7 +776,7 @@ class mine_hantee():
             self.fenetre.blit(self.fond_uni,(0,0))
             
             #titre de la fenêtre
-            self.fenetre.blit(police3.render("Paramètres avancés",True,pygame.Color("#000000")),(100,50))
+            self.fenetre.blit(self.police3.render("Paramètres avancés",True,pygame.Color("#000000")),(100,50))
             
             #affichage de l'éventuel message d'erreur 
             if len(dico_erreurs)!=0:
