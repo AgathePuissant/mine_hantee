@@ -298,7 +298,16 @@ class mine_hantee():
                         pygame.event.pump()
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                     
-    
+        if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
+            
+            self.fin_du_jeu([[j.nom for j in self.plateau_jeu.dico_joueurs],[j.points for j in self.plateau_jeu.dico_joueurs]])
+            
+    def fin_du_jeu(self,scores) :
+        
+        self.fenetre.blit(self.fond_uni,0,0)
+        
+        for i in range(len(scores)) :
+            self.fenetre.blit(self.police3.render("Score du joueur "+str(scores[0][i])+" : "+str(scores[1][i]),False,pygame.Color("#000000")),(700,200+i*100))
                 
     
     def afficher_commandes(self,debut=False) :
