@@ -129,60 +129,21 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
                         
                 dico_heuristique[(k,i,m)] = heuristique
     
-
-    #On créé une liste des heuristiques triée
-    heur_triees = [v for k, v in sorted(dico_heuristique.items(), key=lambda item: item[1])]
-    #On cherche les 5 valeurs d'heuristiques maximales si il y a au moins 5 valeurs
-    #différentes
-    max_heur = []
-    j=0
-    while j<len(heur_triees) and len(max_heur)<5:
-        if heur_triees[len(heur_triees)-j-1] not in max_heur :
-            max_heur.append(heur_triees[len(heur_triees)-j-1])
-        j += 1
-
     chemins_opti = []
     inser_opti = []
     orientation_opti = []
-    
-    #On trouve le/les chemin(s) correspondant aux 5 heuristiques maximales
-    for triplet in dico_heuristique.keys():
-        if dico_heuristique[triplet] in max_heur :
-            chemins_opti.append(chemins_possibles_total[triplet[0]][triplet[1]][triplet[2]])
-            #On trouve les coordonnées de l'insertion correspondant au chemin optimal trouvé
-            inser_opti.append(plateau.insertions_possibles[triplet[0]])
-            orientation_opti.append(triplet[1])
-            
-            
-    #Pour la sortie, 3 possibilités :
-    #Retourner un coup parmi les 5 ayant les meilleures heuristiques
-    if output_type=="alea":
-        #Les instances de cartes stockées dans les chemins possibles correspondent
-        #aux instances du plateau dupliqué, il faut donc retrouver les instances qui
-        #correspondent au vrai plateau utilisé
-        chemin_plateau = []
-    
-        rang = rd.randint(0,len(chemins_opti)-1)
-        for j in range(1,len(chemins_opti[rang])):
-            chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[rang][j].id])
-            
-        out=[inser_opti[rang], orientation_opti[rang],chemin_plateau]
 
-
-    #Ou retourner une liste contenant les coups des 5 meilleures heuristiques
-    elif output_type=="liste" :
-        #On recupere une liste de triplets inser_opti, orientation_opti, chemin_plateau
-        meilleurs_chemins=[]
-        for rang in range(len(chemins_opti)):
-            chemin_plateau=[]
-            for j in range(1,len(chemins_opti[rang])):
-                chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[rang][j].id])
-            meilleurs_chemins.append([orientation_opti[rang],inser_opti[rang],chemin_plateau])
-        out=meilleurs_chemins
+    if output_type == "single":
         
-    
-    #Ou bien retourner le coup correspondant à la meilleure heuristique
-    elif output_type == "single":
+        max_heur = max(dico_heuristique.values())
+        
+        for triplet in dico_heuristique.keys():
+            if dico_heuristique[triplet] == max_heur :
+                chemins_opti.append(chemins_possibles_total[triplet[0]][triplet[1]][triplet[2]])
+                #On trouve les coordonnées de l'insertion correspondant au chemin optimal trouvé
+                inser_opti.append(plateau.insertions_possibles[triplet[0]])
+                orientation_opti.append(triplet[1])
+        
         chemin_plateau = []
         #Si il n'y a qu'un seul chemin optimal, on le choisit
         if len(chemins_opti) == 1:
@@ -199,6 +160,58 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
             for j in range(1,len(chemins_opti[rang])):
                 chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[rang][j].id])
             out = [inser_opti[rang], orientation_opti[rang],chemin_plateau]
+            
+    else :
         
+        #On créé une liste des heuristiques triée
+        heur_triees = [v for k, v in sorted(dico_heuristique.items(), key=lambda item: item[1])]
+        #On cherche les 5 valeurs d'heuristiques maximales si il y a au moins 5 valeurs
+        #différentes
+        max_heur = []
+        j=0
+        while j<len(heur_triees) and len(max_heur)<5:
+            if heur_triees[len(heur_triees)-j-1] not in max_heur :
+                max_heur.append(heur_triees[len(heur_triees)-j-1])
+            j += 1
+    
         
+        #On trouve le/les chemin(s) correspondant aux 5 heuristiques maximales
+        for triplet in dico_heuristique.keys():
+            if dico_heuristique[triplet] in max_heur :
+                chemins_opti.append(chemins_possibles_total[triplet[0]][triplet[1]][triplet[2]])
+                #On trouve les coordonnées de l'insertion correspondant au chemin optimal trouvé
+                inser_opti.append(plateau.insertions_possibles[triplet[0]])
+                orientation_opti.append(triplet[1])
+                
+            
+        #Retourner un coup parmi les 5 ayant les meilleures heuristiques
+        if output_type=="alea":
+            #Les instances de cartes stockées dans les chemins possibles correspondent
+            #aux instances du plateau dupliqué, il faut donc retrouver les instances qui
+            #correspondent au vrai plateau utilisé
+            chemin_plateau = []
+        
+            rang = rd.randint(0,len(chemins_opti)-1)
+            for j in range(1,len(chemins_opti[rang])):
+                chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[rang][j].id])
+                
+            out=[inser_opti[rang], orientation_opti[rang],chemin_plateau]
+    
+    
+        #Ou retourner une liste contenant les coups des 5 meilleures heuristiques
+        elif output_type=="liste" :
+            #On recupere une liste de triplets inser_opti, orientation_opti, chemin_plateau
+            meilleurs_chemins=[]
+            for rang in range(len(chemins_opti)):
+                chemin_plateau=[]
+                for j in range(1,len(chemins_opti[rang])):
+                    chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[rang][j].id])
+                meilleurs_chemins.append([orientation_opti[rang],inser_opti[rang],chemin_plateau])
+            out=meilleurs_chemins
+        
+    
+    #Ou bien retourner le coup correspondant à la meilleure heuristique
     return(out)
+    
+# = plateau(3,['Elodie', 'Joueur2', 'Ordinateur3', 'zodj'],[0, 0, 1],7,{'dimensions_plateau': '7', 'nb_fantomes': '21', 'nb_joueurs': '3', 'mode_joueur_1': 'manuel', 'mode_joueur_2': 'manuel', 'mode_joueur_3': 'automatique', 'mode_joueur_4': 'manuel', 'niveau_ia_1': '3', 'niveau_ia_2': '1', 'niveau_ia_3': '1', 'niveau_ia_4': '1', 'pseudo_joueur_1': 'Elodie', 'pseudo_joueur_2': 'Joueur2', 'pseudo_joueur_3': 'Ordinateur3', 'pseudo_joueur_4': 'zodj', 'nb_fantomes_mission': '3', 'nb_joker': '1', 'points_pepite': '1', 'points_fantome': '5', 'points_fantome_mission': '20', 'bonus_mission': '40'})
+#print(IA_simple(2,plat,"liste"))
