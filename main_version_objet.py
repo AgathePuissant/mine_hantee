@@ -11,7 +11,7 @@ import numpy as np
 import random as rd
 import pickle
 import glob
-import copy
+import copy as copy
 import math
 from moviepy.editor import *
 from PodSixNet.Connection import ConnectionListener, connection
@@ -157,6 +157,7 @@ class mine_hantee():
                     
                     while self.dico_stop["test_carte"]!=False:
                         
+                        self.etape_jeu=joueur.nom+"_"+"inserer_carte"
                         etape="Tourner la carte avec R, cliquer pour insérer"
                         
                         for event in pygame.event.get():   
@@ -201,18 +202,24 @@ class mine_hantee():
                     #initialisation à la position du joueur
                     
                     carte_actuelle=joueur.carte_position
-                    
+                    joueur.cartes_explorees=[carte_actuelle]
                     cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
-                    
+                    self.etape_jeu=joueur.nom+"_"+"deplacement"
                     information=""
                     
                     #parcours des evenements
-                    while self.dico_stop["test_entree"]==True and len(cartes_accessibles)>0:#La 2e condition deconne a cause de cartes_accessibles
+                    #Tant que le joueur ne passe pas son tour et peut encore se deplacer
+                    while self.dico_stop["test_entree"]==True and len(cartes_accessibles)>0:
                         
                         etape="Déplacer avec les flèches, entrée pour finir"
                         
                         for event in pygame.event.get():
                             
+                            #Correction pour supprimer les cartes explorees des cartes accessibles
+                            for carte_ex in joueur.cartes_explorees:
+                                if carte_ex in cartes_accessibles:
+                                    cartes_accessibles.remove(carte_ex)
+                                    
                             afficher_commandes_button.handle_event(event,self.afficher_commandes)
                             
                             #deplacement
@@ -225,9 +232,13 @@ class mine_hantee():
                                         clip.preview()
                                 else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                                     information=deplace
+                                
+                                joueur.cartes_explorees.append(carte_actuelle)
                                 carte_actuelle=joueur.carte_position
                                 cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
                                 
+                            
+
                                 
                             #fin de tour
                             if event.type == KEYDOWN and (event.key== K_RETURN):
@@ -255,9 +266,9 @@ class mine_hantee():
                 
                 else:
                     if joueur.niveau == 1:
-                        IA = IA_debutant(j,self.plateau_jeu)
+                        IA = IA_simple(j,self.plateau_jeu, output_type="alea")
                     elif joueur.niveau == 2:
-                        IA = IA_simple(j,self.plateau_jeu)
+                        IA = IA_simple(j,self.plateau_jeu, output_type="single")
                     coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
     
                     #On tourne la carte
