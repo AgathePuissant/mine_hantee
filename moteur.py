@@ -164,6 +164,7 @@ class plateau(object):
         self.points_fantome=int(dico_parametres['points_fantome'])
         self.points_fantome_mission=int(dico_parametres['points_fantome_mission'])
         self.bonus_mission=int(dico_parametres['bonus_mission'])
+        self.etape_jeu=""
         
         positions_initiales = [] #cartes du milieu où se placent les joueurs en début de partie
         
