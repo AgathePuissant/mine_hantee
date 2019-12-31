@@ -863,6 +863,7 @@ class mine_hantee():
 
 
 mn = mine_hantee()
-print(mn.menu())
+
+mn.menu()
 
 pygame.quit()
