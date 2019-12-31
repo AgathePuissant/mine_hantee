@@ -5,6 +5,7 @@ FICHIER DE DEFINITION DES CLASSES DU MOTEUR DU JEU
 
 import numpy as np
 import random as rd
+import copy as copy
 
 class carte(object):
     """
@@ -163,6 +164,7 @@ class plateau(object):
         self.points_fantome=int(dico_parametres['points_fantome'])
         self.points_fantome_mission=int(dico_parametres['points_fantome_mission'])
         self.bonus_mission=int(dico_parametres['bonus_mission'])
+        self.etape_jeu=""
         
         positions_initiales = [] #cartes du milieu où se placent les joueurs en début de partie
         
@@ -440,6 +442,7 @@ class plateau(object):
         """
 
         carte_depart=self.dico_joueurs[id_joueur].carte_position
+        retour=[]
             
         #On stocke les coordonnées de la carte où on veut aller
         if key == 274: #bas
@@ -456,7 +459,7 @@ class plateau(object):
         
         #On vérifie qu'on ne fonce pas dans une extrêmité du plateau
         if nv_coord[0]<0 or nv_coord[1]<0 or nv_coord[0]>=self.N or nv_coord[1]>=self.N :
-            retour = "Ce déplacement est impossible."
+            retour.append("Ce déplacement est impossible.")
         else :
             #On retrouve la carte associée aux nouvelles coordonnées
             for i in self.dico_cartes.values():
@@ -469,17 +472,17 @@ class plateau(object):
             if nv_carte in cartes_accessibles:
                 #On vérifie que le joueur n'est pas déjà passé par cette carte pendant ce tour
                 if nv_carte in self.dico_joueurs[id_joueur].cartes_explorees:
-                    retour = "Cette case a déjà été explorée."
+                    retour.append("Cette case a déjà été explorée.")
                 
                 else:
                     self.dico_joueurs[id_joueur].carte_position = nv_carte #On déplace le joueur
                     self.dico_joueurs[id_joueur].cartes_explorees.append(nv_carte)
                     retour = nv_carte
             else:
-                retour = "Ce déplacement est impossible."
+                retour.append("Ce déplacement est impossible.")
                 
 
-        return [retour]
+        return retour
     
     
     def compte_points(self,id_joueur,nv_carte):
@@ -564,3 +567,172 @@ class plateau(object):
                     L_chemin_possibles=L_chemin_possibles+nouveaux_chemins
             
         return L_chemin_possibles
+    
+    
+    
+    
+    def partie_aleatoire(self, profondeur="fin"):
+        """"
+        Termine la partie du plateau ou l'avance de [profondeur] tours avec des coups aleatoires
+        """
+        #recuperer le tour et l'etape de jeu
+        if self.etape_jeu!="":
+            etape_jeu=self.etape_jeu
+            nom_joueur, etape=etape_jeu.split("_")
+        liste_noms=[truc.nom for truc in self.dico_joueurs.values()]
+        compteur=liste_noms.index(nom_joueur)
+        
+        #decompte des tours
+        tours=0
+        #Boucle du jeu. On joue tant qu'il reste des fantômes à attraper ou jusqu'a atteindre la profondeur cible
+        while self.id_dernier_fantome!=self.nbre_fantomes or tours==profondeur:
+            tours+=1
+                    
+            #Tours de jeu
+            #on parcours chaque joueur à chaque tours.
+            while compteur<len(self.dico_joueurs):
+                joueur=self.dico_joueurs[compteur]
+                
+                #On teste l'etape de jeu :
+                if etape=="inserer_carte":                
+                    #rotation de la carte : On tourne la carte 0 à 3 fois, aléatoirement
+                    rotations=rd.randint(0,3)
+                    for rot in range(rotations):
+                        self.carte_a_jouer.orientation[0],self.carte_a_jouer.orientation[1],self.carte_a_jouer.orientation[2],self.carte_a_jouer.orientation[3]=self.carte_a_jouer.orientation[3],self.carte_a_jouer.orientation[0],self.carte_a_jouer.orientation[1],self.carte_a_jouer.orientation[2]
+                            
+                    #ajouter la carte
+                    coord=rd.choice(self.insertions_possibles)
+                    self.deplace_carte(coord)
+                    etape="deplacement"                                                         
+                    
+                    if joueur.first_move==[]:
+                        joueur.first_move.append(rotations)
+                        joueur.first_move.append(coord)
+                if etape=="deplacement":
+                    #2e etape : Deplacement du joueur
+                    #initialisation à la position du joueur
+                    
+                    carte_actuelle=joueur.carte_position
+                    chemins=self.chemins_possibles(carte_actuelle)
+                    chemin=rd.choice(chemins)
+                    chemin.remove(carte_actuelle)
+                    
+                    #garder en memoire le 1er coup
+                    if len(joueur.first_move)==2:
+                        joueur.first_move.extend(chemin)
+                    for nv_carte in chemin:
+                        #deplacement
+                        joueur.carte_position = nv_carte 
+                        joueur.cartes_explorees.append(nv_carte)
+        
+                        #Si il y a une pépite sur la nouvelle carte, le joueur la ramasse
+                        if nv_carte.presence_pepite == True : 
+                            joueur.points += 1
+                            nv_carte.presence_pepite = False
+            
+                        #Si il y a un fantôme sur la nouvelle carte, le joueur le capture si c'est possible
+                        #i.e. si c'est le fantôme à capturer et s'il n'a pas encore capturé de fantôme pendant ce tour
+                        if nv_carte.id_fantome == self.id_dernier_fantome+1 and joueur.capture_fantome == False :
+                            #Si le fantôme est sur l'ordre de mission, le joueur gagne 20 points
+                            if nv_carte.id_fantome in joueur.fantome_target : 
+                                joueur.points += 20
+                                joueur.fantome_target.remove(nv_carte.id_fantome)
+                                #Si l'ordre de mission est totalement rempli, le joueur gagne 40 points
+                                if joueur.fantome_target==[]:
+                                    joueur.points += 40
+                            #Si le fantôme n'est pas sur l'ordre de mission, le joueur gagne 5 points
+                            else:
+                                joueur.points += 5
+                
+                            joueur.capture_fantome = True
+                            self.id_dernier_fantome += 1
+                            nv_carte.id_fantome = 0
+                    etape="inserer_carte"
+                            
+                #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
+                joueur.cartes_explorees = [carte_actuelle]
+                joueur.capture_fantome = False
+                compteur+=1
+            compteur=0
+            
+            
+            
+    def coups_possibles(self, joueur_id):
+        """
+        renvoie une liste des coups possibles pour un joueur, sous la forme :
+            list([nb_rotations, [coordonnees], chemin])
+        avec :
+            - nb_rotations le nombre de rotations de la carte à inserer (entier de 0 à 3)
+            - [coordonnees] un doublon donnant les coordonnees d'insertion de la carte
+            - chemin une liste de cartes correspondant à un deplacement possible
+        """
+        #copie du plateau pour pouvoir evaluer les coups possibles apres insertion de la carte
+        copie=copy.deepcopy(self)
+        liste_coups=[]
+        rotations=list(range(4))
+        coord_insertions=copie.insertions_possibles
+        #on boucle sur les rotations possibles, puis sur les coordonnees d'insertion possible
+        for rota in rotations:
+            liste1=[rota]
+            
+            for coord in coord_insertions:
+                #pour chaque rotation, on re-copie le plateau pour prendre en compte l'insertion de la carte
+                sub_copie=copy.deepcopy(copie)
+                liste2=liste1+[coord]
+                sub_copie.deplace_carte(coord)
+                joueur=sub_copie.dico_joueurs[joueur_id]
+                carte_actuelle=joueur.carte_position
+                chemins=sub_copie.chemins_possibles(carte_actuelle)
+                #finalement on recupere les deplacements possibles
+                for chemin in chemins:
+                    chemin.remove(carte_actuelle)
+                    liste3=liste2+[chemin]
+                    liste_coups.append(liste3)
+        return(liste_coups)
+        
+    
+    def joue_coup(self, coup, id_joueur):
+        """
+        joue un coup sous forme [orientation, coordonnées, deplacement] avec :
+            - orientation entier correspondant à l'orientation de la carte à inserer
+            - coordonnées les coordonnées d'insertion de la carte : list(int,int)
+            - deplacement une liste d'objets cartes non séparés par un mur
+        """
+        #recuperer les inputs
+        rotations, coord, chemin=coup
+        joueur=self.dico_joueurs[id_joueur]
+        
+        #tourner la carte
+        for rot in range(int(rotations)):
+            self.carte_a_jouer.orientation[0],self.carte_a_jouer.orientation[1],self.carte_a_jouer.orientation[2],self.carte_a_jouer.orientation[3]=self.carte_a_jouer.orientation[3],self.carte_a_jouer.orientation[0],self.carte_a_jouer.orientation[1],self.carte_a_jouer.orientation[2]
+        #inserer la carte
+        self.deplace_carte(coord)
+        
+        
+        #deplacer le joueur
+        for nv_carte in chemin:
+                joueur.carte_position = nv_carte 
+                joueur.cartes_explorees.append(nv_carte)
+    
+                #Si il y a une pépite sur la nouvelle carte, le joueur la ramasse
+                if nv_carte.presence_pepite == True : 
+                    joueur.points += 1
+                    nv_carte.presence_pepite = False
+    
+                #Si il y a un fantôme sur la nouvelle carte, le joueur le capture si c'est possible
+                #i.e. si c'est le fantôme à capturer et s'il n'a pas encore capturé de fantôme pendant ce tour
+                if nv_carte.id_fantome == self.id_dernier_fantome+1 and joueur.capture_fantome == False :
+                    #Si le fantôme est sur l'ordre de mission, le joueur gagne 20 points
+                    if nv_carte.id_fantome in joueur.fantome_target : 
+                        joueur.points += 20
+                        joueur.fantome_target.remove(nv_carte.id_fantome)
+                        #Si l'ordre de mission est totalement rempli, le joueur gagne 40 points
+                        if joueur.fantome_target==[]:
+                            joueur.points += 40
+                    #Si le fantôme n'est pas sur l'ordre de mission, le joueur gagne 5 points
+                    else:
+                        joueur.points += 5
+        
+                    joueur.capture_fantome = True
+                    self.id_dernier_fantome += 1
+                    nv_carte.id_fantome = 0
