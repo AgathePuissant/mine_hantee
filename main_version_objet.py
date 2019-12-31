@@ -356,13 +356,48 @@ class mine_hantee():
         texte_sauv="Partie sauvegardée"
     
         
+    def afficher_partie(self,num) :
+        
+        self.num_partie=num
+        
+        self.dico_stop["charger"]=False
+        self.dico_stop["aff_partie"]=True
+        
+        lancer_partie_button=Bouton(800,300,200,50,"Lancer la partie")
+        retour_menu_button=Bouton(500,300,200,50,"Retour au menu")
+        
+        self.fenetre.blit(police.render("Partie "+str(self.num_partie)+" sélectionnée",True,pygame.Color("#000000")),(800,100))
+        
+        pygame.display.flip() #Update l'écran                                
+                                        
+        while self.dico_stop["aff_partie"]==True :
+            
+            lancer_partie_button.draw(self.fenetre) 
+            retour_menu_button.draw(self.fenetre)
+            
+            pygame.display.flip() #Update l'écran
+            
+            for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+                
+                lancer_partie_button.handle_event(event,self.game)
+                
+                retour_menu_button.handle_event(event,self.menu)
+                
+                if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
+            
+    
+        
     def charger_partie(self):
         #global fenetre,liste_sauv,num_partie,retour_partie,dico_stop
         
         self.dico_stop["charger"]=True
-        retour_partie=False
-        lancer_partie_button=Bouton(800,300,200,50,"Lancer la partie")
         retour_menu_button=Bouton(500,300,200,50,"Retour au menu")
+        
+        if self.liste_sauv!=[] :
+            boutons_charger_partie=[]
+            for i in range(len(self.liste_sauv)) :
+                boutons_charger_partie.append(Bouton(500,100+i*100,200,50,"Partie "+str(self.liste_sauv[i])))
             
         while self.dico_stop["charger"] ==True:
                     
@@ -372,25 +407,24 @@ class mine_hantee():
                 self.fenetre.blit(self.fond_uni,(0,0))  #On colle le fond du menu
                 
                 for i in range(len(self.liste_sauv)) :
-                    button_charger_partie(self.fenetre,"Partie "+str(self.liste_sauv[i]),500,100+i*100,200,50,pygame.Color("#b46503"),pygame.Color("#d09954"),self.liste_sauv[i])
-                
-                if retour_partie==True :
-                    self.fenetre.blit(self.police.render("Partie "+str(self.num_partie)+" sélectionnée",True,pygame.Color("#000000")),(800,100))
-                    lancer_partie_button.draw(self.fenetre)                                                    
+                    boutons_charger_partie[i].draw(self.fenetre)
+                                                                      
             else :
                 
                 self.fenetre.blit(self.fond_uni,(0,0))  #On colle le fond du menu
-                self.fenetre.blit(self.police.render("Aucune partie sauvegardee",True,pygame.Color("#000000")),(450,100))
-                retour_menu_button.draw(self.fenetre)
+                self.fenetre.blit(police.render("Aucune partie sauvegardée",True,pygame.Color("#000000")),(450,100))
+            
+            retour_menu_button.draw(self.fenetre)
                 
             pygame.display.flip() #Update l'écran
             
             for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
                 
-                if retour_partie==True :
-                    lancer_partie_button.handle_event(event,self.game)
-                else :
-                    retour_menu_button.handle_event(event,self.menu)
+                if self.liste_sauv!=[] :
+                    for i in range(len(self.liste_sauv)) :
+                        boutons_charger_partie[i].handle_event(event,self.afficher_partie,i+1)
+                
+                retour_menu_button.handle_event(event,self.menu)
                 
                 if event.type == QUIT:     #Si un de ces événements est de type QUIT
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
