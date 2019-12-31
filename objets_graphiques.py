@@ -22,6 +22,19 @@ police2=pygame.font.SysFont('calibri', 25)
 police3=pygame.font.SysFont('calibri', 35)
 
 def text_objects(text, font):
+    """
+    Fonction renvoyant, pour un texte et une police donnés, les objets graphiques pyGame correspondants. 
+    Ces objets graphiques peuvent ensuite être utilisés pour dessiner le texte dans une fenêtre. 
+    
+    Prend en entrée :
+        - text : texte à dessiner dans une fenêtre (string).
+        - font : police du texte (police, objet graphique pyGame). 
+    
+    Renvoie : 
+        - textSurface : surface graphique du texte (surface, objet graphique pyGame).
+        - textSurface.get_rect() : rectangle délimitant la surface graphique du texte (rectangle, objet graphique pyGame). 
+    """
+    
     textSurface = font.render(text, True, pygame.Color("#000000"))
     return textSurface, textSurface.get_rect()
 
@@ -65,16 +78,19 @@ class Bouton:
     def handle_event(self, event, action, parametre_action=None):
         """
         Méthode permettant de gérer, pour le bouton, les évenements pyGame 
-        lors de l'utilisation de l'ordinateur par l'utilisateur. 
+        associés à l'utilisation de l'ordinateur par l'utilisateur. 
         
         Prend en entrée : 
-            - event : 
-            - action : 
-            - parametre_action : 
+            - event : évènement pyGame (event).
+            - action : action à exécuter lorsque l'utilisateur clique sur le bouton (fonction). 
+            - parametre_action : paramètre de l'action à exécuter (int, float ou booléen). 
         
-        Renvoie :
+        Actualise, en fonction de l'évènement d'entrée, l'état d'activité du bouton et sa couleur. 
+        Lorsque que la souris de l'utilisateur se trouve au-dessus du bouton, celui-ci est actif et change de couleur.
         
+        Délenche l'action si l'utilisateur clique sur le bouton. 
         """
+        
         mouse = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
         #si la souris se trouve au dessous du bouton, on l'active et on change la couleur
@@ -96,6 +112,15 @@ class Bouton:
             self.color=COLOR_INACTIVE
     
     def draw(self, fenetre):
+        """
+        Méthode permettant de dessiner le bouton dans la fenêtre. 
+        
+        Prend en entrée : 
+            - fenetre : fenetre dans laquelle le bouton est dessiné (fenetre pyGame).
+        
+        Dessine le rectangle associé au bouton ainsi que son texte dans la fenêtre. 
+        """
+        
         # Blit le rectangle. 
         pygame.draw.rect(fenetre, self.color, self.rect)
         # Blit le texte.
