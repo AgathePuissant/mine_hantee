@@ -59,6 +59,7 @@ class mine_hantee():
         if hasattr(mine_hantee, 'dico_stop') == False: 
             self.dico_stop={"intro" : True}
         elif any(value == True for value in self.dico_stop.values()):
+            self.dico_stop = dict.fromkeys(self.dico_stop, False)
             self.dico_stop["intro"]=True
         else :
             self.dico_stop = dict.fromkeys(self.dico_stop, False)
@@ -302,21 +303,41 @@ class mine_hantee():
             
             self.fin_du_jeu([[j.nom,j.points] for j in self.plateau_jeu.dico_joueurs])
             
+            
+            
     def fin_du_jeu(self,scores) :
+        
+        self.dico_stop = dict.fromkeys(self.dico_stop, False)
+        self.dico_stop["fin"]=True
         
         def getKey(elem):
             return elem[1]
         
         scores.sort(key=getKey,reverse=True)
         
-        self.fenetre.blit(self.fond_uni,0,0)
+        self.fenetre.blit(self.fond_uni,(0,0))
         
-        self.fenetre.blit(self.police3.render(scores[0][0]+" a gagné!",False,pygame.Color("#000000")),(700,100))
+        self.fenetre.blit(self.police3.render(scores[0][0]+" a gagné!",False,pygame.Color("#000000")),(500,100))
         
+        retour_menu_button=Bouton(500,600,200,50,"Retour au menu")
+        
+        retour_menu_button.draw(self.fenetre)
         
         for i in range(len(scores)) :
-            self.fenetre.blit(self.police3.render("Score du joueur "+str(scores[i][0])+" : "+str(scores[i][1]),False,pygame.Color("#000000")),(700,200+i*100))
+            self.fenetre.blit(self.police3.render("Score du joueur "+str(scores[i][0])+" : "+str(scores[i][1]),False,pygame.Color("#000000")),(500,200+i*100))
     
+        pygame.display.flip()
+        
+        while self.dico_stop["fin"]==True :
+            
+            for event in pygame.event.get() :
+                
+                retour_menu_button.handle_event(event,self.menu)
+                    
+                if event.type == pygame.QUIT :
+                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                    
+                    
     def afficher_commandes(self,debut=False) :
     
         self.dico_stop["comm"]=True
