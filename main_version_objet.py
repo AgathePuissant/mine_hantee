@@ -95,7 +95,7 @@ class mine_hantee():
 
         #Initialisation d'une nouvelle partie ou chargement d'une ancienne partie
         if self.nouvelle==False :
-            self.plateau_test=pickle.load(open("sauvegarde "+str(self.num_partie),"rb"))
+            self.plateau_jeu=pickle.load(open("sauvegarde "+str(self.num_partie),"rb"))
             self.dico_stop["aff_partie"]=False
         elif self.nouvelle==True :
             #Création d'un nouveau plateau
@@ -117,7 +117,7 @@ class mine_hantee():
                     niveau='niveau_ia_'+str(joueur)
                     liste_niveaux=liste_niveaux+[int(dico_parametres[niveau])]
             
-            self.plateau_test=plateau(nb_joueurs,liste_noms,liste_niveaux,dimensions_plateau,dico_parametres)
+            self.plateau_jeu=plateau(nb_joueurs,liste_noms,liste_niveaux,dimensions_plateau,dico_parametres)
             
         else :
             pass
@@ -126,7 +126,7 @@ class mine_hantee():
         
         afficher_commandes_button=Bouton(725,5,150,40,"Commandes")
     
-        N = self.plateau_test.N
+        N = self.plateau_jeu.N
         
         
         self.dico_stop["rester_jeu"]=True
@@ -135,18 +135,18 @@ class mine_hantee():
         
         
         #Boucle du jeu. On joue tant qu'il reste des fantômes à attraper
-        while self.plateau_test.id_dernier_fantome!=self.plateau_test.nbre_fantomes and self.dico_stop["rester_jeu"]==True:
+        while self.plateau_jeu.id_dernier_fantome!=self.plateau_jeu.nbre_fantomes and self.dico_stop["rester_jeu"]==True:
     
             #Tours de jeu
             #on parcours chaque joueur à chaque tours.
-            for j in self.plateau_test.dico_joueurs :
+            for j in self.plateau_jeu.dico_joueurs :
                 
                 information="" #Initialisation du texte d'erreur
                 etape=""
                 
-                joueur=self.plateau_test.dico_joueurs[j]
+                joueur=self.plateau_jeu.dico_joueurs[j]
     
-                actualise_fenetre(self.plateau_test,self.fenetre,joueur,information,afficher_commandes_button,etape)
+                actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
     
                 if joueur.niveau == 0 :
                     #premiere etape : rotation et insertion de la carte
@@ -165,7 +165,7 @@ class mine_hantee():
                             
                             #Si on appuie sur R, rotation de la carte à jouer
                             if event.type == KEYDOWN and event.key == K_r: 
-                                self.plateau_test.carte_a_jouer.orientation[0],self.plateau_test.carte_a_jouer.orientation[1],self.plateau_test.carte_a_jouer.orientation[2],self.plateau_test.carte_a_jouer.orientation[3]=self.plateau_test.carte_a_jouer.orientation[3],self.plateau_test.carte_a_jouer.orientation[0],self.plateau_test.carte_a_jouer.orientation[1],self.plateau_test.carte_a_jouer.orientation[2]
+                                self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
                             
                             #ajouter la carte lorsque l'utilisateur clique dans le plateau
                             
@@ -173,9 +173,9 @@ class mine_hantee():
                                 #clic gauche : insertion de la carte à jouer
                                 if event.button==1: 
         
-                                    coord=[int(math.floor(event.pos[1]/700*self.plateau_test.N)),int(math.floor(event.pos[0]/700*self.plateau_test.N))]
+                                    coord=[int(math.floor(event.pos[1]/700*self.plateau_jeu.N)),int(math.floor(event.pos[0]/700*self.plateau_jeu.N))]
                                     
-                                    test_inser=self.plateau_test.deplace_carte(coord)
+                                    test_inser=self.plateau_jeu.deplace_carte(coord)
                                    
                                     if test_inser==False :
                                         information=["Insertion impossible"]
@@ -193,7 +193,7 @@ class mine_hantee():
                             elif event.type == QUIT:
                                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
                                 
-                        actualise_fenetre(self.plateau_test,self.fenetre,joueur,information,afficher_commandes_button,etape)
+                        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                        
                                             
                                             
@@ -202,7 +202,7 @@ class mine_hantee():
                     
                     carte_actuelle=joueur.carte_position
                     
-                    cartes_accessibles=self.plateau_test.cartes_accessibles1(carte_actuelle)
+                    cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
                     
                     information=""
                     
@@ -217,16 +217,16 @@ class mine_hantee():
                             
                             #deplacement
                             if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
-                                deplace = self.plateau_test.deplace_joueur(j,event.key)
+                                deplace = self.plateau_jeu.deplace_joueur(j,event.key)
                                 if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
-                                    information=self.plateau_test.compte_points(j,deplace)
+                                    information=self.plateau_jeu.compte_points(j,deplace)
                                     #si le joueur capture un fantome, on lance l'animation de capture
                                     if joueur.capture_fantome == True :
                                         clip.preview()
                                 else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                                     information=deplace
                                 carte_actuelle=joueur.carte_position
-                                cartes_accessibles=self.plateau_test.cartes_accessibles1(carte_actuelle)
+                                cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
                                 
                                 
                             #fin de tour
@@ -243,7 +243,7 @@ class mine_hantee():
                                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
                                 
                         #Update l'écran                                                                
-                        actualise_fenetre(self.plateau_test,self.fenetre,joueur,information,afficher_commandes_button,etape)
+                        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
         
                             
                     #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
@@ -255,29 +255,29 @@ class mine_hantee():
                 
                 else:
                     if joueur.niveau == 1:
-                        IA = IA_debutant(j,self.plateau_test)
+                        IA = IA_debutant(j,self.plateau_jeu)
                     elif joueur.niveau == 2:
-                        IA = IA_simple(j,self.plateau_test)
+                        IA = IA_simple(j,self.plateau_jeu)
                     coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
     
                     #On tourne la carte
                     for i in range(orientation):
-                        self.plateau_test.carte_a_jouer.orientation[0],self.plateau_test.carte_a_jouer.orientation[1],self.plateau_test.carte_a_jouer.orientation[2],self.plateau_test.carte_a_jouer.orientation[3]=self.plateau_test.carte_a_jouer.orientation[3],self.plateau_test.carte_a_jouer.orientation[0],self.plateau_test.carte_a_jouer.orientation[1],self.plateau_test.carte_a_jouer.orientation[2]
+                        self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
                         pygame.time.wait(200)
-                        actualise_fenetre(self.plateau_test,self.fenetre,joueur,information,afficher_commandes_button,etape)
+                        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                      
-                    self.plateau_test.deplace_carte(coord_inser) #On l'insère
+                    self.plateau_jeu.deplace_carte(coord_inser) #On l'insère
                     pygame.time.wait(200)
-                    actualise_fenetre(self.plateau_test,self.fenetre,joueur,information,afficher_commandes_button,etape)
+                    actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                     
     
                     information=""
                     for i in chemin :
                         joueur.carte_position = i
-                        information=self.plateau_test.compte_points(j,i)
+                        information=self.plateau_jeu.compte_points(j,i)
     
                         pygame.time.wait(200)
-                        actualise_fenetre(self.plateau_test,self.fenetre,joueur,information,afficher_commandes_button,etape)
+                        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                     
     
                 
@@ -352,7 +352,7 @@ class mine_hantee():
                     
     def sauvegarder(self):
         
-        pickle.dump(self.plateau_test,open("sauvegarde "+str(self.num_partie),"wb"))
+        pickle.dump(self.plateau_jeu,open("sauvegarde "+str(self.num_partie),"wb"))
         texte_sauv="Partie sauvegardée"
         
     def afficher_partie(self,num) :
