@@ -51,12 +51,12 @@ class mine_hantee():
         self.police2=pygame.font.SysFont('calibri', 25)
         self.police3=pygame.font.SysFont('calibri', 35)
         
-            
+        self.dico_stop={}
     
     def menu(self):
         
         #en cours de modification
-        if hasattr(mine_hantee, 'dico_stop') == False: 
+        if self.dico_stop=={} : 
             self.dico_stop={"intro" : True}
         elif any(value == True for value in self.dico_stop.values()):
             self.dico_stop = dict.fromkeys(self.dico_stop, False)
@@ -419,7 +419,7 @@ class mine_hantee():
         self.dico_stop["aff_partie"]=True
         
         lancer_partie_button=Bouton(800,300,200,50,"Lancer la partie")
-        retour_menu_button=Bouton(500,300,200,50,"Retour au menu")
+        retour=Bouton(400,300,300,50,"Sélectionner autre partie")
         
         self.fenetre.blit(police.render("Partie "+str(self.num_partie)+" sélectionnée",True,pygame.Color("#000000")),(800,100))
         
@@ -428,7 +428,7 @@ class mine_hantee():
         while self.dico_stop["aff_partie"]==True :
             
             lancer_partie_button.draw(self.fenetre) 
-            retour_menu_button.draw(self.fenetre)
+            retour.draw(self.fenetre)
             
             pygame.display.flip() #Update l'écran
             
@@ -436,47 +436,13 @@ class mine_hantee():
                 
                 lancer_partie_button.handle_event(event,self.game)
                 
-                retour_menu_button.handle_event(event,self.menu)
+                retour.handle_event(event,self.charger_partie)
                 
                 if event.type == QUIT:     #Si un de ces événements est de type QUIT
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
-            
-    
-        
-    def afficher_partie(self,num) :
-        
-        self.num_partie=num
-        
-        self.dico_stop["charger"]=False
-        self.dico_stop["aff_partie"]=True
-        
-        lancer_partie_button=Bouton(800,300,200,50,"Lancer la partie")
-        retour_menu_button=Bouton(500,300,200,50,"Retour au menu")
-        
-        self.fenetre.blit(police.render("Partie "+str(self.num_partie)+" sélectionnée",True,pygame.Color("#000000")),(800,100))
-        
-        pygame.display.flip() #Update l'écran                                
-                                        
-        while self.dico_stop["aff_partie"]==True :
-            
-            lancer_partie_button.draw(self.fenetre) 
-            retour_menu_button.draw(self.fenetre)
-            
-            pygame.display.flip() #Update l'écran
-            
-            for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
-                
-                lancer_partie_button.handle_event(event,self.game)
-                
-                retour_menu_button.handle_event(event,self.menu)
-                
-                if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
-            
-    
+
         
     def charger_partie(self):
-        #global fenetre,liste_sauv,num_partie,retour_partie,dico_stop
         
         self.dico_stop["charger"]=True
         retour_menu_button=Bouton(500,300,200,50,"Retour au menu")
