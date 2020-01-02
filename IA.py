@@ -208,6 +208,9 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
                     chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[rang][j].id])
                 meilleurs_chemins.append([orientation_opti[rang],inser_opti[rang],chemin_plateau])
             out=meilleurs_chemins
+            #reduire le nombre de coups testes
+            if len(out)>10:
+                out=rd.sample(out, 10)
         
     
     #Ou bien retourner le coup correspondant à la meilleure heuristique
