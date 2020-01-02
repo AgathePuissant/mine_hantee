@@ -9,7 +9,7 @@
 #####################################
 
 #Dimension du plateau (le plateau étant un carré, la longueur renseignée correspond à la fois à la longueur et à la largeur)
-dimensions_plateau=7
+dimensions_plateau=11
 
 #Nombre de fantômes
 nb_fantomes=21
@@ -25,7 +25,6 @@ nb_joueurs=3
 mode_joueur_1=manuel
 mode_joueur_2=manuel
 mode_joueur_3=automatique
-mode_joueur_4=manuel
 
 #Niveaux des joueurs automatiques (4 joueurs automatiques au maximum)
 niveau_ia_1=3
