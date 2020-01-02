@@ -574,6 +574,7 @@ class plateau(object):
     def partie_aleatoire(self, profondeur="fin"):
         """"
         Termine la partie du plateau ou l'avance de [profondeur] tours avec des coups aleatoires
+
         """
         #recuperer le tour et l'etape de jeu
         if self.etape_jeu!="":
@@ -594,7 +595,7 @@ class plateau(object):
                 joueur=self.dico_joueurs[compteur]
                 
                 #On teste l'etape de jeu :
-                if etape=="inserer_carte":                
+                if etape=="inserer-carte":                
                     #rotation de la carte : On tourne la carte 0 à 3 fois, aléatoirement
                     rotations=rd.randint(0,3)
                     for rot in range(rotations):
@@ -605,9 +606,7 @@ class plateau(object):
                     self.deplace_carte(coord)
                     etape="deplacement"                                                         
                     
-                    if joueur.first_move==[]:
-                        joueur.first_move.append(rotations)
-                        joueur.first_move.append(coord)
+
                 if etape=="deplacement":
                     #2e etape : Deplacement du joueur
                     #initialisation à la position du joueur
@@ -617,9 +616,7 @@ class plateau(object):
                     chemin=rd.choice(chemins)
                     chemin.remove(carte_actuelle)
                     
-                    #garder en memoire le 1er coup
-                    if len(joueur.first_move)==2:
-                        joueur.first_move.extend(chemin)
+
                     for nv_carte in chemin:
                         #deplacement
                         joueur.carte_position = nv_carte 
@@ -647,7 +644,7 @@ class plateau(object):
                             joueur.capture_fantome = True
                             self.id_dernier_fantome += 1
                             nv_carte.id_fantome = 0
-                    etape="inserer_carte"
+                    etape="inserer-carte"
                             
                 #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
                 joueur.cartes_explorees = [carte_actuelle]
