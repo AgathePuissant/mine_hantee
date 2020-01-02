@@ -142,6 +142,7 @@ class mine_hantee():
             #on parcours chaque joueur à chaque tours.
             for j in self.plateau_jeu.dico_joueurs :
                 
+                
                 information="" #Initialisation du texte d'erreur
                 etape=""
                 
@@ -158,7 +159,7 @@ class mine_hantee():
                     
                     while self.dico_stop["test_carte"]!=False:
                         
-                        self.etape_jeu=joueur.nom+"_"+"inserer_carte"
+                        self.plateau_jeu.etape_jeu=joueur.nom+"_"+"inserer-carte"
                         etape="Tourner la carte avec R, cliquer pour insérer"
                         
                         for event in pygame.event.get():   
@@ -205,7 +206,7 @@ class mine_hantee():
                     carte_actuelle=joueur.carte_position
                     joueur.cartes_explorees=[carte_actuelle]
                     cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
-                    self.etape_jeu=joueur.nom+"_"+"deplacement"
+                    self.plateau_jeu.etape_jeu=joueur.nom+"_"+"deplacement"
                     information=""
                     
                     #initialiser un marqueur pour l'animation de capture du fantôme
@@ -262,10 +263,18 @@ class mine_hantee():
         
                             
                 else:
+                    self.plateau_jeu.etape_jeu=joueur.nom+"_"+"inserer-carte"
+           
+                    
                     if joueur.niveau == 1:
                         IA = IA_simple(j,self.plateau_jeu, output_type="alea")
                     elif joueur.niveau == 2:
                         IA = IA_simple(j,self.plateau_jeu, output_type="single")
+                    elif joueur.niveau == 3:
+                        coups=IA_simple(j,self.plateau_jeu, output_type="liste")
+                        IA=IA_monte_carlo(self.plateau_jeu, j, 20, liste_coups=coups, profondeur=10)
+                        IA=IA[1],IA[0],IA[2]
+                        print(IA)
                         
                     coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
     
@@ -297,6 +306,7 @@ class mine_hantee():
                 #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
                 joueur.cartes_explorees = [carte_actuelle]
                 joueur.capture_fantome = False
+
                 
                 if self.dico_stop["test_carte"]==False and self.dico_stop["test_entree"]==False and self.dico_stop["rester_jeu"]==False:
                     break
