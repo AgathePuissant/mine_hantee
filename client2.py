@@ -94,7 +94,7 @@ class mine_hantee(ConnectionListener):
             
         dico_parametres = {'dimensions_plateau': '7', 'nb_fantomes': '21', 'nb_joueurs': '2', 'mode_joueur_1': 'manuel', 'mode_joueur_2': 'manuel', 'mode_joueur_3': 'manuel', 'mode_joueur_4': 'manuel', 'niveau_ia_1': '1', 'niveau_ia_2': '1', 'niveau_ia_3': '1', 'niveau_ia_4': '1', 'pseudo_joueur_1': joueur_0, 'pseudo_joueur_2': joueur_1, 'pseudo_joueur_3': '', 'pseudo_joueur_4': '', 'nb_fantomes_mission': '3', 'nb_joker': '1', 'points_pepite': '1', 'points_fantome': '5', 'points_fantome_mission': '20', 'bonus_mission': '40'}
         self.plateau_jeu=plateau(2,[joueur_0,joueur_1],[0,0],7,dico_parametres)
-        self.joueur_ent = self.plateau_jeu.dico_joueurs[joueur_id]
+        self.joueur_ent = self.plateau_jeu.dico_joueurs[self.joueur_id]
     
         
         
@@ -117,9 +117,37 @@ class mine_hantee(ConnectionListener):
             deplace = self.plateau_jeu.deplace_joueur(data["num"],data["event"])
             self.plateau_jeu.compte_points(data["num"],deplace)
 
+    def Network_victoire(self,data):
+        
+        self.dico_stop = dict.fromkeys(self.dico_stop, False)
+        self.dico_stop["fin"]=True
+        
+        self.fenetre.blit(self.fond_uni,(0,0))
+
+        self.fenetre.blit(self.police3.render("Vous avez gagné!",False,pygame.Color("#000000")),(500,100))
+        
+        for event in pygame.event.get() :
+                
+            if event.type == pygame.QUIT :
+                self.dico_stop = dict.fromkeys(self.dico_stop, False)
 
 
-    def affiche_plateau(plat,fenetre):
+    def Network_echec(self,data):
+        
+        self.dico_stop = dict.fromkeys(self.dico_stop, False)
+        self.dico_stop["fin"]=True
+        
+        self.fenetre.blit(self.fond_uni,(0,0))
+
+        self.fenetre.blit(self.police3.render("Vous avez perdu...",False,pygame.Color("#000000")),(500,100))
+        
+        for event in pygame.event.get() :
+                
+            if event.type == pygame.QUIT :
+                self.dico_stop = dict.fromkeys(self.dico_stop, False)
+
+
+    def affiche_plateau(self,plat,fenetre):
     
         #Création des images nécesssaires au plateau
         #fond = pygame.image.load("fond.jpg").convert()
@@ -227,7 +255,7 @@ class mine_hantee(ConnectionListener):
             fenetre.blit(pepite,(x,y))
                
                    
-    def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte):
+    def actualise_fenetre(self,plateau,fenetre,joueur,info,bouton,etape_texte):
         """
         fonction pour actualiser l'affichage dans la fonction jeu
         """
@@ -240,8 +268,11 @@ class mine_hantee(ConnectionListener):
                     fenetre.blit(police.render("Score : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(800,340+i*80+20))
                     fenetre.blit(police.render("Ordre de mission : "+str(sorted(plateau.dico_joueurs[i].fantome_target)),False,pygame.Color("#000000")),(800,340+i*80+40))
     
-                    #test texte pour afficher le joueur qui joue
-        fenetre.blit(police.render("C'est a "+str(self.joueur_ent.nom)+" de jouer",False,pygame.Color(0,0,0)),(800,240))
+        #test texte pour afficher le joueur qui joue
+        if self.turn:
+            fenetre.blit(police.render("C'est à vous de jouer",False,pygame.Color(0,0,0)),(800,240))
+        else:
+            fenetre.blit(police.render("C'est le tour de votre adversaire",False,pygame.Color(0,0,0)),(800,240))
      
         #affichage du message d'erreur
         for i in range(len(info)) :                       
@@ -262,7 +293,7 @@ class mine_hantee(ConnectionListener):
         information="" #Initialisation du texte d'erreur
         etape=""
         
-        self.afficher_commandes(debut=True)
+        #self.afficher_commandes(debut=True)
         afficher_commandes_button=Bouton(725,5,150,40,"Commandes")
         
         self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
@@ -273,7 +304,7 @@ class mine_hantee(ConnectionListener):
         self.dico_stop["test_entree"]=True
         
         
-        while self.dico_stop["test_carte"]!=False:
+        while self.dico_stop["test_carte"]!=False and self.turn:
             
             self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"inserer-carte"
             etape="Tourner la carte avec R, cliquer pour insérer"
@@ -330,7 +361,7 @@ class mine_hantee(ConnectionListener):
         premiere_capture=True
         #parcours des evenements
         #Tant que le joueur ne passe pas son tour et peut encore se deplacer
-        while self.dico_stop["test_entree"]==True and len(cartes_accessibles)>0:
+        while self.dico_stop["test_entree"]==True and len(cartes_accessibles)>0 and self.turn:
             
             etape="Déplacer avec les flèches, entrée pour finir"
             
@@ -385,45 +416,12 @@ class mine_hantee(ConnectionListener):
 
         if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
             
-            self.fin_du_jeu([[j.nom,j.points] for j in self.plateau_jeu.dico_joueurs])
-   
+            #self.fin_du_jeu([[j.nom,j.points] for j in self.plateau_jeu.dico_joueurs])
+            self.Send({"action": "fin", "gameid": self.gameid})
+            
 
-            
-    def fin_du_jeu(self,scores) :
-        
-        self.dico_stop = dict.fromkeys(self.dico_stop, False)
-        self.dico_stop["fin"]=True
-        
-        def getKey(elem):
-            return elem[1]
-        
-        scores.sort(key=getKey,reverse=True)
-        
-        self.fenetre.blit(self.fond_uni,(0,0))
-        
-        self.fenetre.blit(self.police3.render(scores[0][0]+" a gagné!",False,pygame.Color("#000000")),(500,100))
-        
-        retour_menu_button=Bouton(500,600,200,50,"Retour au menu")
-        
-        retour_menu_button.draw(self.fenetre)
-        
-        for i in range(len(scores)) :
-            self.fenetre.blit(self.police3.render("Score du joueur "+str(scores[i][0])+" : "+str(scores[i][1]),False,pygame.Color("#000000")),(500,200+i*100))
-    
-        pygame.display.flip()
-        
-        while self.dico_stop["fin"]==True :
-            
-            for event in pygame.event.get() :
-                
-                retour_menu_button.handle_event(event,self.menu)
-                    
-                if event.type == pygame.QUIT :
-                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
-                
-                
-                
-                    
+
+                 
     def afficher_commandes(self,debut=False) :
     
         self.dico_stop["comm"]=True
@@ -497,5 +495,9 @@ class mine_hantee(ConnectionListener):
 
 
 mn = mine_hantee()
-mn.game()
+while 1:
+    if mn.game()==1:
+        break
+mn.finished()
+
 
