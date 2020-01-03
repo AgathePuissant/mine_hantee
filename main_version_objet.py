@@ -14,8 +14,6 @@ import glob
 import copy as copy
 import math
 from moviepy.editor import *
-from PodSixNet.Connection import ConnectionListener, connection
-from time import sleep
 
 from moteur import *
 from objets_graphiques import *
