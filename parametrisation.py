@@ -92,6 +92,8 @@ def tests_max_inputs(dico):
                 'nb_joker': 10, 'points_pepite': 50, 'points_fantome': 200, 
                 'points_fantome_mission': 200, 'bonus_mission': 500}
     
+    dico_min={'nb_fantomes': int(dico['nb_joueurs'])*int(dico['nb_fantomes_mission']), 'nb_fantomes_mission':1}
+    
     dico_erreurs={}
     
     for cle_input in dico.keys():
@@ -101,6 +103,14 @@ def tests_max_inputs(dico):
             if cle_input==cle_max:
                 if int(dico[cle_input])>dico_max[cle_max]:
                     dico_erreurs[cle_input]='max'
+                    erreur='max'
+        
+        #on vérifie si les valeurs renseignées ne dépassent pas le minimum autorisé
+        for cle_min in dico_min:
+            if cle_input==cle_min:
+                if int(dico[cle_input])<dico_min[cle_min]:
+                    dico_erreurs[cle_input]='min'
+                    erreur='min'
                     
     if len(dico_erreurs)==0:
         dico['test_max']=False
@@ -110,7 +120,7 @@ def tests_max_inputs(dico):
         else:
             fonction_suivante(dico)
     else:
-        dico_erreurs['type']='max'
+        dico_erreurs['type']=erreur
         fonction_prec=dico['fonction_prec']
         fonction_prec(dico_erreurs)
                         
