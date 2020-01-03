@@ -25,6 +25,7 @@ nb_joueurs=3
 mode_joueur_1=manuel
 mode_joueur_2=manuel
 mode_joueur_3=automatique
+mode_joueur_4=automatique
 
 #Niveaux des joueurs automatiques (4 joueurs automatiques au maximum)
 niveau_ia_1=3
