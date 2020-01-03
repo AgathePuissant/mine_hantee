@@ -816,6 +816,8 @@ class mine_hantee():
                     self.fenetre.blit(self.police2.render("ERREUR : Renseignez tous les champs!",True,self.COLOR_ERROR),(550,50))
                 elif dico_erreurs['type']=='max':
                     self.fenetre.blit(self.police2.render("ERREUR : Renseignez une valeur plus petite",True,self.COLOR_ERROR),(550,50))
+                elif dico_erreurs['type']=='min':
+                    self.fenetre.blit(self.police2.render("ERREUR : Renseignez une valeur plus grande",True,self.COLOR_ERROR),(550,50))
             
             #dessin des boutons
             valider.draw(self.fenetre)  
