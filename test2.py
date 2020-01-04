@@ -12,11 +12,35 @@ import pickle
 import glob
 import copy
 import math
-
+from moviepy.editor import *
 
 class carte(object):
+    """
+    Classe décrivant une carte du plateau.
+    Comprend uniquement la méthode d'initialisation, permettant d'attribuer aux
+    attributs de la classe leurs valeurs.
+    """
     
     def __init__(self, ID, orientation, coord, deplacable=False, id_fantome = 0):
+        """
+        Prend en entrée :
+            - ID : identifiant de la carte (entier)
+            - orientation : description du type de carte et de son orientation, i.e.
+            liste de longueur 4 dont chaque élément correspond à un côté de la carte
+            et vaut 1 si un mur est présent, 0 sinon. Le premier élément correspond
+            au côté du haut, le deuxième au côté à droite et ainsi de suite (liste)
+            - coord : coordonnées de la carte sur le plateau, i.e. liste de 2
+            entiers correspondant à la ligne et la colonne de la carte (liste)
+            - deplacable : carte pouvant être déplacée (True) ou non (False) (booleen)
+            - id_fantome : identifiant du fantôme présent sur la carte. Vaut 0
+            si il n'y a pas de fantôme (entier)
+        
+        Initialise les attributs correspondant à ces éléments d'entrées ainsi que 
+        l'attribut :
+            - presence_pepite : présence d'une pépite sur la carte (True) ou 
+            non (False). L'attribut est initialisé à True, chaque carte
+            comportant une pépite en début de jeu (booleen).
+        """
         
         self.id = ID
         self.orientation = orientation
@@ -27,25 +51,115 @@ class carte(object):
         
         
 class joueur(object):
+    """
+    Classe décrivant un joueur du jeu.
+    Comprend uniquement la méthode d'initialisation, permettant d'attribuer aux
+    attributs de la classe leurs valeurs.
+    """
     
     def __init__(self, ID, nom, niveau, fantome_target, carte_position, nb_joker):
+        """
+        Prend en entrée : 
+             - ID : identifiant du joueur (entier)
+             - nom : pseudo du joueur, valant automatiquement Ordinateur{num de l'id}
+             si le joueur est un joueur automatique (chaîne de caractères)
+             - niveau : niveau du joueur automatique, 1 pour débutant, 2 pour
+             intermédiaire et 3 pour confirmé. Vaut 0 si le joueur est réel (entier)
+             - fantome_target : liste des id des fantômes présents sur l'ordre
+             de mission du joueur (liste)
+             - carte_position : carte sur laquelle le joueur est positionné sur 
+             le plateau (entité de la classe carte)
+             - nb_joker : nombre de jokers utilisables par le joueur (entier)
+        
+        Initialise les attributs correspondant à ces éléments d'entrées ainsi que 
+        les attributs :
+            - points : nombre de points gagnés par le joueur (entier)
+            - capture_fantome : vaut True si le joueur a déjà capturé un fantôme
+            pendant un tour donné, False sinon. Cet attribut est réinitialisé 
+            à False à chaque début de tour (booleen).
+            - cartes_explorées : liste des cartes déjà explorées par le joueur
+            pendant un tour donné. Cet attribut est réinitialisé à une liste
+            d'un élément comprenant la carte sur laquelle se trouve le joueur
+            à chaque début de tour (liste).    
+        """
+        
         self.id = ID
         self.nom = nom
         self.niveau = niveau
         self.fantome_target = fantome_target
         self.carte_position = carte_position
+        self.nb_joker=nb_joker
         self.points = 0
         self.cartes_explorees = [carte_position]
         self.capture_fantome = False
-        self.nb_joker=nb_joker
 
 
 class plateau(object):
     """
-    - seuls les N impairs sont acceptés
+    Classe décrivant le plateau de jeu et permettant de le modifier.
+    
+    Comprend les méthodes :
+        - initialisation : permet d'attribuer aux attributs de la classe leurs 
+        valeurs et de créer les entités de carte et joueur nécessaires 
+        pour le jeu.
+        - deplace_carte : prend en entrée des coordonnées d'insertion, modifie
+        les positions des cartes sur le plateau selon ces coordonnées et la 
+        carte insérée, et actualise la carte hors du plateau.
+        - carte_accessibles : prend en entrée une carte du plateau et renvoie
+        la liste des cartes accessibles à partir de la carte d'entrée.
+        - deplace_joueur : prend en entrée l'identifiant d'un joueur et un input
+        directionnel et déplace le joueur sur le plateau selon l'input si c'est 
+        possible
+        - compte_points : prend en entrée l'identifiant d'un joueur et la nouvelle
+        carte sur laquelle il se trouve, actualise les points du joueur selon
+        ce qui se trouve sur la nouvelle carte, et actualise la carte.
+        - chemins_possibles : prend en entrée une carte du plateau et renvoie 
+        tous les chemins possibles à partir de cette carte pour une configuration
+        du plateau donnée. 
     """
+    
     def __init__(self, nb_joueurs, liste_noms, liste_niveaux, N, dico_parametres):
+        """
+        Prend en entrée : 
+            - nb_joueurs : nombre de joueurs total de la partie (entier)
+            - liste_noms : liste des pseudos choisis par les joueurs réels (entier)
+            - liste_niveaux : liste des niveaux choisis pour les joueurs 
+            automatiques (entier)
+            - N : dimension du plateau (le plateau fait NXN cases). Ne peut prendre
+            que les valeurs 7+n*5 avec n entier positif (entier).
+            - dico_parametres : dictionnaire des paramètres choisis par l'utilisateur
+            au début de la partie. Contient notamment le nombre de points qu'une 
+            pépite ou qu'un fantôme (sur l'ordre de mission ou non) rapporte,
+            le nombre de points que rapporte un ordre de mission complet, le 
+            nombre de fantômes présents sur le plateau (dictionnaire).
         
+        Initialise les attributs correspondant à ces éléments d'entrées ainsi que 
+        les attributs :
+            - position : matrice symbolisant le plateau et dont la valeur pour
+            chaque coordonnées (ligne, colonne) correspond à l'identifiant de la 
+            carte présente à ces coordonnées sur le plateau (array).
+            - dico_cartes : dictionnaire des cartes de jeu dont les clés sont 
+            les identifiants des cartes et les valeurs l'entité de classe carte
+            correspondante (dictionnaire)
+            - dico_joueurs : dictionnaire des joueurs de jeu dont les clés sont 
+            les identifiants des joueurs et les valeurs l'entité de classe joueur
+            correspondante (dictionnaire)
+            - insertions_possibles : ensemble des coordonnées où les cartes 
+            peuvent être insérées sur le plateau (liste).
+        
+        Crée les entités de classe carte, leur nombre dépendant de la dimension 
+        du plateau. 
+        On attribut aux cartes fixes leur localisation, leur type et leur orientation,
+        et on place les cartes déplaçables aléatoirement sur le reste du plateau. 
+        Une certaine proportion de chaque type de cartes déplaçables est créé 
+        (selon les proportions données dans l'énoncé pour N=7) et leur orientation 
+        est également assignée aléatoirement. 
+        
+        Place aléatoirement les fantômes sur le plateau. 
+        
+        Créé les entités de classe joueur en fonction des paramètres d'entrée.
+        """
+    
         self.N = N
         self.position=np.zeros([N,N])
         self.id_dernier_fantome=0
@@ -71,12 +185,14 @@ class plateau(object):
         pool3=[rd.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) for i in range(int(nb_deplacable*6/34))]
         pool=pool1+pool2+pool3
         
-        #Pool des id des fantômes à placer sur le plateau
+        #Pool du placement des fantomes 
         self.nbre_fantomes = int(dico_parametres['nb_fantomes'])
         nb_max_fant=(N-2)*(N//2)+(N//2)*(N//2-1)
-        pas_fant=nb_max_fant//self.nbre_fantomes
-        print('pas_fant',pas_fant)
-        compte_pas=1
+        pos_fant=range(nb_max_fant)
+        pool_pos_fant=rd.sample(pos_fant,self.nbre_fantomes)
+        compt=0
+        
+        #Pool des id des fantômes à placer sur le plateau
         pool_fantomes = [i for i in range(1,self.nbre_fantomes+1)]
         pool_fantomes = np.random.permutation(pool_fantomes)
         
@@ -138,12 +254,10 @@ class plateau(object):
                     #Elle accueille un fantome
                     if ligne>0 and ligne<N-1 and colonne>0 and colonne<N-1:
                         if compte_fantomes<self.nbre_fantomes:
-                            if compte_pas==pas_fant:
+                            if compt in pool_pos_fant:
                                 id_fantome=pool_fantomes[compte_fantomes]
                                 compte_fantomes += 1
-                                compte_pas=1
-                            else:
-                                compte_pas+=1
+                            compt += 1
                     #si la carte fait partie de la couronne extérieure et qu'elle est déplaçable, 
                     #on ajoute ses coordonnées aux coordonnées à la liste des insertions possibles. 
                     elif ligne==0 or ligne==N-1 or colonne==0 or colonne==N-1:
@@ -181,6 +295,15 @@ class plateau(object):
     
         
     def deplace_carte(self,coord) :
+        """
+        Méthode permettant de modifier les positions des cartes sur le plateau 
+        lors de l'insertion d'une carte et d'actualiser la carte hors du plateau.
+        
+        Prend en entrée :
+            - coord : coordonnées où la carte est insérée (liste).
+            
+        Renvoie True si la carte a pu être insérée, False sinon.
+        """
         
         x=coord[0]
         y=coord[1]
@@ -260,8 +383,17 @@ class plateau(object):
         
     def cartes_accessibles1(self,carte):
         """
-        carte=carte de la position pour laquelle on veut trouver les cartes accessibles
+        Méthode permettant de trouver les cartes accessibles à partir d'une 
+        carte donnée.
+        
+        Prend en entrée :
+            - carte : carte de laquelle on évalue les cartes accessibles (entité
+            de classe carte)
+            
+        Renvoie la liste des entités de carte qui sont accessibles à partir de 
+        la carte d'entrée.
         """
+        
         cartes_accessibles=[] #liste des entitÃ©s des cartes accessibles
         coord=carte.coord
                     
@@ -302,6 +434,18 @@ class plateau(object):
     
     
     def deplace_joueur(self,id_joueur,key):
+        """
+        Méthode qui permet de déplacer un joueur sur le plateau.
+        
+        Prend en entrée :
+             - id_joueur : identifiant du joueur à déplacer (entier)
+             - key : input directionnel informant sur le déplacement à effectuer
+        
+        Renvoie l'entité de la nouvelle carte sur laquelle se trouve le joueur
+        si le déplacement a été effectué, l'explication de pourquoi le déplacement
+        n'a pas pu être fait sous forme de string sinon (liste)
+        
+        """
 
         carte_depart=self.dico_joueurs[id_joueur].carte_position
             
@@ -342,12 +486,23 @@ class plateau(object):
             else:
                 retour = "Ce déplacement est impossible."
                 
-        #retour=' et '.join(retour)
 
-        return retour
+        return [retour]
     
     
     def compte_points(self,id_joueur,nv_carte):
+        """
+        Méthode qui permet d'actualiser les points d'un joueur selon la carte
+        sur laquelle il se trouve et les objets présents sur cette carte.
+        
+        Prend en entrée :
+             - id_joueur : identifiant du joueur considéré (entier)
+             - nv_carte : nouvelle carte sur laquelle il se trouve (entité de
+             classe carte)
+             
+        Renvoie une liste de chaînes de caractère décrivant quel(s) objet(s) le 
+        joueur a trouvé sur la carte, s'il a trouvé quelque chose. 
+        """
         
         retour = []
         #Si il y a une pépite sur la nouvelle carte, le joueur la ramasse
@@ -382,10 +537,18 @@ class plateau(object):
 
     def chemins_possibles(self, carte_depart=0, chemin_en_cours=[]):
         """
-        fonction récursive qui donne tous les chemins possibles à partir d'une carte sur le plateau. 
-        un chemin correspond à une suite de cartes
-        amélioration possible : soit on donne le chemin de départ, soit on donne le chemin en cours. 
+        Méthode récursive qui permet de trouver tous les chemins possibles à
+        partir d'une carte sur le plateau (un chemin correspond à une suite de cartes).
+        
+        Prend en entrée :
+            - carte_depart : la carte de laquelle on commence les chemins (entité
+            de classe carte)
+            - chemin_en_cours : chemin en train d'être construit récursivement (liste)
+            
+        Retourne la liste des chemins possibles à partir de la carte d'entrée,
+        soit une liste de listes d'entités de carte.
         """
+        
         L_chemin_possibles=[]
         #si on se trouve au niveau du point de départ
         if carte_depart!=0:
@@ -414,6 +577,31 @@ class plateau(object):
 #------------------------------------IA---------------------------------------
 
 def IA_simple(id_joueur,plateau_en_cours):
+    """
+    Fonction permettant pour un joueur automatique de niveau débutant de savoir 
+    quel coup jouer à un moment donné du jeu.
+    
+    Prend en entrée :
+         - id_joueur : identifiant de joueur automatique (entier)
+         - plateau_en_cours : état du plateau lors du tour du joueur automatique
+         (entité de classe plateau)
+    
+    A partir d'une copie de l'entité de plateau, génère tous les chemins possibles
+    à partir de l'emplacement du joueur en utilisant la méthode chemins_possibles
+    de plateau et en prenant en compte toutes les orientations de la carte extérieure
+    et toutes les insertions possibles.
+    
+    Calcule pour chacun de ces chemins une valeur d'heuristique en prenant en compte
+    le nombre de pépites sur le chemin, si le joueur capture un fantôme, si ce 
+    fantôme est sur son ordre de mission ou sur l'ordre de mission d'un autre joueur.
+    
+    Choisit le chemin qui maximise l'heuristique (ou si plusieurs chemins la
+    maximise, en choisit un au hasard parmi ceux-ci).
+    
+    Renvoie les coordonnées d'insertion de la carte extérieure (liste), son orientation 
+    (entier correspondant au nombre de fois qu'il faut tourner la carte) et le 
+    chemin optimal (liste d'entités de carte).
+    """
     
     #On duplique l'entité du plateau en cours pour faire des simulations de déplacement
     #de cartes sans impacter le vrai plateau
@@ -725,7 +913,7 @@ def affiche_plateau(plat,fenetre):
     mur3 = pygame.image.load("mur3.png").convert_alpha()
     mur4 = pygame.image.load("mur4.png").convert_alpha()
     liste_im_joueur = [pygame.image.load("joueur"+str(i)+".png").convert_alpha() for i in range(1,5)]
-    fond_a_jouer = pygame.image.load("fond_carte_a_jouer.png").convert()
+    fond_a_jouer = pygame.image.load("fond_carte_a_jouer.jpg").convert()
     fantome = pygame.image.load("fantome.png").convert_alpha()
     pepite = pygame.image.load("pepite.png").convert_alpha()
     indeplacable = pygame.image.load("indeplacable.png").convert_alpha()
@@ -737,20 +925,20 @@ def affiche_plateau(plat,fenetre):
     N = plat.N #on récupère la taille du plateau
      
     #Mise  à jour de la taille des images en fonction du nombre de cartes du plateau
-    x_mur1 = mur1.get_width()
-    y_mur1 = mur1.get_height()
+    x_mur1 = 100
+    y_mur1 = 100
     mur1 = pygame.transform.scale(mur1, (int(x_mur1*(7/N)),int(y_mur1*(7/N))))
-    x_mur2 = mur2.get_width()
-    y_mur2 = mur2.get_height()
+    x_mur2 = 100
+    y_mur2 = 100
     mur2 = pygame.transform.scale(mur2, (int(x_mur2*(7/N)),int(y_mur2*(7/N))))
-    x_mur3 = mur3.get_width()
-    y_mur3 = mur3.get_height()
+    x_mur3 = 100
+    y_mur3 = 100
     mur3 = pygame.transform.scale(mur3, (int(x_mur3*(7/N)),int(y_mur3*(7/N))))
-    x_mur4 = mur4.get_width()
-    y_mur4 = mur4.get_height()
+    x_mur4 = 100
+    y_mur4 = 100
     mur4 = pygame.transform.scale(mur4, (int(x_mur4*(7/N)),int(y_mur4*(7/N))))
-    x_fond_a_jouer = fond_a_jouer.get_width()
-    y_fond_a_jouer = fond_a_jouer.get_height()
+    x_fond_a_jouer = 100
+    y_fond_a_jouer = 100
     fond_a_jouer = pygame.transform.scale(fond_a_jouer,(int(x_fond_a_jouer*(7/N)),int(y_fond_a_jouer*(7/N))))
     x_fantome = fantome.get_width()
     y_fantome = fantome.get_height()
@@ -762,8 +950,8 @@ def affiche_plateau(plat,fenetre):
     y_indeplacable = indeplacable.get_height()
     indeplacable  = pygame.transform.scale(indeplacable, (int(x_indeplacable*(7/N)),int(y_indeplacable*(7/N))))
     for i in range (4) :
-        x_joueur = liste_im_joueur[i].get_width()
-        y_joueur = liste_im_joueur[i].get_height()
+        x_joueur = 60
+        y_joueur = 60
         liste_im_joueur[i] = pygame.transform.scale(liste_im_joueur[i], (int(x_joueur*(7/N)),int(y_joueur*(7/N))))
     
     #Création de la police du jeu
@@ -838,6 +1026,7 @@ def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte):
 
                 #test texte pour afficher le joueur qui joue
     fenetre.blit(police.render("C'est a "+str(joueur.nom)+" de jouer",False,pygame.Color(0,0,0)),(800,240))
+ 
     #affichage du message d'erreur
     for i in range(len(info)) :                       
         fenetre.blit(police.render(info[i],False,pygame.Color("#000000")),(760,180+i*20))
@@ -937,6 +1126,8 @@ def game() :
     
     
     dico_stop["rester_jeu"]=True
+    #in charge l'animation en cas de capture de fantome
+    clip = VideoFileClip('animation.mp4')
     
     
     #Boucle du jeu. On joue tant qu'il reste des fantômes à attraper
@@ -983,7 +1174,7 @@ def game() :
                                 test_inser=plateau_test.deplace_carte(coord)
                                
                                 if test_inser==False :
-                                    information="Insertion impossible"
+                                    information=["Insertion impossible"]
                                 #Sinon, on finit cette section du tour
     
                                 else :
@@ -1025,6 +1216,9 @@ def game() :
                             deplace = plateau_test.deplace_joueur(j,event.key)
                             if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
                                 information=plateau_test.compte_points(j,deplace)
+                                #si le joueur capture un fantome, on lance l'animation de capture
+                                if joueur.capture_fantome == True :
+                                    clip.preview()
                             else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                                 information=deplace
                             carte_actuelle=joueur.carte_position
