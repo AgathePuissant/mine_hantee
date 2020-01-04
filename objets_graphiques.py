@@ -226,8 +226,37 @@ class InputBox:
 #Definition des choiceboxs (boutons de sélection de valeurs prédéfinies)
 
 class ChoiceBox:
+    """
+    Classe d'objets graphiques définissant les boutons de choix (choiceboxs) dans pyGame. 
+    Permet à l'utilisateur de choisir une valeur unique entre différents boutons de choix
+    en cliquant sur le bouton désiré. 
+    
+    Comprend les méthodes :
+        - initialisation : permet d'attribuer aux boutons de la classe leurs 
+        caractéristiques (graphiques ou non).
+        - handle_event : prend en entrée un évènement pyGame ainsi que la liste des boutons associés.
+        Traite l'évènement donné en entrée et actualise les caractéristiques du bouton 
+        et des ses boutons associés.
+        - draw : prend en entrée la fenêtre pyGame et dessine le bouton dans la fenêtre. 
+    """
     
     def __init__(self, x, y, w, h, text, active=False):
+        """
+        Prend en entrée : 
+            - x : abscisse du coin en haut à gauche du rectangle du bouton (float).
+            - y : ordonnée du coin en haut à gauche du rectangle du bouton (float).
+            - w : largeur du rectangle du bouton (float).
+            - h : hauteur du rectangle du bouton (float).
+            - text : texte du bouton (string). 
+            - active : état d'activité du bouton, non-actif par défaut (booléen).
+        
+        Initialise les attributs correspondant à ces éléments d'entrées ainsi que 
+        les attributs :
+            - rect : rectangle du bouton (rectangle, objet graphique pyGame).
+            - color : couleur (color, objet graphique pyGame). 
+            - txt_surface : surface graphique du texte du bouton (surface, objet graphique pyGame).
+        """
+        
         self.rect = pygame.Rect(x, y, w, h)
         if active==False:
             self.color = COLOR_INACTIVE
@@ -238,6 +267,20 @@ class ChoiceBox:
         self.active=active
     
     def handle_event(self, event, ChoiceBox_associees=[]):
+        """
+        Méthode permettant de gérer, pour le bouton, les évenements pyGame 
+        associés à l'utilisation de l'ordinateur par l'utilisateur. 
+        
+        Prend en entrée : 
+            - event : évènement pyGame (event).
+            - ChoiceBox_associees : boutons de choix associés au bouton. 
+            L'utilisateur peut réaliser un choix unique entre tous ces boutons. 
+        
+        Actualise, en fonction de l'évènement d'entrée, les états d'activité et les couleurs 
+        du bouton et de ses boutons associés. 
+        Si l'utilisateur clique sur le bouton, celui-ci devient actif, et les boutons 
+        associés sont inactivés. 
+        """
         if event.type == pygame.MOUSEBUTTONDOWN:
             # si l'utilisateur clique sur le rectangle de inputbox.
             if self.rect.collidepoint(event.pos):
@@ -252,6 +295,14 @@ class ChoiceBox:
             self.color = COLOR_ACTIVE if self.active else COLOR_INACTIVE
     
     def draw(self,fenetre):
+        """
+        Méthode permettant de dessiner le bouton de choix dans la fenêtre. 
+        
+        Prend en entrée : 
+            - fenetre : fenetre dans laquelle le bouton est dessiné (fenetre pyGame).
+        
+        Dessine le rectangle associé au bouton ainsi que son texte dans la fenêtre. 
+        """
         # Blit le rectangle. 
         pygame.draw.rect(fenetre, self.color, self.rect, 2)
         # Blit le texte. 
