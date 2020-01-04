@@ -586,9 +586,8 @@ class plateau(object):
         #decompte des tours
         tours=0
         #Boucle du jeu. On joue tant qu'il reste des fantômes à attraper ou jusqu'a atteindre la profondeur cible
-        while self.id_dernier_fantome!=self.nbre_fantomes or tours==profondeur:
-            tours+=1
-                    
+        while self.id_dernier_fantome!=self.nbre_fantomes and tours<profondeur:
+            tours+=1       
             #Tours de jeu
             #on parcours chaque joueur à chaque tours.
             while compteur<len(self.dico_joueurs):
