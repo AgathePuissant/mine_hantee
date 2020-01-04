@@ -231,7 +231,7 @@ class mine_hantee():
                                     information=self.plateau_jeu.compte_points(j,deplace)
                                     #si le joueur capture un fantome, on lance l'animation de capture
                                     if joueur.capture_fantome == True and premiere_capture==True:
-                                        clip.preview()
+                                        #clip.preview()
                                         premiere_capture=False
                                 else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                                     information=deplace
@@ -270,9 +270,10 @@ class mine_hantee():
                         IA = IA_simple(j,self.plateau_jeu, output_type="single")
                     elif joueur.niveau == 3:
                         coups=IA_simple(j,self.plateau_jeu, output_type="liste")
-                        IA=IA_monte_carlo(self.plateau_jeu, j, 20, liste_coups=coups, profondeur=10)
+                        IA=IA_monte_carlo(self.plateau_jeu, j, 2, liste_coups=coups, profondeur=50)
                         IA=IA[1],IA[0],IA[2]
                         print(IA)
+
                         
                     coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
     
