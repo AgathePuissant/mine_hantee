@@ -19,11 +19,11 @@ nb_fantomes=21
 #####################################
 
 #Nombre de joueurs
-nb_joueurs=3
+nb_joueurs=2
 
 #Mode de jeu des joueurs (avec 4 joueurs au maximum)
 mode_joueur_1=manuel
-mode_joueur_2=manuel
+mode_joueur_2=automatique
 mode_joueur_3=automatique
 mode_joueur_4=automatique
 
