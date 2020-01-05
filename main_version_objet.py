@@ -117,7 +117,7 @@ class mine_hantee():
                     liste_niveaux=liste_niveaux+[int(dico_parametres[niveau])]
             
             self.plateau_jeu=plateau(nb_joueurs,liste_noms,liste_niveaux,dimensions_plateau,dico_parametres)
-            
+
         else :
             pass
         
@@ -196,8 +196,7 @@ class mine_hantee():
                                 
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                        
-                                            
-                                            
+
                     #2e etape : On parcours les évènements tant que le joueur n'a pas appuyé sur entrée ou tant qu'il peut encore se déplacer
                     #initialisation à la position du joueur
                     
@@ -270,9 +269,9 @@ class mine_hantee():
                         IA = IA_simple(j,self.plateau_jeu, output_type="single")
                     elif joueur.niveau == 3:
                         coups=IA_simple(j,self.plateau_jeu, output_type="liste")
-                        IA=IA_monte_carlo(self.plateau_jeu, j, 3, liste_coups=coups, profondeur=20)
+                        IA=IA_monte_carlo(self.plateau_jeu, j, reps=50, liste_coups=coups, profondeur=20)
                         IA=IA[1],IA[0],IA[2]
-                        print(IA)
+
 
                         
                     coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
@@ -291,6 +290,7 @@ class mine_hantee():
                     actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                     pygame.event.pump()
     
+                    #deplacement du joueur et decompte des points
                     information=""
                     for i in chemin :
                         pygame.event.pump()
