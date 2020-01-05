@@ -681,8 +681,8 @@ class mine_hantee():
                 choix_automatique=choix_modes_joueurs[k-1][1]
                 choix_manuel.draw(self.fenetre)
                 #le joueur 1 est forcément manuel
-                if k!=1:
-                    choix_automatique.draw(self.fenetre)
+                #if k!=1:
+                choix_automatique.draw(self.fenetre)
                 #si le mode automatique est activé, l'utilisateur peut choisir le niveau de l'ia. 
                 #mais il ne peut pas choisir son nom
                 if choix_automatique.active:
@@ -713,8 +713,8 @@ class mine_hantee():
                     choix_automatique=choix_modes_joueurs[k-1][1]
                     choix_manuel.handle_event(event,choix_modes_joueurs[k-1])
                     #le joueur 1 est forcément manuel
-                    if k!=1:
-                        choix_automatique.handle_event(event,choix_modes_joueurs[k-1])
+                    #if k!=1:
+                    choix_automatique.handle_event(event,choix_modes_joueurs[k-1])
                     if choix_automatique.active:
                         choix_lvl_joueurs[k-1][0].handle_event(event,choix_lvl_joueurs[k-1])
                         choix_lvl_joueurs[k-1][1].handle_event(event,choix_lvl_joueurs[k-1])
