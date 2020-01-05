@@ -270,7 +270,7 @@ class mine_hantee():
                         IA = IA_simple(j,self.plateau_jeu, output_type="single")
                     elif joueur.niveau == 3:
                         coups=IA_simple(j,self.plateau_jeu, output_type="liste")
-                        IA=IA_monte_carlo(self.plateau_jeu, j, 2, liste_coups=coups, profondeur=50)
+                        IA=IA_monte_carlo(self.plateau_jeu, j, 3, liste_coups=coups, profondeur=20)
                         IA=IA[1],IA[0],IA[2]
                         print(IA)
 
