@@ -425,9 +425,9 @@ class mine_hantee(ConnectionListener):
                 
                 #deplacement
                 if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
-                    deplace = self.plateau_jeu.deplace_joueur(j,event.key)
+                    deplace = self.plateau_jeu.deplace_joueur(self.joueur_ent.id,event.key)
                     if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
-                        information=self.plateau_jeu.compte_points(j,deplace)
+                        information=self.plateau_jeu.compte_points(self.joueur_ent.id,deplace)
                         self.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
                         #si le joueur capture un fantome, on lance l'animation de capture
                         if self.joueur_ent.capture_fantome == True and premiere_capture==True:
