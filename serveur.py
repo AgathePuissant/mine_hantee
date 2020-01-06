@@ -8,11 +8,13 @@ Created on Fri Jan  3 09:12:18 2020
 import PodSixNet.Channel
 import PodSixNet.Server
 from time import sleep
+import copy as copy
 
 from moteur import *
 from objets_graphiques import *
 from parametrisation import *
 from IA import *
+
 
 #Each time a client connects, a new Channel based class will be created
 class ClientChannel(PodSixNet.Channel.Channel):
@@ -79,11 +81,25 @@ class MineServer(PodSixNet.Server.Server):
         else:
             channel.gameid=self.currentIndex
             self.queue.append(channel)
-            self.queue[0].Send({"action": "startgame","joueur_id":0, "gameid": self.currentIndex})
-            self.queue[1].Send({"action": "startgame","joueur_id":1, "gameid": self.currentIndex})
-            print("La partie peut commencer !")
             self.games.append(self.queue)
-            Game(self.queue, self.currentIndex)
+            plat = Game(self.queue, self.currentIndex).plateau_jeu
+            #fant_target0 = list(plat.dico_joueurs[0].fantome_target)
+            #fant_target1 = list(plat.dico_joueurs[1].fantome_target)
+            #print(plat.__dict__)
+            data0 = {"action": "startgame","joueur_id":0, "gameid": self.currentIndex,"plat" : plat.__dict__}
+            data1 = {"action": "startgame","joueur_id":1, "gameid": self.currentIndex,"plat" : plat.__dict__}
+            #for i in range((plat.N)**2):
+                #orientation = list(plat.dico_cartes[i].orientation)
+                #fantome = plat.dico_cartes[i].id_fantome
+                #data0[str(i)+"_carteor"] = orientation
+                #data1[str(i)+"_carteor"] = orientation
+                #data0[str(i)+"_cartefant"] = fantome
+                #data1[str(i)+"_cartefant"] = fantome
+            print(data0)
+            #"cartes": list(plat.dico_cartes[0].orientation), "joueurs":list(plat.dico_joueurs[0].fantome_target
+            self.queue[0].Send(data0)
+            self.queue[1].Send(data1)
+            print("La partie peut commencer !")
             self.queue= []
 
         
@@ -183,13 +199,16 @@ class Game:
         
     
     
-print("STARTING SERVER ON LOCALHOST")
+print("Serveur ouvert")
 
-address=input("Host:Port (localhost:8000): ")
+address=input("Entrer une adresse de type Host:Port (entrée : adresse automatique localhost:8000): ")
 if not address:
     host, port="localhost", 8000
+    print("localhost, 8000")
+    print("en attente de connexions...")
 else:
     host,port=address.split(":")
+    print("en attente de connexions...")
 
 MineServe=MineServer(localaddr=(host, int(port)))
 #MineServe=MineServer()

@@ -9,7 +9,7 @@
 #####################################
 
 #Dimension du plateau (le plateau étant un carré, la longueur renseignée correspond à la fois à la longueur et à la largeur)
-dimensions_plateau=11
+dimensions_plateau=7
 
 #Nombre de fantômes
 nb_fantomes=21
@@ -36,7 +36,7 @@ niveau_ia_4=1
 #Peudos des joueurs (4 joueurs au maximum)
 
 pseudo_joueur_1=Elodie
-pseudo_joueur_2=Joueur2
+pseudo_joueur_2=Juliette
 pseudo_joueur_3=Ordinateur3
 pseudo_joueur_4=zodj
 
