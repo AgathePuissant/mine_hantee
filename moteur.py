@@ -267,7 +267,7 @@ class plateau(object):
         
         #La carte qui reste dans pool est la carte à l'exterieur du plateau
         self.carte_a_jouer=carte(compte_id,pool[compte_deplacable],["",""],True)
-        self.dico_cartes[compte_id] = self.carte_a_jouer
+#        self.dico_cartes[compte_id] = self.carte_a_jouer
         
         #Initialisation des joueurs
         #Création des entités de joueurs
@@ -308,8 +308,8 @@ class plateau(object):
         else:
             
             out=True
-        
-            self.dico_cartes[self.carte_a_jouer.id].coord=[x,y]
+            
+            
             
             #Traite tous les cas possible : carte insérée de chaque côté
             
@@ -355,8 +355,13 @@ class plateau(object):
                     
             else :
                 return False
-                    
+            
+            self.carte_a_jouer.coord=[x,y]
+            
             self.position[x,y]=self.carte_a_jouer.id
+        
+            self.dico_cartes[self.carte_a_jouer.id]=self.carte_a_jouer
+                    
                     
             if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
                     
@@ -365,11 +370,16 @@ class plateau(object):
                     carte_sauvegardee.id_fantome=0 #on supprime le fantôme de la carte sortie
                     
             for i in range(len(self.dico_joueurs)) : 
+                
                 if carte_sauvegardee.id==self.dico_joueurs[i].carte_position.id :
+                    
                     self.dico_joueurs[i].carte_position=self.dico_cartes[self.position[x,y]]
                         
                 
+            del self.dico_cartes[carte_sauvegardee.id]
+            
             self.carte_a_jouer=carte_sauvegardee #update la carte à jouer
+            
             self.carte_a_jouer.coord=['','']
             
         return out
@@ -586,9 +596,8 @@ class plateau(object):
         #decompte des tours
         tours=0
         #Boucle du jeu. On joue tant qu'il reste des fantômes à attraper ou jusqu'a atteindre la profondeur cible
-        while self.id_dernier_fantome!=self.nbre_fantomes or tours==profondeur:
-            tours+=1
-                    
+        while self.id_dernier_fantome!=self.nbre_fantomes and tours<profondeur:
+            tours+=1       
             #Tours de jeu
             #on parcours chaque joueur à chaque tours.
             while compteur<len(self.dico_joueurs):

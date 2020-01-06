@@ -226,8 +226,37 @@ class InputBox:
 #Definition des choiceboxs (boutons de sélection de valeurs prédéfinies)
 
 class ChoiceBox:
+    """
+    Classe d'objets graphiques définissant les boutons de choix (choiceboxs) dans pyGame. 
+    Permet à l'utilisateur de choisir une valeur unique entre différents boutons de choix
+    en cliquant sur le bouton désiré. 
+    
+    Comprend les méthodes :
+        - initialisation : permet d'attribuer aux boutons de la classe leurs 
+        caractéristiques (graphiques ou non).
+        - handle_event : prend en entrée un évènement pyGame ainsi que la liste des boutons associés.
+        Traite l'évènement donné en entrée et actualise les caractéristiques du bouton 
+        et des ses boutons associés.
+        - draw : prend en entrée la fenêtre pyGame et dessine le bouton dans la fenêtre. 
+    """
     
     def __init__(self, x, y, w, h, text, active=False):
+        """
+        Prend en entrée : 
+            - x : abscisse du coin en haut à gauche du rectangle du bouton (float).
+            - y : ordonnée du coin en haut à gauche du rectangle du bouton (float).
+            - w : largeur du rectangle du bouton (float).
+            - h : hauteur du rectangle du bouton (float).
+            - text : texte du bouton (string). 
+            - active : état d'activité du bouton, non-actif par défaut (booléen).
+        
+        Initialise les attributs correspondant à ces éléments d'entrées ainsi que 
+        les attributs :
+            - rect : rectangle du bouton (rectangle, objet graphique pyGame).
+            - color : couleur (color, objet graphique pyGame). 
+            - txt_surface : surface graphique du texte du bouton (surface, objet graphique pyGame).
+        """
+        
         self.rect = pygame.Rect(x, y, w, h)
         if active==False:
             self.color = COLOR_INACTIVE
@@ -238,6 +267,20 @@ class ChoiceBox:
         self.active=active
     
     def handle_event(self, event, ChoiceBox_associees=[]):
+        """
+        Méthode permettant de gérer, pour le bouton, les évenements pyGame 
+        associés à l'utilisation de l'ordinateur par l'utilisateur. 
+        
+        Prend en entrée : 
+            - event : évènement pyGame (event).
+            - ChoiceBox_associees : boutons de choix associés au bouton. 
+            L'utilisateur peut réaliser un choix unique entre tous ces boutons. 
+        
+        Actualise, en fonction de l'évènement d'entrée, les états d'activité et les couleurs 
+        du bouton et de ses boutons associés. 
+        Si l'utilisateur clique sur le bouton, celui-ci devient actif, et les boutons 
+        associés sont inactivés. 
+        """
         if event.type == pygame.MOUSEBUTTONDOWN:
             # si l'utilisateur clique sur le rectangle de inputbox.
             if self.rect.collidepoint(event.pos):
@@ -252,6 +295,14 @@ class ChoiceBox:
             self.color = COLOR_ACTIVE if self.active else COLOR_INACTIVE
     
     def draw(self,fenetre):
+        """
+        Méthode permettant de dessiner le bouton de choix dans la fenêtre. 
+        
+        Prend en entrée : 
+            - fenetre : fenetre dans laquelle le bouton est dessiné (fenetre pyGame).
+        
+        Dessine le rectangle associé au bouton ainsi que son texte dans la fenêtre. 
+        """
         # Blit le rectangle. 
         pygame.draw.rect(fenetre, self.color, self.rect, 2)
         # Blit le texte. 
@@ -272,6 +323,10 @@ def affiche_plateau(plat,fenetre):
     fantome = pygame.image.load("fantome.png").convert_alpha()
     pepite = pygame.image.load("pepite.png").convert_alpha()
     indeplacable = pygame.image.load("indeplacable.png").convert_alpha()
+    fleche1= pygame.image.load("fleche1.png").convert_alpha()
+    fleche2= pygame.image.load("fleche2.png").convert_alpha()
+    fleche3= pygame.image.load("fleche3.png").convert_alpha()
+    fleche4= pygame.image.load("fleche4.png").convert_alpha()
 
     
     #Chargement du fond dans la fenetre 
@@ -304,9 +359,21 @@ def affiche_plateau(plat,fenetre):
     x_indeplacable = indeplacable.get_width()
     y_indeplacable = indeplacable.get_height()
     indeplacable  = pygame.transform.scale(indeplacable, (int(x_indeplacable*(7/N)),int(y_indeplacable*(7/N))))
+    x_fleche1 = 40
+    y_fleche1 = 40
+    fleche1 = pygame.transform.scale(fleche1, (int(x_fleche1*(7/N)),int(y_fleche1*(7/N))))
+    x_fleche2 = 40
+    y_fleche2 = 40
+    fleche2 = pygame.transform.scale(fleche2, (int(x_fleche2*(7/N)),int(y_fleche2*(7/N))))
+    x_fleche3 = 40
+    y_fleche3 = 40
+    fleche3 = pygame.transform.scale(fleche3, (int(x_fleche3*(7/N)),int(y_fleche3*(7/N))))
+    x_fleche4 = 40
+    y_fleche4 = 40
+    fleche4 = pygame.transform.scale(fleche4, (int(x_fleche4*(7/N)),int(y_fleche4*(7/N))))
+    x_joueur = 60
+    y_joueur = 60
     for i in range (4) :
-        x_joueur = 60
-        y_joueur = 60
         liste_im_joueur[i] = pygame.transform.scale(liste_im_joueur[i], (int(x_joueur*(7/N)),int(y_joueur*(7/N))))
     
     #Création de la police du jeu
@@ -341,11 +408,29 @@ def affiche_plateau(plat,fenetre):
             if plat.dico_cartes[plat.position[i,j]].id_fantome!=0 :
                 fenetre.blit(fantome,(y,x))
                 fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(y+10,x+30))
-                       
+     #On met des flèches là ou les insertions sont possibles
+    for i in plat.insertions_possibles :
+        if i[0]==0 :
+            x=i[0]*int(100*7/N)+((((100*7/N))/2)-int(x_fleche1*(7/N))/2)
+            y=i[1]*int(100*7/N)+((((100*7/N))/2)-int(y_fleche1*(7/N))/2)
+            fenetre.blit(fleche1,(y,x))
+        elif i[1]== 0 :
+            x=i[0]*int(100*7/N)+((((100*7/N))/2)-int(x_fleche3*(7/N))/2)
+            y=i[1]*int(100*7/N)+((((100*7/N))/2)-int(y_fleche3*(7/N))/2)
+            fenetre.blit(fleche3,(y,x))
+        elif i[0]<i[1]:
+            x=i[0]*int(100*7/N)+((((100*7/N))/2)-int(x_fleche4*(7/N))/2)
+            y=i[1]*int(100*7/N)+((((100*7/N))/2)-int(y_fleche4*(7/N))/2)
+            fenetre.blit(fleche4,(y,x))
+        else :
+            x=i[0]*int(100*7/N)+((((100*7/N))/2)-int(x_fleche2*(7/N))/2)
+            y=i[1]*int(100*7/N)+((((100*7/N))/2)-int(y_fleche2*(7/N))/2)
+            fenetre.blit(fleche2,(y,x))
+                               
     for i in range(len(plat.dico_joueurs)) :
-        x=plat.dico_joueurs[i].carte_position.coord[0]*int(100*7/N)
-        y=plat.dico_joueurs[i].carte_position.coord[1]*int(100*7/N)
-        fenetre.blit(liste_im_joueur[i],(y,x))
+        x=plat.dico_joueurs[i].carte_position.coord[0]*int(100*7/N)+((((100*7/N))/2)-int(x_joueur*(7/N))/2)
+        y=plat.dico_joueurs[i].carte_position.coord[1]*int(100*7/N)+((((100*7/N))/2)-int(y_joueur*(7/N))/2)
+        fenetre.blit(liste_im_joueur[i],(y,x))                   
         
 #on place la carte à jouer dans le coin droite haut du plateau 
     x=750
@@ -372,6 +457,10 @@ def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte):
     """
     affiche_plateau(plateau,fenetre)
     liste_im_joueur = [pygame.image.load("joueur"+str(i)+".png").convert_alpha() for i in range(1,5)]
+    for i in range (4) :
+        x_joueur = 60
+        y_joueur = 60
+        liste_im_joueur[i] = pygame.transform.scale(liste_im_joueur[i], (int(x_joueur),int(y_joueur)))
 
     for i in range(len(plateau.dico_joueurs)) :
                 fenetre.blit(liste_im_joueur[i],(1030,320+i*80))

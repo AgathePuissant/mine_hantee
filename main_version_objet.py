@@ -231,7 +231,7 @@ class mine_hantee():
                                     information=self.plateau_jeu.compte_points(j,deplace)
                                     #si le joueur capture un fantome, on lance l'animation de capture
                                     if joueur.capture_fantome == True and premiere_capture==True:
-                                        clip.preview()
+                                        #clip.preview()
                                         premiere_capture=False
                                 else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                                     information=deplace
@@ -270,9 +270,10 @@ class mine_hantee():
                         IA = IA_simple(j,self.plateau_jeu, output_type="single")
                     elif joueur.niveau == 3:
                         coups=IA_simple(j,self.plateau_jeu, output_type="liste")
-                        IA=IA_monte_carlo(self.plateau_jeu, j, 20, liste_coups=coups, profondeur=10)
+                        IA=IA_monte_carlo(self.plateau_jeu, j, 3, liste_coups=coups, profondeur=20)
                         IA=IA[1],IA[0],IA[2]
                         print(IA)
+
                         
                     coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
     
@@ -679,6 +680,8 @@ class mine_hantee():
                 choix_manuel=choix_modes_joueurs[k-1][0]
                 choix_automatique=choix_modes_joueurs[k-1][1]
                 choix_manuel.draw(self.fenetre)
+                #le joueur 1 est forcément manuel
+                #if k!=1:
                 choix_automatique.draw(self.fenetre)
                 #si le mode automatique est activé, l'utilisateur peut choisir le niveau de l'ia. 
                 #mais il ne peut pas choisir son nom
@@ -709,6 +712,8 @@ class mine_hantee():
                     choix_manuel=choix_modes_joueurs[k-1][0]
                     choix_automatique=choix_modes_joueurs[k-1][1]
                     choix_manuel.handle_event(event,choix_modes_joueurs[k-1])
+                    #le joueur 1 est forcément manuel
+                    #if k!=1:
                     choix_automatique.handle_event(event,choix_modes_joueurs[k-1])
                     if choix_automatique.active:
                         choix_lvl_joueurs[k-1][0].handle_event(event,choix_lvl_joueurs[k-1])
@@ -816,6 +821,8 @@ class mine_hantee():
                     self.fenetre.blit(self.police2.render("ERREUR : Renseignez tous les champs!",True,self.COLOR_ERROR),(550,50))
                 elif dico_erreurs['type']=='max':
                     self.fenetre.blit(self.police2.render("ERREUR : Renseignez une valeur plus petite",True,self.COLOR_ERROR),(550,50))
+                elif dico_erreurs['type']=='min':
+                    self.fenetre.blit(self.police2.render("ERREUR : Renseignez une valeur plus grande",True,self.COLOR_ERROR),(550,50))
             
             #dessin des boutons
             valider.draw(self.fenetre)  

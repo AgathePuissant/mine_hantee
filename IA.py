@@ -15,22 +15,24 @@ def IA_monte_carlo(plateau_en_cours,joueur_id, reps, liste_coups=[], profondeur=
     #recuperer la liste des coups possibles
     if liste_coups==[]:
         liste_coups=plateau_en_cours.coups_possibles(joueur_id)
-    
+    liste_coups_copy=copy.deepcopy(liste_coups)
     liste_scores=[]
     progression=0
     start=time.time()
     #pour chaque coup, on le joue et on fait [reps] parties aleatoires
-    for coup in liste_coups:
+    for coup in liste_coups_copy:
         score=0
         progression+=1
-        print("progression :"+str(progression/len(liste_coups)*100)+"%")
+        print("progression :"+str(progression/len(liste_coups_copy)*100)+"%")
         for essai in range(reps):
+            copie=0
             copie=copy.deepcopy(plateau_en_cours)
             copie.joue_coup(coup, joueur_id)
             copie.partie_aleatoire(profondeur)
             score+=copie.dico_joueurs[joueur_id].points
         score=score/reps
         liste_scores.append(score)
+    #Recuperer le coup correspondant à la meilleure heuristique
     index_max=liste_scores.index(max(liste_scores))
     coup_optimal=liste_coups[index_max]
     end=time.time()
@@ -202,6 +204,7 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
         elif output_type=="liste" :
             #On recupere une liste de triplets inser_opti, orientation_opti, chemin_plateau
             meilleurs_chemins=[]
+            
             for rang in range(len(chemins_opti)):
                 chemin_plateau=[]
                 for j in range(1,len(chemins_opti[rang])):
