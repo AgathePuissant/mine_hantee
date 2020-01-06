@@ -25,6 +25,7 @@ class ClientChannel(PodSixNet.Channel.Channel):
     def Network_rotation(self, data):
         num = data["num"]
         self.gameid = data["gameid"]
+        print("recu")
         
         self._server.rotation(data,self.gameid, num)
  
@@ -111,7 +112,7 @@ class MineServer(PodSixNet.Server.Server):
             data0["joueur_id"] = 0
             data1["joueur_id"] = 1
             
-            print(data0)
+            #print(data0)
             self.queue[0].Send(data0)
             self.queue[1].Send(data1)
             print("La partie peut commencer !")
@@ -123,6 +124,7 @@ class MineServer(PodSixNet.Server.Server):
         game = [a for a in self.games if a.gameid==gameid]
         if len(game)==1:
             game[0].rotation(data, num)
+        print("recu2")
     
     def insertion(self, data, gameid, num, coord):
         game = [a for a in self.games if a.gameid==gameid]
@@ -175,6 +177,7 @@ class Game:
             
             self.joueur_0.Send(data)
             self.joueur_1.Send(data)
+        print("renvoie")
         
         
     def insertion(self,data, num, coord):
