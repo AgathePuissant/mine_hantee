@@ -429,7 +429,31 @@ class mine_hantee(ConnectionListener):
             while self.dico_stop["test_entree"]==True and len(cartes_accessibles)>0:
                 
                 etape="Déplacer avec les flèches, entrée pour finir"
-                
+
+                #deplacement
+                if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
+                    deplace = self.plateau_jeu.deplace_joueur(self.joueur_ent.id,event.key)
+                    if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
+                        information=self.plateau_jeu.compte_points(self.joueur_ent.id,deplace)
+                        self.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
+                        #si le joueur capture un fantome, on lance l'animation de capture
+                        if self.joueur_ent.capture_fantome == True and premiere_capture==True:
+                            clip.preview()
+                            premiere_capture=False
+                    else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
+                        information=deplace
+                    
+                    self.joueur_ent.cartes_explorees.append(carte_actuelle)
+                    carte_actuelle=self.joueur_ent.carte_position
+                    cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
+                    
+                #fin de tour
+                if event.type == KEYDOWN and (event.key== K_RETURN):
+                    self.dico_stop["test_entree"]=False
+                    self.Send({"action": "changejoueur", "num": self.joueur_id, "gameid": self.gameid})
+
+                    information=""
+               
                 for event in pygame.event.get():
                     
                     #Correction pour supprimer les cartes explorees des cartes accessibles
