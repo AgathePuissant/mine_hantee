@@ -407,7 +407,7 @@ def affiche_plateau(plat,fenetre):
             if plat.dico_cartes[plat.position[i,j]].presence_pepite==True:
                 fenetre.blit(pepite,(y,x))
             if plat.dico_cartes[plat.position[i,j]].id_fantome!=0 :
-                if plat.dico_cartes[plat.position[i,j]].id_fantome != plat.dernier_fantome :
+                if plat.dico_cartes[plat.position[i,j]].id_fantome != plat.id_dernier_fantome :
                     fenetre.blit(fantome_cible,(y,x))
                 else :
                     fenetre.blit(fantome,(y,x))
