@@ -83,20 +83,35 @@ class MineServer(PodSixNet.Server.Server):
             self.queue.append(channel)
             self.games.append(self.queue)
             plat = Game(self.queue, self.currentIndex).plateau_jeu
-            #fant_target0 = list(plat.dico_joueurs[0].fantome_target)
-            #fant_target1 = list(plat.dico_joueurs[1].fantome_target)
-            #print(plat.__dict__)
-            data0 = {"action": "startgame","joueur_id":0, "gameid": self.currentIndex,"plat" : plat.__dict__}
-            data1 = {"action": "startgame","joueur_id":1, "gameid": self.currentIndex,"plat" : plat.__dict__}
-            #for i in range((plat.N)**2):
-                #orientation = list(plat.dico_cartes[i].orientation)
-                #fantome = plat.dico_cartes[i].id_fantome
-                #data0[str(i)+"_carteor"] = orientation
-                #data1[str(i)+"_carteor"] = orientation
-                #data0[str(i)+"_cartefant"] = fantome
-                #data1[str(i)+"_cartefant"] = fantome
+            
+            data0 = {"action": "startgame", "gameid": self.currentIndex}
+            
+            fant_target0 = plat.dico_joueurs[0].fantome_target
+            fant_target1 = plat.dico_joueurs[1].fantome_target
+            for j in range(len(fant_target0)):
+                fant_target0[j] = int(fant_target0[j])
+                fant_target1[j] = int(fant_target1[j])
+            data0["fant_target0"] = fant_target0
+            data0["fant_target1"] = fant_target1
+            
+            ori_carte_ext = list(plat.carte_a_jouer.orientation)
+            for j in range(len(ori_carte_ext)):
+                ori_carte_ext[j] = int(ori_carte_ext[j])
+            data0["carte_a_jouer_or"] = ori_carte_ext
+            
+            for i in range((plat.N)**2):
+                orientation = list(plat.dico_cartes[i].orientation)
+                for j in range(len(orientation)):
+                    orientation[j] = int(orientation[j])
+                fantome = int(plat.dico_cartes[i].id_fantome)
+                data0[str(i)+"_carteor"] = orientation
+                data0[str(i)+"_cartefant"] = fantome
+                
+            data1 = copy.deepcopy(data0)
+            data0["joueur_id"] = 0
+            data1["joueur_id"] = 1
+            
             print(data0)
-            #"cartes": list(plat.dico_cartes[0].orientation), "joueurs":list(plat.dico_joueurs[0].fantome_target
             self.queue[0].Send(data0)
             self.queue[1].Send(data1)
             print("La partie peut commencer !")
@@ -217,4 +232,23 @@ while True:
     sleep(0.01)
     
     
-    
+#dico_parametres = {'dimensions_plateau': '7', 'nb_fantomes': '21', 'nb_joueurs': '2', 'mode_joueur_1': 'manuel', 'mode_joueur_2': 'manuel', 'mode_joueur_3': 'manuel', 'mode_joueur_4': 'manuel', 'niveau_ia_1': '1', 'niveau_ia_2': '1', 'niveau_ia_3': '1', 'niveau_ia_4': '1', 'pseudo_joueur_1': 0, 'pseudo_joueur_2': 1, 'pseudo_joueur_3': '', 'pseudo_joueur_4': '', 'nb_fantomes_mission': '3', 'nb_joker': '1', 'points_pepite': '1', 'points_fantome': '5', 'points_fantome_mission': '20', 'bonus_mission': '40'}
+#plat=plateau(2,[0,1],[0,0],7,dico_parametres)
+#
+#data0 = {"action": "startgame","joueur_id":0}
+#data1 = {"action": "startgame","joueur_id":1}
+#fant_target0 = plat.dico_joueurs[0].fantome_target
+#fant_target1 = plat.dico_joueurs[1].fantome_target
+#data0["fant_target"] = fant_target0
+#data1["fant_target"] = fant_target1
+##print(plat.__dict__)
+#for i in range((plat.N)**2):
+#    orientation = list(plat.dico_cartes[i].orientation)
+#    fantome = int(plat.dico_cartes[i].id_fantome)
+#    print(orientation,type(orientation))
+#    print(fantome,type(fantome))
+#    data0["_carteor"] = orientation
+#    data1["_carteor"] = orientation
+#    data0["_cartefant"] = fantome
+#    data1["_cartefant"] = fantome
+#print(data0)
