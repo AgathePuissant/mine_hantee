@@ -321,6 +321,7 @@ def affiche_plateau(plat,fenetre):
     liste_im_joueur = [pygame.image.load("joueur"+str(i)+".png").convert_alpha() for i in range(1,5)]
     fond_a_jouer = pygame.image.load("fond_carte_a_jouer.jpg").convert()
     fantome = pygame.image.load("fantome.png").convert_alpha()
+    fantome_cible = pygame.image.load("fantome_cible.png").convert_alpha()
     pepite = pygame.image.load("pepite.png").convert_alpha()
     indeplacable = pygame.image.load("indeplacable.png").convert_alpha()
     fleche1= pygame.image.load("fleche1.png").convert_alpha()
@@ -406,7 +407,10 @@ def affiche_plateau(plat,fenetre):
             if plat.dico_cartes[plat.position[i,j]].presence_pepite==True:
                 fenetre.blit(pepite,(y,x))
             if plat.dico_cartes[plat.position[i,j]].id_fantome!=0 :
-                fenetre.blit(fantome,(y,x))
+                if plat.dico_cartes[plat.position[i,j]].id_fantome != plat.id_dernier_fantome :
+                    fenetre.blit(fantome_cible,(y,x))
+                else :
+                    fenetre.blit(fantome,(y,x))
                 fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(y+10,x+30))
      #On met des flèches là ou les insertions sont possibles
     for i in plat.insertions_possibles :
