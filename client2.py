@@ -32,7 +32,10 @@ class mine_hantee(ConnectionListener):
         self.running=True
         self.joueur_id=data["joueur_id"]
         self.gameid=data["gameid"]
-    
+        self.dico= data["plat"]
+        
+
+
     def __init__(self):
     
         pygame.init()
@@ -86,14 +89,18 @@ class mine_hantee(ConnectionListener):
             self.turn=True
             joueur_0 = "Moi"
             joueur_1 = "Adversaire"
-            
+
         else:
             self.turn=False
             joueur_0 = "Adversaire"
             joueur_1 = "Moi"
             
-        dico_parametres = {'dimensions_plateau': '7', 'nb_fantomes': '21', 'nb_joueurs': '2', 'mode_joueur_1': 'manuel', 'mode_joueur_2': 'manuel', 'mode_joueur_3': 'manuel', 'mode_joueur_4': 'manuel', 'niveau_ia_1': '1', 'niveau_ia_2': '1', 'niveau_ia_3': '1', 'niveau_ia_4': '1', 'pseudo_joueur_1': joueur_0, 'pseudo_joueur_2': joueur_1, 'pseudo_joueur_3': '', 'pseudo_joueur_4': '', 'nb_fantomes_mission': '3', 'nb_joker': '1', 'points_pepite': '1', 'points_fantome': '5', 'points_fantome_mission': '20', 'bonus_mission': '40'}
+        dico_parametres = {'dimensions_plateau': '7', 'nb_fantomes': '21', 'nb_joueurs': '2', 'mode_joueur_1': 'manuel', 'mode_joueur_2': 'manuel', 'mode_joueur_3': 'manuel', 'mode_joueur_4': 'manuel', 'niveau_ia_1': '1', 'niveau_ia_2': '1', 'niveau_ia_3': '1', 'niveau_ia_4': '1', 'pseudo_joueur_1': 0, 'pseudo_joueur_2': 1, 'pseudo_joueur_3': '', 'pseudo_joueur_4': '', 'nb_fantomes_mission': '3', 'nb_joker': '1', 'points_pepite': '1', 'points_fantome': '5', 'points_fantome_mission': '20', 'bonus_mission': '40'}
         self.plateau_jeu=plateau(2,[joueur_0,joueur_1],[0,0],7,dico_parametres)
+         
+        #self.plateau_jeu=data["plateau"]
+        #self.plateau_jeu.dico_joueurs[0].nom = joueur_0
+        #self.plateau_jeu.dico_joueurs[1].nom = joueur_1
         self.joueur_ent = self.plateau_jeu.dico_joueurs[self.joueur_id]
     
         
