@@ -175,8 +175,9 @@ class mine_hantee():
                                 if event.button==1: 
         
                                     coord=[int(math.floor(event.pos[1]/700*self.plateau_jeu.N)),int(math.floor(event.pos[0]/700*self.plateau_jeu.N))]
-                                    
+
                                     test_inser=self.plateau_jeu.deplace_carte(coord)
+
                                    
                                     if test_inser==False :
                                         information=["Insertion impossible"]
@@ -234,6 +235,7 @@ class mine_hantee():
                                         premiere_capture=False
                                 else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                                     information=deplace
+
                                 
                                 joueur.cartes_explorees.append(carte_actuelle)
                                 carte_actuelle=joueur.carte_position
@@ -269,13 +271,14 @@ class mine_hantee():
                         IA = IA_simple(j,self.plateau_jeu, output_type="single")
                     elif joueur.niveau == 3:
                         coups=IA_simple(j,self.plateau_jeu, output_type="liste")
-                        IA=IA_monte_carlo(self.plateau_jeu, j, reps=50, liste_coups=coups, profondeur=20)
+                        IA=IA_monte_carlo(self.plateau_jeu, j, reps=100, liste_coups=coups, profondeur=5)
                         IA=IA[1],IA[0],IA[2]
 
 
-                        
-                    coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
     
+                    coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
+                    #print("insertion : "+str(coord_inser))
+                    #print("chemin :"+str([carte.coord for carte in chemin]))
                     #On tourne la carte
                     for i in range(orientation):
                         pygame.event.pump()
@@ -283,16 +286,23 @@ class mine_hantee():
                         pygame.time.wait(200)
                         pygame.event.pump()
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
-                     
+                    
+                    #print("insertion")
                     self.plateau_jeu.deplace_carte(coord_inser) #On l'insère
                     pygame.time.wait(200)
                     pygame.event.pump()
                     actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                     pygame.event.pump()
-    
+                    #print("deplacement")
                     #deplacement du joueur et decompte des points
                     information=""
+                    print("chemin :")
+                    print([carte.coord for carte in chemin])
+                    print([carte for carte in chemin])
+                    print(self.plateau_jeu.carte_a_jouer)
                     for i in chemin :
+                        #print("cartes accessibles")
+                        #print([carte.coord for carte in self.plateau_jeu.cartes_accessibles1(i)])
                         pygame.event.pump()
                         joueur.carte_position = i
                         information=self.plateau_jeu.compte_points(j,i)
@@ -301,7 +311,7 @@ class mine_hantee():
                         pygame.event.pump()
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                     
-         
+                    #print("fin")
                 #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
                 joueur.cartes_explorees = [carte_actuelle]
                 joueur.capture_fantome = False
