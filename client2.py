@@ -28,33 +28,6 @@ from IA import *
 class mine_hantee(ConnectionListener):
     
     
-    def Network_startgame(self, data):
-        self.running=True
-        self.joueur_id=data["joueur_id"]
-        self.gameid=data["gameid"]
-        self.dico= data["plat"]
-        
-
-        if self.joueur_id==0:
-            self.turn=True
-            joueur_0 = "Moi"
-            joueur_1 = "Adversaire"
-
-        else:
-            self.turn=False
-            joueur_0 = "Adversaire"
-            joueur_1 = "Moi"
-            
-            
-        dico_parametres = {'dimensions_plateau': '7', 'nb_fantomes': '21', 'nb_joueurs': '2', 'mode_joueur_1': 'manuel', 'mode_joueur_2': 'manuel', 'mode_joueur_3': 'manuel', 'mode_joueur_4': 'manuel', 'niveau_ia_1': '1', 'niveau_ia_2': '1', 'niveau_ia_3': '1', 'niveau_ia_4': '1', 'pseudo_joueur_1': 0, 'pseudo_joueur_2': 1, 'pseudo_joueur_3': '', 'pseudo_joueur_4': '', 'nb_fantomes_mission': '3', 'nb_joker': '1', 'points_pepite': '1', 'points_fantome': '5', 'points_fantome_mission': '20', 'bonus_mission': '40'}
-        self.plateau_jeu=plateau(2,[joueur_0,joueur_1],[0,0],7,dico_parametres)
-            
-        #self.plateau_jeu = data["plateau_jeu"]
-        self.joueur_ent = self.plateau_jeu.dico_joueurs[self.joueur_id]
-        
-        
-
-
     def __init__(self):
     
         pygame.init()
@@ -96,7 +69,7 @@ class mine_hantee(ConnectionListener):
             print("e.g.", "localhost:31425")
             exit()
             
-        print("Labyrinthe client started")
+        print("Labyrinthe client 2 started")
         
         self.running=False
         while not self.running:
@@ -104,6 +77,38 @@ class mine_hantee(ConnectionListener):
             connection.Pump()
             sleep(0.01)
 
+
+    def Network_startgame(self, data):
+        
+        self.running=True
+        self.joueur_id=data["joueur_id"]
+        self.gameid=data["gameid"]
+
+
+        if self.joueur_id==0:
+            self.turn=True
+            joueur_0 = "Moi"
+            joueur_1 = "Adversaire"
+
+        else:
+            self.turn=False
+            joueur_0 = "Adversaire"
+            joueur_1 = "Moi"
+            
+            
+        dico_parametres = {'dimensions_plateau': '7', 'nb_fantomes': '21', 'nb_joueurs': '2', 'mode_joueur_1': 'manuel', 'mode_joueur_2': 'manuel', 'mode_joueur_3': 'manuel', 'mode_joueur_4': 'manuel', 'niveau_ia_1': '1', 'niveau_ia_2': '1', 'niveau_ia_3': '1', 'niveau_ia_4': '1', 'pseudo_joueur_1': joueur_0, 'pseudo_joueur_2': joueur_1, 'pseudo_joueur_3': '', 'pseudo_joueur_4': '', 'nb_fantomes_mission': '3', 'nb_joker': '1', 'points_pepite': '1', 'points_fantome': '5', 'points_fantome_mission': '20', 'bonus_mission': '40'}
+        self.plateau_jeu=plateau(2,[joueur_0,joueur_1],[0,0],7,dico_parametres)
+        self.joueur_ent = self.plateau_jeu.dico_joueurs[self.joueur_id]
+        
+        self.plateau_jeu.dico_joueurs[0].fantome_target = data["fant_target0"]
+        self.plateau_jeu.dico_joueurs[1].fantome_target = data["fant_target1"]
+        
+        for i in range(self.plateau_jeu.N**2):
+            self.plateau_jeu.dico_cartes[i].orientation = data[str(i)+"_carteor"]
+            self.plateau_jeu.dico_cartes[i].id_fantome = data[str(i)+"_cartefant"]
+        
+        self.plateau_jeu.carte_a_jouer.orientation = data["carte_a_jouer_or"]
+        
         
     def Network_close(self, data):
         exit()
