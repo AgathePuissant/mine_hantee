@@ -468,10 +468,12 @@ def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte):
 
     for i in range(len(plateau.dico_joueurs)) :
                 fenetre.blit(liste_im_joueur[i],(1030,320+i*80))
-                fenetre.blit(police.render(str(plateau.dico_joueurs[i].nom) + " : ",False,pygame.Color("#000000")),(800,340+i*80))
-                fenetre.blit(police.render("Score : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(800,340+i*80+20))
-                fenetre.blit(police.render("Ordre de mission : "+str(sorted(plateau.dico_joueurs[i].fantome_target)),False,pygame.Color("#000000")),(800,340+i*80+40))
+                fenetre.blit(police_small.render(str(plateau.dico_joueurs[i].nom) + " : ",False,pygame.Color("#000000")),(800,340+i*75))
+                fenetre.blit(police1.render("Score : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(800,340+i*75+15))
+                fenetre.blit(police1.render("Ordre de mission : "+str(sorted(plateau.dico_joueurs[i].fantome_target)),False,pygame.Color("#000000")),(800,340+i*75+30))
+                fenetre.blit(police1.render("Jokers restants : "+str(plateau.dico_joueurs[i].nb_joker),False,pygame.Color("#000000")),(800,340+i*75+45))
 
+                                           
                 #test texte pour afficher le joueur qui joue
     fenetre.blit(police.render("C'est a "+str(joueur.nom)+" de jouer",False,pygame.Color(0,0,0)),(800,240))
  
