@@ -356,31 +356,32 @@ class plateau(object):
             else :
                 return False
             
-            self.carte_a_jouer.coord=[x,y]
-            
-            self.position[x,y]=self.carte_a_jouer.id
-        
-            self.dico_cartes[self.carte_a_jouer.id]=self.carte_a_jouer
                     
-                    
-            if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
-                    
-                    self.dico_cartes[self.position[x,y]].id_fantome=carte_sauvegardee.id_fantome #on déplace ce fantôme à l'autre bout du plateau
-                    
+            #si il y'a un fantome sur la carte sortie, on le place à l'autre bout du plateau        
+            if carte_sauvegardee.id_fantome!=0 : 
+                    self.dico_cartes[self.position[x,y]].id_fantome=carte_sauvegardee.id_fantome
                     carte_sauvegardee.id_fantome=0 #on supprime le fantôme de la carte sortie
-                    
-            for i in range(len(self.dico_joueurs)) : 
-                
-                if carte_sauvegardee.id==self.dico_joueurs[i].carte_position.id :
-                    
-                    self.dico_joueurs[i].carte_position=self.dico_cartes[self.position[x,y]]
-                        
-                
-            del self.dico_cartes[carte_sauvegardee.id]
             
-            self.carte_a_jouer=carte_sauvegardee #update la carte à jouer
-            
-            self.carte_a_jouer.coord=['','']
+            #si il y a un joueur sur la carte, on le place à l'autre bout du plateau
+            for joueur in self.dico_joueurs.values() : 
+                if joueur.carte_position==carte_sauvegardee :
+                    joueur.carte_position=self.carte_a_jouer
+
+                    
+            #On echange la carte insérée et celle qui est sortie du plateau, et les attributs nécessaire
+            #coordonnées
+            self.carte_a_jouer.coord=[x,y]
+            carte_sauvegardee.coord=["",""]
+            #id
+            self.carte_a_jouer.id=carte_sauvegardee.id
+            self.dico_cartes[carte_sauvegardee.id]=self.carte_a_jouer
+            carte_sauvegardee.id=int(self.N**2+1)
+            #position
+            self.position[x,y]=self.carte_a_jouer.id
+            #finalement, on place la carte sortante dans carte_a_jouer
+            self.carte_a_jouer=carte_sauvegardee
+
+
             
         return out
         
@@ -630,29 +631,9 @@ class plateau(object):
                         #deplacement
                         joueur.carte_position = nv_carte 
                         joueur.cartes_explorees.append(nv_carte)
+                        self.compte_points(joueur.id, nv_carte)
         
-                        #Si il y a une pépite sur la nouvelle carte, le joueur la ramasse
-                        if nv_carte.presence_pepite == True : 
-                            joueur.points += 1
-                            nv_carte.presence_pepite = False
-            
-                        #Si il y a un fantôme sur la nouvelle carte, le joueur le capture si c'est possible
-                        #i.e. si c'est le fantôme à capturer et s'il n'a pas encore capturé de fantôme pendant ce tour
-                        if nv_carte.id_fantome == self.id_dernier_fantome+1 and joueur.capture_fantome == False :
-                            #Si le fantôme est sur l'ordre de mission, le joueur gagne 20 points
-                            if nv_carte.id_fantome in joueur.fantome_target : 
-                                joueur.points += 20
-                                joueur.fantome_target.remove(nv_carte.id_fantome)
-                                #Si l'ordre de mission est totalement rempli, le joueur gagne 40 points
-                                if joueur.fantome_target==[]:
-                                    joueur.points += 40
-                            #Si le fantôme n'est pas sur l'ordre de mission, le joueur gagne 5 points
-                            else:
-                                joueur.points += 5
-                
-                            joueur.capture_fantome = True
-                            self.id_dernier_fantome += 1
-                            nv_carte.id_fantome = 0
+
                     etape="inserer-carte"
                             
                 #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
