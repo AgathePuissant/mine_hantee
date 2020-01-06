@@ -366,8 +366,22 @@ class mine_hantee(ConnectionListener):
                 self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"inserer-carte"
                 etape="Tourner la carte avec R, cliquer pour insérer"
                 
+
                 for event in pygame.event.get():   
-                    
+
+                #deplacement
+                if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
+                    deplace = self.plateau_jeu.deplace_joueur(self.joueur_ent.id,event.key)
+                    if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
+                        information=self.plateau_jeu.compte_points(self.joueur_ent.id,deplace)
+                        self.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
+                        #si le joueur capture un fantome, on lance l'animation de capture
+                        if self.joueur_ent.capture_fantome == True and premiere_capture==True:
+                            clip.preview()
+                            premiere_capture=False
+                    else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
+                        information=deplace
+
                     afficher_commandes_button.handle_event(event,self.afficher_commandes)
                     
                     #Si on appuie sur R, rotation de la carte à jouer
