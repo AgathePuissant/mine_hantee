@@ -5,6 +5,7 @@ FICHIER DEFINISSANT LES INTELLIGENCES ARTIFICIELLES
 import time as time
 import copy as copy
 import random as rd
+import numpy as np
 
 def IA_monte_carlo(plateau_en_cours,joueur_id, reps, liste_coups=[], profondeur="fin"):
     """
@@ -107,6 +108,7 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
             orientation[0],orientation[1],orientation[2],orientation[3]=orientation[3],orientation[0],orientation[1],orientation[2]
         
         chemins_possibles_total.append(chemins_possibles_carte)
+
     dico_heuristique = {} #dico avec le rang (couple) d'un chemin dans chemin_possibles_total en clé et son heuristique en valeur
     
 
@@ -114,19 +116,19 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
         for i in range(len(chemins_possibles_total[k])) : #i: rang du sous-sous ensemble correspondant à l'orientation de la carte
             for m in range(len(chemins_possibles_total[k][i])):#m: rang du chemin possible parmi le sous-sous-ensemble
                 heuristique = 0
-                #On examine chaque case
-                for j in chemins_possibles_total[k][i][m]:
-                    #Si il y a une pépite sur la case
-                    if j.presence_pepite == True : 
+                #On examine chaque carte
+                for carte in chemins_possibles_total[k][i][m]:
+                    #Si il y a une pépite sur la carte
+                    if carte.presence_pepite == True : 
                         heuristique +=1
                     #Si il y a un de nos fantomes target attrapable
-                    if j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in plateau.dico_joueurs[id_joueur].fantome_target:
+                    if carte.id_fantome == plateau.id_dernier_fantome+1 and carte.id_fantome in plateau.dico_joueurs[id_joueur].fantome_target:
                         heuristique += 20
                     #Si il y a un des fantomes target d'un adversaire attrapable
-                    elif j.id_fantome == plateau.id_dernier_fantome+1 and j.id_fantome in target_adversaires:
+                    elif carte.id_fantome == plateau.id_dernier_fantome+1 and carte.id_fantome in target_adversaires:
                         heuristique += 10
                     #Si il y a un fantome attrapable qui n'est le target de personne
-                    elif j.id_fantome == plateau.id_dernier_fantome+1:
+                    elif carte.id_fantome == plateau.id_dernier_fantome+1:
                         heuristique += 5
                         
                 dico_heuristique[(k,i,m)] = heuristique
@@ -146,6 +148,8 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
                 inser_opti.append(plateau.insertions_possibles[triplet[0]])
                 orientation_opti.append(triplet[1])
         
+        
+
         chemin_plateau = []
         #Si il n'y a qu'un seul chemin optimal, on le choisit
         if len(chemins_opti) == 1:
@@ -167,17 +171,19 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
         
         #On créé une liste des heuristiques triée
         heur_triees = [v for k, v in sorted(dico_heuristique.items(), key=lambda item: item[1])]
+        
+        
         #On cherche les 5 valeurs d'heuristiques maximales si il y a au moins 5 valeurs
         #différentes
         max_heur = []
         j=0
-        while j<len(heur_triees) and len(max_heur)<5:
+        while j<len(heur_triees) and len(max_heur)<3:
             if heur_triees[len(heur_triees)-j-1] not in max_heur :
                 max_heur.append(heur_triees[len(heur_triees)-j-1])
             j += 1
-    
         
-        #On trouve le/les chemin(s) correspondant aux 5 heuristiques maximales
+        
+        #On trouve le/les chemin(s) correspondant aux 3 heuristiques maximales
         for triplet in dico_heuristique.keys():
             if dico_heuristique[triplet] in max_heur :
                 chemins_opti.append(chemins_possibles_total[triplet[0]][triplet[1]][triplet[2]])
@@ -186,7 +192,7 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
                 orientation_opti.append(triplet[1])
                 
             
-        #Retourner un coup parmi les 5 ayant les meilleures heuristiques
+        #Retourner un coup parmi les 3 ayant les meilleures heuristiques
         if output_type=="alea":
             #Les instances de cartes stockées dans les chemins possibles correspondent
             #aux instances du plateau dupliqué, il faut donc retrouver les instances qui
@@ -215,7 +221,7 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
             if len(out)>10:
                 out=rd.sample(out, 10)
         
-    
+
     #Ou bien retourner le coup correspondant à la meilleure heuristique
     return(out)
     
