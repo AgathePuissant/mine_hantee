@@ -267,7 +267,7 @@ class plateau(object):
         
         #La carte qui reste dans pool est la carte à l'exterieur du plateau
         self.carte_a_jouer=carte(compte_id,pool[compte_deplacable],["",""],True)
-#        self.dico_cartes[compte_id] = self.carte_a_jouer
+        self.dico_cartes[compte_id] = self.carte_a_jouer
         
         #Initialisation des joueurs
         #Création des entités de joueurs
@@ -308,8 +308,8 @@ class plateau(object):
         else:
             
             out=True
-            
-            
+        
+            self.dico_cartes[self.carte_a_jouer.id].coord=[x,y]
             
             #Traite tous les cas possible : carte insérée de chaque côté
             
@@ -355,33 +355,22 @@ class plateau(object):
                     
             else :
                 return False
-            
                     
-            #si il y'a un fantome sur la carte sortie, on le place à l'autre bout du plateau        
-            if carte_sauvegardee.id_fantome!=0 : 
-                    self.dico_cartes[self.position[x,y]].id_fantome=carte_sauvegardee.id_fantome
-                    carte_sauvegardee.id_fantome=0 #on supprime le fantôme de la carte sortie
-            
-            #si il y a un joueur sur la carte, on le place à l'autre bout du plateau
-            for joueur in self.dico_joueurs.values() : 
-                if joueur.carte_position==carte_sauvegardee :
-                    joueur.carte_position=self.carte_a_jouer
-
-                    
-            #On echange la carte insérée et celle qui est sortie du plateau, et les attributs nécessaire
-            #coordonnées
-            self.carte_a_jouer.coord=[x,y]
-            carte_sauvegardee.coord=["",""]
-            #id
-            self.carte_a_jouer.id=carte_sauvegardee.id
-            self.dico_cartes[carte_sauvegardee.id]=self.carte_a_jouer
-            carte_sauvegardee.id=int(self.N**2+1)
-            #position
             self.position[x,y]=self.carte_a_jouer.id
-            #finalement, on place la carte sortante dans carte_a_jouer
-            self.carte_a_jouer=carte_sauvegardee
-
-
+                    
+            if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
+                    
+                    self.dico_cartes[self.position[x,y]].id_fantome=carte_sauvegardee.id_fantome #on déplace ce fantôme à l'autre bout du plateau
+                    
+                    carte_sauvegardee.id_fantome=0 #on supprime le fantôme de la carte sortie
+                    
+            for i in range(len(self.dico_joueurs)) : 
+                if carte_sauvegardee.id==self.dico_joueurs[i].carte_position.id :
+                    self.dico_joueurs[i].carte_position=self.dico_cartes[self.position[x,y]]
+                        
+                
+            self.carte_a_jouer=carte_sauvegardee #update la carte à jouer
+            self.carte_a_jouer.coord=[self.N**2,self.N**2]
             
         return out
         
@@ -409,30 +398,42 @@ class plateau(object):
             for i in self.dico_cartes.values():
                 if i.coord == [coord[0],coord[1]-1]:
                     carte_access = i
-            if carte_access.orientation[1] == 0: #Si aucun mur de la carte accessible ne barre le passage
-                cartes_accessibles.append(carte_access)
+            try:
+                if carte_access.orientation[1] == 0: #Si aucun mur de la carte accessible ne barre le passage
+                    cartes_accessibles.append(carte_access)
+            except:
+                pass
             
         if ((coord[1]+1)<self.N and carte.orientation[1]==0):
             #Si on est pas sur l'extrÃªmitÃ© droite du plateau
             for i in self.dico_cartes.values():
                 if i.coord == [coord[0],coord[1]+1]:
                     carte_access = i
-            if carte_access.orientation[3] == 0:
-                cartes_accessibles.append(carte_access)
+            try:
+                if carte_access.orientation[3] == 0:
+                    cartes_accessibles.append(carte_access)
+            except:
+                pass
         
         if ((coord[0]-1)>=0 and carte.orientation[0]==0): #Si on est pas sur l'extrÃªmitÃ© haute du plateau
             for i in self.dico_cartes.values():
                 if i.coord == [coord[0]-1,coord[1]]:
                     carte_access = i
-            if carte_access.orientation[2] == 0:
-                cartes_accessibles.append(carte_access)
+            try:
+                if carte_access.orientation[2] == 0:
+                    cartes_accessibles.append(carte_access)
+            except:
+                pass
         
         if ((coord[0]+1)<self.N and carte.orientation[2]==0): #Si on est pas sur l'extrÃªmitÃ© basse du plateau
             for i in self.dico_cartes.values():
                 if i.coord == [coord[0]+1,coord[1]]:
                     carte_access = i
-            if carte_access.orientation[0] == 0:
-                cartes_accessibles.append(carte_access)
+            try:
+                if carte_access.orientation[0] == 0:
+                    cartes_accessibles.append(carte_access)
+            except:
+                pass
         
         return cartes_accessibles
     
