@@ -391,15 +391,18 @@ class mine_hantee():
                     
                     
     def afficher_commandes(self,debut=False) :
+        """
+        Méthode permettant d'afficher dans la fenêtre les details des 
+        commandes du jeu. 
+        L'utilisateur peut revenir à la partie en appuyant sur 'Espace' 
+        """
     
         self.dico_stop["comm"]=True
         
         while self.dico_stop["comm"]==True :
         
             self.fenetre.blit(self.fond_uni,(0,0))
-            
             self.fenetre.blit(self.police3.render("Commandes",True,pygame.Color("#000000")),(100,100))
-            
             self.fenetre.blit(self.police2.render("R : tourner la carte.",False,pygame.Color("#000000")),(100,200))
             self.fenetre.blit(self.police2.render("Clic sur une carte déplaçable en périphérie du plateau : insérer la carte extérieure.",False,pygame.Color("#000000")),(100,250))
             self.fenetre.blit(self.police2.render("Flèches directionnelles : déplacer le joueur.",False,pygame.Color("#000000")),(100,300))
@@ -409,15 +412,17 @@ class mine_hantee():
             if debut==False:                                                                                         
                 self.fenetre.blit(self.police2.render("Appuyez sur espace pour revenir au jeu.",False,pygame.Color("#000000")),(100,500))
             else:
+                #les commandes sont affichées en début de partie
                 self.fenetre.blit(self.police2.render("Appuyez sur espace pour commencer le jeu.",False,pygame.Color("#000000")),(100,500))                                                                                             
             
+            #actualisation de l'écran
             pygame.display.flip() 
                                                             
             for event in pygame.event.get() :
-                
+                #retour ou lancement de la partie
                 if event.type == KEYDOWN and event.key == K_SPACE :
                     self.dico_stop["comm"]=False
-                    
+                #sortie du jeu   
                 if event.type == pygame.QUIT :
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
                 
@@ -537,12 +542,16 @@ class mine_hantee():
     
                     
     def nouvelle_partie(self):
-        '''
-        Fonction de paramétrisation simple 1
-        demande le nombre de joueurs pour la partie (entre 2,3 et 4) 
-        '''
+        """
+        Méthode de paramétrisation d'une nouvelle partie : étape 1.
+        Demande à l'utilisateur de choisir le nombre de joueurs.
+        L'utilisateur peut valider son choix pour passer à la 
+        deuxième étape de paramétrisation 
+        ou revenir au menu principal. 
+        """
         
         self.nouvelle=True
+        
         #attribution du numéro de la partie
         if self.liste_sauv!=[]:
             self.num_partie=np.max(self.liste_sauv)+1
@@ -614,7 +623,18 @@ class mine_hantee():
     
     def parametrisation_1(self,dico_erreurs={}):
         """
-        Fonction qui lance la paramétrisation des joueurs
+        Méthode de paramétrisation d'une nouvelle partie : étape 2.
+        Demande à l'utilisateur de renseigner les paramètres des 
+        différents joueurs. 
+        
+        Prend en argument : 
+            - dico_erreurs : dictionnaire contenant les paramètres 
+            pour lesquels l'utilisateur a commis une erreur de saisie 
+            ainsi que le type d'erreur (dictionnaire). Par défaut, 
+            l'utilisateur n'a pas commis d'erreurs.
+            
+        L'utilisateur peut valider son choix pour passer à la 3ème étape 
+        de paramétrisation ou revenir à l'étape précédente. 
         """
         
         self.dico_stop['nouvellepartie']=False
@@ -787,11 +807,21 @@ class mine_hantee():
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
     
     def parametrisation_2(self,dico_erreurs={}):
-        '''
-        Fonction qui lance la paramétrisation des paramètres avancés de la partie
-        '''    
-
+        """
+        Méthode de paramétrisation d'une nouvelle partie : étape 3.
+        Demande à l'utilisateur de renseigner les paramètres avancés 
+        de la partie. 
         
+        Prend en argument : 
+            - dico_erreurs : dictionnaire contenant les paramètres 
+            pour lesquels l'utilisateur a commis une erreur de saisie 
+            ainsi que le type d'erreur (dictionnaire). Par défaut, 
+            l'utilisateur n'a pas commis d'erreurs.
+            
+        L'utilisateur peut valider son choix et lancer la partie 
+        ou revenir à l'étape précédente. 
+        """
+       
         self.dico_stop['parametrisation1']=False
         self.dico_stop['parametrisation2']=True
         
