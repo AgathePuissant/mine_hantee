@@ -51,7 +51,7 @@ class ClientChannel(PodSixNet.Channel.Channel):
     def Network_changejoueur(self, data):
         num = data["num"]
         self.gameid = data["gameid"]
-        
+        print("recu change joueur")
         self._server.changejoueur(data,self.gameid, num)
     
     def Network_fin(self, data):
@@ -181,17 +181,22 @@ class Game:
         print("renvoie")
         if num==self.turn:
             self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
+            if self.turn == 0:
+                self.joueur_1.Send(data)
+            else:
+                self.joueur_0.Send(data)
             
-            self.joueur_0.Send(data)
-            self.joueur_1.Send(data)
         
         
     def insertion(self,data, num, coord):
         if num==self.turn:
             self.plateau_jeu.deplace_carte(coord)
             
-            self.joueur_0.Send(data)
-            self.joueur_1.Send(data)
+            if self.turn == 0:
+                self.joueur_1.Send(data)
+            else:
+                self.joueur_0.Send(data)
+            
     
     def deplacement(self,data, num, event):
         
@@ -199,16 +204,26 @@ class Game:
             deplace = self.plateau_jeu.deplace_joueur(num,event)
             self.plateau_jeu.compte_points(num,deplace)
             
-            self.joueur_0.Send(data)
-            self.joueur_1.Send(data)
+            if self.turn == 0:
+                self.joueur_1.Send(data)
+            else:
+                self.joueur_0.Send(data)
+            
             
             
     def changejoueur(self,data, num):
         
         if num==self.turn:
-            self.turn = 0 if self.turn else 1
-            self.joueur_0.Send({"action":"yourturn", "tour":True if self.turn==1 else False})
-            self.joueur_1.Send({"action":"yourturn", "tour":True if self.turn==0 else False})
+            if self.turn == 0:
+                self.turn = 1
+                self.joueur_1.Send({"action":"yourturn", "tour":True})
+                self.joueur_0.Send({"action":"yourturn", "tour":False})
+                
+            else:
+                self.turn = 0
+                self.joueur_0.Send({"action":"yourturn", "tour":True})
+                self.joueur_1.Send({"action":"yourturn", "tour":False})
+            
 
             
     def fin(self,data):
