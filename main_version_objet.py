@@ -52,6 +52,11 @@ class mine_hantee():
         self.dico_stop={}
     
     def menu(self):
+        """
+        Méthode permettant de créer et d'afficher le menu du jeu dans la fenêtre. 
+        A partir de ce menu, l'utilisateur peut lancer une nouvelle partie
+        ou charger une nouvelle partie par l'intermédiaire de boutons. 
+        """
         
         #en cours de modification
         if self.dico_stop=={} : 
@@ -61,28 +66,34 @@ class mine_hantee():
             self.dico_stop["intro"]=True
         else :
             self.dico_stop = dict.fromkeys(self.dico_stop, False)
-    
+        
+        #définition des boutons
         nouvelle_partie_button=Bouton(500,350,200,50,"Nouvelle partie")
         charger_partie_button=Bouton(500,450,200,50,"Charger une partie")
         
         self.nouvelle=False
+  
+        while self.dico_stop["intro"]==True:
         
-    
-        while self.dico_stop["intro"]==True: #Boucle infinie
-                    
-            pygame.display.flip() #Update l'écran
-            self.fenetre.blit(self.fond_menu,(0,0))  #On colle le fond du menu
+            #actualisation de l'écran        
+            pygame.display.flip()
+            #fond du menu
+            self.fenetre.blit(self.fond_menu,(0,0))
             
             self.liste_sauv=glob.glob("sauvegarde*")
             self.liste_sauv=[int(self.liste_sauv[i][-1]) for i in range(len(self.liste_sauv))]
+            
+            #dessin des boutons
             nouvelle_partie_button.draw(self.fenetre)
             charger_partie_button.draw(self.fenetre)
             
-            for event in pygame.event.get(): #Instructions de sortie
+            for event in pygame.event.get():
                 
+                #gestion des événements liés aux boutons
                 nouvelle_partie_button.handle_event(event,self.nouvelle_partie)
                 charger_partie_button.handle_event(event,self.charger_partie)
                 
+                #instructions de sortie
                 if event.type == pygame.QUIT:
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
                     pygame.display.quit()
@@ -330,45 +341,53 @@ class mine_hantee():
             
             
     def fin_du_jeu(self,scores) :
+        """
+        Méthode permettant d'afficher dans la fenêtre un message de fin de jeu contenant : 
+        - le vainqueur de la partie.
+        - le classement des joueurs.
+        - les scores de chaque joueur.
+        - les ordres de mission complétés.
+        
+        L'utilisateur peut alors choisir de quitter le jeu ou de revenir au menu de départ. 
+        """
 
-            print('scores')
-            print(scores)
+        self.dico_stop = dict.fromkeys(self.dico_stop, False)
+        self.dico_stop["fin"]=True
 
-            self.dico_stop = dict.fromkeys(self.dico_stop, False)
-            self.dico_stop["fin"]=True
+        def getKey(elem):
+            return elem[1]
+        
+        #tri des scores pour établir le classement
+        scores.sort(key=getKey,reverse=True)
+        
+        self.fenetre.blit(self.fond_uni,(0,0))
+        self.fenetre.blit(self.police3.render("Fin du jeu !",True,pygame.Color("#000000")),(500,50))
+        self.fenetre.blit(self.police3.render(scores[0][0]+" a gagné!",False,pygame.Color("#000000")),(425,120))
+        self.fenetre.blit(self.police3.render("Scores des joueurs : ",True,pygame.Color("#000000")),(200,200))
+        
+        #définition et dessin du bouton
+        retour_menu_button=Bouton(500,600,200,50,"Retour au menu")
+        retour_menu_button.draw(self.fenetre)
+        
+        #affichage des scores de joueurs
+        for i in range(len(scores)) :
+            self.fenetre.blit(self.police2.render(str(scores[i][0])+" : ",False,pygame.Color("#000000")),(200,275+i*100))
+            self.fenetre.blit(self.police2.render("Score : "+str(scores[i][1]),False,pygame.Color("#000000")),(400,275+i*100))
+            if len(scores[i][2])==0:
+                self.fenetre.blit(self.police2.render("Ordre de mission complété",False,pygame.Color("#000000")),(600,275+i*100))
+            else:
+                self.fenetre.blit(self.police2.render("Ordre de mission non complété",False,pygame.Color("#000000")),(600,275+i*100))
+        
+        #actualisation de la fenêtre
+        pygame.display.flip()
 
-            def getKey(elem):
-                return elem[1]
-
-            scores.sort(key=getKey,reverse=True)
-
-            self.fenetre.blit(self.fond_uni,(0,0))
-            self.fenetre.blit(self.police3.render("Fin du jeu !",True,pygame.Color("#000000")),(500,50))
-            self.fenetre.blit(self.police3.render(scores[0][0]+" a gagné!",False,pygame.Color("#000000")),(425,120))
-            self.fenetre.blit(self.police3.render("Scores des joueurs : ",True,pygame.Color("#000000")),(200,200))
-
-            retour_menu_button=Bouton(500,600,200,50,"Retour au menu")
-
-            retour_menu_button.draw(self.fenetre)
-
-            for i in range(len(scores)) :
-                self.fenetre.blit(self.police2.render(str(scores[i][0])+" : ",False,pygame.Color("#000000")),(200,275+i*100))
-                self.fenetre.blit(self.police2.render("Score : "+str(scores[i][1]),False,pygame.Color("#000000")),(400,275+i*100))
-                if len(scores[i][2])==0:
-                    self.fenetre.blit(self.police2.render("Ordre de mission complété",False,pygame.Color("#000000")),(600,275+i*100))
-                else:
-                    self.fenetre.blit(self.police2.render("Ordre de mission non complété",False,pygame.Color("#000000")),(600,275+i*100))
-
-            pygame.display.flip()
-
-            while self.dico_stop["fin"]==True :
-
-                for event in pygame.event.get() :
-
-                    retour_menu_button.handle_event(event,self.menu)
-
-                    if event.type == pygame.QUIT :
-                        self.dico_stop = dict.fromkeys(self.dico_stop, False)
+        while self.dico_stop["fin"]==True :
+            for event in pygame.event.get() :
+                #gestion des évènements liés au bouton
+                retour_menu_button.handle_event(event,self.menu)
+                #sortie du jeu
+                if event.type == pygame.QUIT :
+                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
                     
                     
     def afficher_commandes(self,debut=False) :
