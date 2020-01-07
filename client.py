@@ -108,6 +108,7 @@ class mine_hantee(ConnectionListener):
         
         self.plateau_jeu.carte_a_jouer.orientation = data["carte_a_jouer_or"]
         
+    
         
     def Network_close(self, data):
         exit()
@@ -336,98 +337,43 @@ class mine_hantee(ConnectionListener):
     
 
     def game(self):
-                
-        #On vérifie que c'est bien au tour de ce joueur
-
+        
+    
         information="" #Initialisation du texte d'erreur
         etape=""
-        
         #self.afficher_commandes(debut=True)
         afficher_commandes_button=Bouton(725,5,150,40,"Commandes")
-        
-        self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
-
-        #premiere etape : rotation et insertion de la carte
-        #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
-        self.dico_stop["test_carte"]=True
-        self.dico_stop["test_entree"]=True
-        
-        
-        while self.dico_stop["test_carte"]!=False and self.turn:
-            
-            self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"inserer-carte"
-            etape="Tourner la carte avec R, cliquer pour insérer"
-            
-            for event in pygame.event.get():   
                 
-                afficher_commandes_button.handle_event(event,self.afficher_commandes)
-                
-                #Si on appuie sur R, rotation de la carte à jouer
-                if event.type == KEYDOWN and event.key == K_r: 
-                    self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
-                    self.Send({"action": "rotation", "num": self.joueur_id, "gameid": self.gameid})
-
-                #ajouter la carte lorsque l'utilisateur clique dans le plateau
-                
-                elif event.type == MOUSEBUTTONDOWN : 
-                    #clic gauche : insertion de la carte à jouer
-                    if event.button==1: 
-
-                        coord=[int(math.floor(event.pos[1]/700*self.plateau_jeu.N)),int(math.floor(event.pos[0]/700*self.plateau_jeu.N))]
-                        
-                        test_inser=self.plateau_jeu.deplace_carte(coord)
-                       
-                        if test_inser==False :
-                            information=["Insertion impossible"]
-                        #Sinon, on finit cette section du tour
-
-                        else :
-                            information=""
-                            self.Send({"action": "insertion", "coord":coord, "num": self.joueur_id, "gameid": self.gameid})
-
-                            self.dico_stop["test_carte"]=False
-                            
-
-                elif event.type == KEYDOWN and event.key == K_SPACE :
-                    self.pause()
-                
-                elif event.type == QUIT:
-                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
-                    
+        if self.turn == False:
             self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
-                                        
-                                
-        #2e etape : On parcours les évènements tant que le joueur n'a pas appuyé sur entrée ou tant qu'il peut encore se déplacer
-        #initialisation à la position du joueur
-        
-        carte_actuelle=self.joueur_ent.carte_position
-        self.joueur_ent.cartes_explorees=[carte_actuelle]
-        cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
-        self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"deplacement"
-        information=""
-        
-        #initialiser un marqueur pour l'animation de capture du fantôme
-        premiere_capture=True
-        #parcours des evenements
-        #Tant que le joueur ne passe pas son tour et peut encore se deplacer
-        while self.dico_stop["test_entree"]==True and len(cartes_accessibles)>0 and self.turn:
+            pygame.event.pump()
+            connection.Pump()
+            self.Pump()
             
-            etape="Déplacer avec les flèches, entrée pour finir"
+        else:
             
-            for event in pygame.event.get():
+            
+            self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
+    
+            #premiere etape : rotation et insertion de la carte
+            #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
+            self.dico_stop["test_carte"]=True
+            self.dico_stop["test_entree"]=True
+            
+            
+            while self.dico_stop["test_carte"]!=False:
                 
-                #Correction pour supprimer les cartes explorees des cartes accessibles
-                for carte_ex in self.joueur_ent.cartes_explorees:
-                    if carte_ex in cartes_accessibles:
-                        cartes_accessibles.remove(carte_ex)
-                        
-                afficher_commandes_button.handle_event(event,self.afficher_commandes)
+                self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"inserer-carte"
+                etape="Tourner la carte avec R, cliquer pour insérer"
                 
+
+                for event in pygame.event.get():   
+
                 #deplacement
                 if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
-                    deplace = self.plateau_jeu.deplace_joueur(j,event.key)
+                    deplace = self.plateau_jeu.deplace_joueur(self.joueur_ent.id,event.key)
                     if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
-                        information=self.plateau_jeu.compte_points(j,deplace)
+                        information=self.plateau_jeu.compte_points(self.joueur_ent.id,deplace)
                         self.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
                         #si le joueur capture un fantome, on lance l'animation de capture
                         if self.joueur_ent.capture_fantome == True and premiere_capture==True:
@@ -435,39 +381,115 @@ class mine_hantee(ConnectionListener):
                             premiere_capture=False
                     else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                         information=deplace
-                    
-                    self.joueur_ent.cartes_explorees.append(carte_actuelle)
-                    carte_actuelle=self.joueur_ent.carte_position
-                    cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
-                    
-                #fin de tour
-                if event.type == KEYDOWN and (event.key== K_RETURN):
-                    self.dico_stop["test_entree"]=False
-                    self.Send({"action": "changejoueur", "num": self.joueur_id, "gameid": self.gameid})
 
-                    information=""
+                    afficher_commandes_button.handle_event(event,self.afficher_commandes)
+                    
+                    #Si on appuie sur R, rotation de la carte à jouer
+                    if event.type == KEYDOWN and event.key == K_r: 
+                        self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
+                        self.Send({"action": "rotation", "num": self.joueur_id, "gameid": self.gameid})
+    
+                    #ajouter la carte lorsque l'utilisateur clique dans le plateau
+                    
+                    elif event.type == MOUSEBUTTONDOWN : 
+                        #clic gauche : insertion de la carte à jouer
+                        if event.button==1: 
+    
+                            coord=[int(math.floor(event.pos[1]/700*self.plateau_jeu.N)),int(math.floor(event.pos[0]/700*self.plateau_jeu.N))]
+                            
+                            test_inser=self.plateau_jeu.deplace_carte(coord)
+                           
+                            if test_inser==False :
+                                information=["Insertion impossible"]
+                            #Sinon, on finit cette section du tour
+    
+                            else :
+                                information=""
+                                self.Send({"action": "insertion", "coord":coord, "num": self.joueur_id, "gameid": self.gameid})
+    
+                                self.dico_stop["test_carte"]=False
+                                
+    
+                    elif event.type == KEYDOWN and event.key == K_SPACE :
+                        self.pause()
+                    
+                    elif event.type == QUIT:
+                        self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                        
+                self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
+                                            
+                                    
+            #2e etape : On parcours les évènements tant que le joueur n'a pas appuyé sur entrée ou tant qu'il peut encore se déplacer
+            #initialisation à la position du joueur
+            
+            carte_actuelle=self.joueur_ent.carte_position
+            self.joueur_ent.cartes_explorees=[carte_actuelle]
+            cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
+            self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"deplacement"
+            information=""
+            
+            #initialiser un marqueur pour l'animation de capture du fantôme
+            premiere_capture=True
+            #parcours des evenements
+            #Tant que le joueur ne passe pas son tour et peut encore se deplacer
+            while self.dico_stop["test_entree"]==True and len(cartes_accessibles)>0:
                 
+                etape="Déplacer avec les flèches, entrée pour finir"
+                
+                for event in pygame.event.get():
                     
-                elif event.type == KEYDOWN and event.key == K_SPACE :
-                    pause()
+                    #Correction pour supprimer les cartes explorees des cartes accessibles
+                    for carte_ex in self.joueur_ent.cartes_explorees:
+                        if carte_ex in cartes_accessibles:
+                            cartes_accessibles.remove(carte_ex)
+                            
+                    afficher_commandes_button.handle_event(event,self.afficher_commandes)
                     
-                elif event.type == QUIT:
-                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                    #deplacement
+                    if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
+                        deplace = self.plateau_jeu.deplace_joueur(j,event.key)
+                        if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
+                            information=self.plateau_jeu.compte_points(j,deplace)
+                            self.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
+                            #si le joueur capture un fantome, on lance l'animation de capture
+                            if self.joueur_ent.capture_fantome == True and premiere_capture==True:
+                                clip.preview()
+                                premiere_capture=False
+                        else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
+                            information=deplace
+                        
+                        self.joueur_ent.cartes_explorees.append(carte_actuelle)
+                        carte_actuelle=self.joueur_ent.carte_position
+                        cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
+                        
+                    #fin de tour
+                    if event.type == KEYDOWN and (event.key== K_RETURN):
+                        self.dico_stop["test_entree"]=False
+                        self.Send({"action": "changejoueur", "num": self.joueur_id, "gameid": self.gameid})
+    
+                        information=""
                     
-            #Update l'écran                                                                
-            self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
-
-
-        #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
-        self.joueur_ent.cartes_explorees = [carte_actuelle]
-        self.joueur_ent.capture_fantome = False
-        
-
-        if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
+                        
+                    elif event.type == KEYDOWN and event.key == K_SPACE :
+                        pause()
+                        
+                    elif event.type == QUIT:
+                        self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                        
+                #Update l'écran                                                                
+                self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
+    
+    
+            #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
+            self.joueur_ent.cartes_explorees = [carte_actuelle]
+            self.joueur_ent.capture_fantome = False
             
-            #self.fin_du_jeu([[j.nom,j.points] for j in self.plateau_jeu.dico_joueurs])
-            self.Send({"action": "fin", "gameid": self.gameid})
-            
+    
+            if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
+                
+                #self.fin_du_jeu([[j.nom,j.points] for j in self.plateau_jeu.dico_joueurs])
+                self.Send({"action": "fin", "gameid": self.gameid})
+                
 
 
                  
