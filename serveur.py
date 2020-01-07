@@ -21,6 +21,9 @@ class ClientChannel(PodSixNet.Channel.Channel):
     def Network(self, data):
         print(data)
     
+    def Network_myaction(self, data):
+        print("myaction:", data)
+        
         
     def Network_rotation(self, data):
         num = data["num"]
@@ -82,7 +85,7 @@ class MineServer(PodSixNet.Server.Server):
         else:
             channel.gameid=self.currentIndex
             self.queue.append(channel)
-            self.games.append(self.queue)
+            self.games.append(channel)
             plat = Game(self.queue, self.currentIndex).plateau_jeu
             
             data0 = {"action": "startgame", "gameid": self.currentIndex}
@@ -232,7 +235,7 @@ MineServe=MineServer(localaddr=(host, int(port)))
 #MineServe=MineServer()
 while True:
     MineServe.Pump()
-    sleep(0.01)
+    sleep(0.001)
     
     
 #dico_parametres = {'dimensions_plateau': '7', 'nb_fantomes': '21', 'nb_joueurs': '2', 'mode_joueur_1': 'manuel', 'mode_joueur_2': 'manuel', 'mode_joueur_3': 'manuel', 'mode_joueur_4': 'manuel', 'niveau_ia_1': '1', 'niveau_ia_2': '1', 'niveau_ia_3': '1', 'niveau_ia_4': '1', 'pseudo_joueur_1': 0, 'pseudo_joueur_2': 1, 'pseudo_joueur_3': '', 'pseudo_joueur_4': '', 'nb_fantomes_mission': '3', 'nb_joker': '1', 'points_pepite': '1', 'points_fantome': '5', 'points_fantome_mission': '20', 'bonus_mission': '40'}
