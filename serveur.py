@@ -18,6 +18,8 @@ from IA import *
 
 #Each time a client connects, a new Channel based class will be created
 class ClientChannel(PodSixNet.Channel.Channel):
+    
+    
     def Network(self, data):
         print(data)
     
@@ -85,9 +87,9 @@ class MineServer(PodSixNet.Server.Server):
         else:
             channel.gameid=self.currentIndex
             self.queue.append(channel)
-            self.games.append(channel)
-            plat = Game(self.queue, self.currentIndex).plateau_jeu
-            
+            jeu = Game(self.queue, self.currentIndex)
+            plat = jeu.plateau_jeu
+            self.games.append(jeu)
             data0 = {"action": "startgame", "gameid": self.currentIndex}
             
             fant_target0 = plat.dico_joueurs[0].fantome_target
@@ -124,10 +126,11 @@ class MineServer(PodSixNet.Server.Server):
         
     
     def rotation(self, data, gameid, num):
+        print("recu2")
         game = [a for a in self.games if a.gameid==gameid]
         if len(game)==1:
             game[0].rotation(data, num)
-        print("recu2")
+        
     
     def insertion(self, data, gameid, num, coord):
         game = [a for a in self.games if a.gameid==gameid]
@@ -175,12 +178,12 @@ class Game:
         
     
     def rotation(self,data,num):
+        print("renvoie")
         if num==self.turn:
             self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
             
             self.joueur_0.Send(data)
             self.joueur_1.Send(data)
-        print("renvoie")
         
         
     def insertion(self,data, num, coord):
