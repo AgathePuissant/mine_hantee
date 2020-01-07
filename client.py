@@ -118,17 +118,17 @@ class mine_hantee(ConnectionListener):
         self.turn = data["tour"]
         
     def Network_rotation(self, data):
-        if data["num"] != self.joueur_id:
-            self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
+        #if data["num"] != self.joueur_id:
+        self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
             
     def Network_insertion(self, data):
-        if data["num"] != self.joueur_id:
-            self.plateau_jeu.deplace_carte(data["coord"])
+        #if data["num"] != self.joueur_id:
+        self.plateau_jeu.deplace_carte(data["coord"])
     
     def Network_deplacement(self, data):
-        if data["num"] != self.joueur_id:
-            deplace = self.plateau_jeu.deplace_joueur(data["num"],data["event"])
-            self.plateau_jeu.compte_points(data["num"],deplace)
+        #if data["num"] != self.joueur_id:
+        deplace = self.plateau_jeu.deplace_joueur(data["num"],data["event"])
+        self.plateau_jeu.compte_points(data["num"],deplace)
 
     def Network_victoire(self,data):
         
@@ -425,7 +425,7 @@ class mine_hantee(ConnectionListener):
             premiere_capture=True
             #parcours des evenements
             #Tant que le joueur ne passe pas son tour et peut encore se deplacer
-            while self.dico_stop["test_entree"]==True and len(cartes_accessibles)>0:
+            while self.dico_stop["test_entree"]==True:
                 
                 etape="Déplacer avec les flèches, entrée pour finir"
                 
