@@ -118,15 +118,15 @@ class mine_hantee(ConnectionListener):
         self.turn = data["tour"]
         
     def Network_rotation(self, data):
-        if data["num"] != joueur_id:
+        if data["num"] != self.joueur_id:
             self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
             
     def Network_insertion(self, data):
-        if data["num"] != joueur_id:
+        if data["num"] != self.joueur_id:
             self.plateau_jeu.deplace_carte(data["coord"])
     
     def Network_deplacement(self, data):
-        if data["num"] != joueur_id:
+        if data["num"] != self.joueur_id:
             deplace = self.plateau_jeu.deplace_joueur(data["num"],data["event"])
             self.plateau_jeu.compte_points(data["num"],deplace)
 
@@ -440,9 +440,9 @@ class mine_hantee(ConnectionListener):
                     
                     #deplacement
                     if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
-                        deplace = self.plateau_jeu.deplace_joueur(j,event.key)
+                        deplace = self.plateau_jeu.deplace_joueur(self.joueur_id,event.key)
                         if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
-                            information=self.plateau_jeu.compte_points(j,deplace)
+                            information=self.plateau_jeu.compte_points(self.joueur_id,deplace)
                             self.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
                             self.Pump()
                             connection.Pump()
