@@ -6,6 +6,7 @@ import time as time
 import copy as copy
 import random as rd
 import numpy as np
+import pygame
 
 def IA_monte_carlo(plateau_en_cours,joueur_id, reps, liste_coups=[], profondeur="fin"):
     """
@@ -26,6 +27,7 @@ def IA_monte_carlo(plateau_en_cours,joueur_id, reps, liste_coups=[], profondeur=
         progression+=1
         print("progression :"+str(progression/len(liste_coups_copy)*100)+"%")
         for essai in range(reps):
+            pygame.event.pump()
             copie=0
             copie=copy.deepcopy(plateau_en_cours)
             copie.joue_coup(coup, joueur_id)
