@@ -252,7 +252,7 @@ class mine_hantee():
                                     
                                     #Sinon, on finit cette section du tour
                                     else :
-                                        information=""
+                                        information=[""]
                                        
                                         self.dico_stop["test_carte"]=False
                                         
@@ -278,7 +278,7 @@ class mine_hantee():
                     
                     #mise à jour de l'étape de jeu
                     self.plateau_jeu.etape_jeu=joueur.nom+"_"+"deplacement"
-                    information=""
+                    information=[""]
                     
                     #initialiser un marqueur pour l'animation de capture du fantôme
                     premiere_capture=True
@@ -321,7 +321,7 @@ class mine_hantee():
                             #fin de tour : "test_entree" est assigné à False, on sort de la boucle de deplacement
                             if event.type == KEYDOWN and (event.key== K_RETURN):
                                 self.dico_stop["test_entree"]=False
-                                information=""
+                                information=[""]
                             
                                 
                             #Si on appuie sur entrée, déclenchement de la pause   
@@ -419,7 +419,7 @@ class mine_hantee():
 
         #deplacement du joueur et decompte des points
         self.plateau_jeu.etape_jeu=joueur.nom+"_"+"deplacement"
-        information=""
+        information=[""]
         for i in chemin :
             pygame.event.pump()
             joueur.carte_position = i
