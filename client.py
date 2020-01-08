@@ -77,14 +77,15 @@ class mine_hantee(ConnectionListener):
             connection.Pump()
             sleep(0.01)
             
-            
-            
+
     def Network_startgame(self, data):
+        
+        print("startgame")
         self.running=True
         self.joueur_id=data["joueur_id"]
         self.gameid=data["gameid"]
 
-        
+
         if self.joueur_id==0:
             self.turn=True
             joueur_0 = "Moi"
@@ -108,19 +109,21 @@ class mine_hantee(ConnectionListener):
             self.plateau_jeu.dico_cartes[i].id_fantome = data[str(i)+"_cartefant"]
         
         self.plateau_jeu.carte_a_jouer.orientation = data["carte_a_jouer_or"]
-        
-    
+
         
     def Network_close(self, data):
         exit()
         
-    def Network_yourturn(self, data):
+    def Network_changejoueur(self, data):
+        print("c'est pas mon tour")
         self.turn = data["tour"]
+        
         
     def Network_rotation(self, data):
         #if data["num"] != self.joueur_id:
         self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
-            
+        print("rotation recue 1")
+        
     def Network_insertion(self, data):
         #if data["num"] != self.joueur_id:
         self.plateau_jeu.deplace_carte(data["coord"])
@@ -129,6 +132,7 @@ class mine_hantee(ConnectionListener):
         #if data["num"] != self.joueur_id:
         deplace = self.plateau_jeu.deplace_joueur(data["num"],data["event"])
         self.plateau_jeu.compte_points(data["num"],deplace)
+
 
     def Network_victoire(self,data):
         
@@ -178,6 +182,8 @@ class mine_hantee(ConnectionListener):
         fleche2= pygame.image.load("fleche2.png").convert_alpha()
         fleche3= pygame.image.load("fleche3.png").convert_alpha()
         fleche4= pygame.image.load("fleche4.png").convert_alpha()
+
+    
         
         #Chargement du fond dans la fenetre 
         fenetre.blit(fond_ext,(0,0))
@@ -259,6 +265,10 @@ class mine_hantee(ConnectionListener):
                     fenetre.blit(fantome,(y,x))
                     fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(y+10,x+30))
                            
+        for i in range(len(plat.dico_joueurs)) :
+            x=plat.dico_joueurs[i].carte_position.coord[0]*int(100*7/N)
+            y=plat.dico_joueurs[i].carte_position.coord[1]*int(100*7/N)
+            fenetre.blit(liste_im_joueur[i],(y,x))
         #On met des flèches là ou les insertions sont possibles
         for i in plat.insertions_possibles :
             if i[0]==0 :
@@ -281,8 +291,8 @@ class mine_hantee(ConnectionListener):
         for i in range(len(plat.dico_joueurs)) :
             x=plat.dico_joueurs[i].carte_position.coord[0]*int(100*7/N)+((((100*7/N))/2)-int(x_joueur*(7/N))/2)
             y=plat.dico_joueurs[i].carte_position.coord[1]*int(100*7/N)+((((100*7/N))/2)-int(y_joueur*(7/N))/2)
-            fenetre.blit(liste_im_joueur[i],(y,x))  
-            
+            fenetre.blit(liste_im_joueur[i],(y,x))
+        
         #on place la carte à jouer dans le coin droite haut du plateau 
         x=750
         y=50
@@ -306,6 +316,7 @@ class mine_hantee(ConnectionListener):
         """
         fonction pour actualiser l'affichage dans la fonction jeu
         """
+
         self.affiche_plateau(plateau,fenetre)
         liste_im_joueur = [pygame.image.load("joueur"+str(i)+".png").convert_alpha() for i in range(1,5)]
         for i in range (4) :
@@ -320,7 +331,7 @@ class mine_hantee(ConnectionListener):
                     fenetre.blit(police.render("Ordre de mission : "+str(sorted(plateau.dico_joueurs[i].fantome_target)),False,pygame.Color("#000000")),(800,340+i*80+40))
     
         #test texte pour afficher le joueur qui joue
-        if self.turn:
+        if self.turn == True :
             fenetre.blit(police.render("C'est à vous de jouer",False,pygame.Color(0,0,0)),(800,240))
         else:
             fenetre.blit(police.render("C'est le tour de votre adversaire",False,pygame.Color(0,0,0)),(800,240))
@@ -345,6 +356,7 @@ class mine_hantee(ConnectionListener):
         etape=""
         #self.afficher_commandes(debut=True)
         afficher_commandes_button=Bouton(725,5,150,40,"Commandes")
+        self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
                 
         if self.turn == False:
             self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
@@ -353,8 +365,7 @@ class mine_hantee(ConnectionListener):
             #self.Pump()
             
         else:
-            
-            
+              
             self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
     
             #premiere etape : rotation et insertion de la carte
@@ -421,8 +432,6 @@ class mine_hantee(ConnectionListener):
             self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"deplacement"
             information=""
             
-            #initialiser un marqueur pour l'animation de capture du fantôme
-            premiere_capture=True
             #parcours des evenements
             #Tant que le joueur ne passe pas son tour et peut encore se deplacer
             while self.dico_stop["test_entree"]==True:
@@ -443,13 +452,10 @@ class mine_hantee(ConnectionListener):
                         deplace = self.plateau_jeu.deplace_joueur(self.joueur_id,event.key)
                         if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
                             information=self.plateau_jeu.compte_points(self.joueur_id,deplace)
-                            self.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
+                            connection.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
                             self.Pump()
                             connection.Pump()
-                            #si le joueur capture un fantome, on lance l'animation de capture
-                            if self.joueur_ent.capture_fantome == True and premiere_capture==True:
-                                clip.preview()
-                                premiere_capture=False
+
                         else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                             information=deplace
                         
@@ -460,7 +466,7 @@ class mine_hantee(ConnectionListener):
                     #fin de tour
                     if event.type == KEYDOWN and (event.key== K_RETURN):
                         self.dico_stop["test_entree"]=False
-                        self.Send({"action": "changejoueur", "num": self.joueur_id, "gameid": self.gameid})
+                        connection.Send({"action": "changejoueur", "num": self.joueur_id, "gameid": self.gameid})
                         self.Pump()
                         connection.Pump()
                         information=""
