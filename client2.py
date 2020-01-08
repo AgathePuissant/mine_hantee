@@ -122,7 +122,7 @@ class mine_hantee(ConnectionListener):
     def Network_rotation(self, data):
         #if data["num"] != self.joueur_id:
         self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
-
+        print("rotation recue")
         
     def Network_insertion(self, data):
         #if data["num"] != self.joueur_id:
@@ -359,11 +359,12 @@ class mine_hantee(ConnectionListener):
         self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
                 
         if self.turn == False:
+            for event in pygame.event.get(): 
+                afficher_commandes_button.handle_event(event,self.afficher_commandes)
             self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
             pygame.event.pump()
-            #connection.Pump()
-            #self.Pump()
             
+
         else:
               
             self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
@@ -485,6 +486,9 @@ class mine_hantee(ConnectionListener):
                 self.Send({"action": "fin", "gameid": self.gameid})
                 self.Pump()
                 connection.Pump()
+                
+        self.Pump()
+        connection.Pump()  
 
 
                  
