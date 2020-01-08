@@ -96,8 +96,7 @@ class mine_hantee():
                 #instructions de sortie
                 if event.type == pygame.QUIT:
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
-                    pygame.display.quit()
-                    pygame.quit()
+                    
         
             
     
@@ -960,4 +959,5 @@ mn = mine_hantee()
 
 mn.menu()
 
+pygame.display.quit()
 pygame.quit()
