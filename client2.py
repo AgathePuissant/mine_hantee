@@ -165,7 +165,19 @@ class mine_hantee(ConnectionListener):
 
 
     def affiche_plateau(self,plat,fenetre):
-    
+        """
+        Fonction permettant d'afficher une instance de la classe plateau 
+        dans la fenêtre pyGame. 
+        
+        Prend en entrée :
+            - plat : plateau de jeu (plateau).
+            - fenetre : fenetre pyGame (fenetre). 
+        
+        Charge l'ensembles des objets graphiques nécessaires au plateau dans pyGame
+        et affiche place ces objets dans la fenêtre en fonction des paramètres
+        du plateau. 
+        """
+        
         #Création des images nécesssaires au plateau
         #fond = pygame.image.load("fond.jpg").convert()
         fond_ext = pygame.image.load("fond_ext.png").convert()
@@ -176,14 +188,13 @@ class mine_hantee(ConnectionListener):
         liste_im_joueur = [pygame.image.load("joueur"+str(i)+".png").convert_alpha() for i in range(1,5)]
         fond_a_jouer = pygame.image.load("fond_carte_a_jouer.jpg").convert()
         fantome = pygame.image.load("fantome.png").convert_alpha()
+        fantome_cible = pygame.image.load("fantome_cible.png").convert_alpha()
         pepite = pygame.image.load("pepite.png").convert_alpha()
         indeplacable = pygame.image.load("indeplacable.png").convert_alpha()
         fleche1= pygame.image.load("fleche1.png").convert_alpha()
         fleche2= pygame.image.load("fleche2.png").convert_alpha()
         fleche3= pygame.image.load("fleche3.png").convert_alpha()
         fleche4= pygame.image.load("fleche4.png").convert_alpha()
-
-    
         
         #Chargement du fond dans la fenetre 
         fenetre.blit(fond_ext,(0,0))
@@ -235,17 +246,18 @@ class mine_hantee(ConnectionListener):
         #Création de la police du jeu
         police = pygame.font.SysFont("calibri", int(20*7/N), bold=True) #Load font object.
         
+        #Affichage des cases du plateau
         for i in range(len(plat.position)) :
             for j in range(len(plat.position)) :
                 x=plat.dico_cartes[plat.position[i,j]].coord[0]*int(100*7/N)
                 y=plat.dico_cartes[plat.position[i,j]].coord[1]*int(100*7/N)
                 fenetre.blit(fond_a_jouer,(y,x))
     
-    # Si on veut ajouter un graphisme pour les cartes déplaçables et indéplaçables
-                           
+                # Ajout d'un graphisme pour les cartes déplaçables et indéplaçable   
                 if plat.dico_cartes[plat.position[i,j]].deplacable==False :
                     fenetre.blit(indeplacable,(y,x))
                 
+                # Affichage des murs
                 for k in range(len(plat.dico_cartes[plat.position[i,j]].orientation)) :
                     #fenetre.blit(fond_a_jouer,(y,x))
                     if plat.dico_cartes[plat.position[i,j]].orientation[k]==1 :
@@ -258,17 +270,21 @@ class mine_hantee(ConnectionListener):
                         elif k==3 :
                             fenetre.blit(mur3,(y,x))
                            
-                           
+                #affichage des pépites           
                 if plat.dico_cartes[plat.position[i,j]].presence_pepite==True:
                     fenetre.blit(pepite,(y,x))
+                    
+                #affichage des fantomes
                 if plat.dico_cartes[plat.position[i,j]].id_fantome!=0 :
-                    fenetre.blit(fantome,(y,x))
+                    if plat.dico_cartes[plat.position[i,j]].id_fantome == plat.id_dernier_fantome+1 :
+                        #le fantome cible est affiché en rouge
+                        fenetre.blit(fantome_cible,(y,x))
+                    else :
+                        #les autres fantomes sont affichés en orange
+                        fenetre.blit(fantome,(y,x))
+                    #les numréos des fantomes sont affichés à côté de chaque fantome
                     fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(y+10,x+30))
-                           
-        for i in range(len(plat.dico_joueurs)) :
-            x=plat.dico_joueurs[i].carte_position.coord[0]*int(100*7/N)
-            y=plat.dico_joueurs[i].carte_position.coord[1]*int(100*7/N)
-            fenetre.blit(liste_im_joueur[i],(y,x))
+        
         #On met des flèches là ou les insertions sont possibles
         for i in plat.insertions_possibles :
             if i[0]==0 :
@@ -287,16 +303,17 @@ class mine_hantee(ConnectionListener):
                 x=i[0]*int(100*7/N)+((((100*7/N))/2)-int(x_fleche2*(7/N))/2)
                 y=i[1]*int(100*7/N)+((((100*7/N))/2)-int(y_fleche2*(7/N))/2)
                 fenetre.blit(fleche2,(y,x))
-                               
+                                   
         for i in range(len(plat.dico_joueurs)) :
             x=plat.dico_joueurs[i].carte_position.coord[0]*int(100*7/N)+((((100*7/N))/2)-int(x_joueur*(7/N))/2)
             y=plat.dico_joueurs[i].carte_position.coord[1]*int(100*7/N)+((((100*7/N))/2)-int(y_joueur*(7/N))/2)
-            fenetre.blit(liste_im_joueur[i],(y,x))
-        
+            fenetre.blit(liste_im_joueur[i],(y,x))                   
+            
         #on place la carte à jouer dans le coin droite haut du plateau 
         x=750
         y=50
         fenetre.blit(fond_a_jouer,(x,y))
+        #avec ses murs
         for k in range(len(plat.carte_a_jouer.orientation)):
             if plat.carte_a_jouer.orientation[k]==1 :
                 if k==0 :
@@ -307,7 +324,7 @@ class mine_hantee(ConnectionListener):
                    fenetre.blit(mur2,(x,y))
                 elif k==3 :
                    fenetre.blit(mur3,(x,y))
-        
+        #et sa pépite éventuellement
         if plat.carte_a_jouer.presence_pepite==True:
             fenetre.blit(pepite,(x,y))
                
