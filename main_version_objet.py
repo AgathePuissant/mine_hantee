@@ -203,7 +203,7 @@ class mine_hantee():
                 information="" 
                 etape="" 
                 
-                #Pour facilité d'écriture
+                #Pour facilité l'écriture
                 joueur=self.plateau_jeu.dico_joueurs[j]
                 
                 #actualisation de la fenêtre à chaque début de tour
@@ -268,12 +268,15 @@ class mine_hantee():
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                        
 
-                    #2e etape : On parcours les évènements tant que le joueur n'a pas appuyé sur entrée ou tant qu'il peut encore se déplacer
+                    #2e etape : On parcoure les évènements tant que le joueur n'a pas appuyé sur entrée ou tant qu'il peut encore se déplacer
+                    
                     #initialisation à la position du joueur
                     
                     carte_actuelle=joueur.carte_position
                     joueur.cartes_explorees=[carte_actuelle]
                     cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
+                    
+                    #Mise à jour de l'étape du jeu et réinitialisation du message d'information
                     self.plateau_jeu.etape_jeu=joueur.nom+"_"+"deplacement"
                     information=""
                     
@@ -287,14 +290,15 @@ class mine_hantee():
                         
                         for event in pygame.event.get():
                             
-                            #Correction pour supprimer les cartes explorees des cartes accessibles
+                            #Correction pour supprimer les cartes explorées des cartes accessibles
                             for carte_ex in joueur.cartes_explorees:
                                 if carte_ex in cartes_accessibles:
                                     cartes_accessibles.remove(carte_ex)
                                     
+                            #gestion des évènements liés au bouton
                             afficher_commandes_button.handle_event(event,self.afficher_commandes)
                             
-                            #deplacement
+                            #déplacement si l'utilisateur appuie sur les touches directionnelles
                             if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
                                 deplace = self.plateau_jeu.deplace_joueur(j,event.key)
                                 if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
@@ -306,7 +310,7 @@ class mine_hantee():
                                 else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                                     information=deplace
 
-                                
+                                #On actualise les cartes explorées, la position du joueur et les cartes qui lui sont accessibles.
                                 joueur.cartes_explorees.append(carte_actuelle)
                                 carte_actuelle=joueur.carte_position
                                 cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
@@ -314,23 +318,25 @@ class mine_hantee():
                             
 
                                 
-                            #fin de tour
+                            #fin de tour si l'utilisateur appuie sur entrée
                             if event.type == KEYDOWN and (event.key== K_RETURN):
                                 self.dico_stop["test_entree"]=False
                                 information=""
                             
                                 
-                                
+                            #lancement de la fonction pause si l'utilisateur appuie sur espace  
                             elif event.type == KEYDOWN and event.key == K_SPACE :
                                 pause()
                                 
+                            #Instructions de sortie
                             elif event.type == QUIT:
                                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
                                 
-                        #Update l'écran                                                                
+                        #Actualisation de l'écran                                                              
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
         
-                            
+                  
+                #Si le joueur est un joueur artificiel, on lance la fonction du fichier IA qui correspond à son niveau et le jeu se déroule tout seul
                 else:
                     self.plateau_jeu.etape_jeu=joueur.nom+"_"+"inserer-carte"
            
@@ -348,28 +354,25 @@ class mine_hantee():
 
     
                     coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
-                    #print("insertion : "+str(coord_inser))
-                    #print("chemin :"+str([carte.coord for carte in chemin]))
+                    
                     #On tourne la carte
                     for i in range(orientation):
-                        pygame.event.pump()
+                        pygame.event.pump() #Sert à indiquer que le jeu est toujours en cours par le pompage des actions (on ne va rien en faire)
                         self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
                         pygame.time.wait(200)
                         pygame.event.pump()
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                     
-                    #print("insertion")
+                    #Insertion de la carte
                     self.plateau_jeu.deplace_carte(coord_inser) #On l'insère
                     pygame.time.wait(200)
                     pygame.event.pump()
                     actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                     pygame.event.pump()
-                    #print("deplacement")
-                    #deplacement du joueur et decompte des points
+                    
+                    #déplacement du joueur et décompte des points
                     information=""
                     for i in chemin :
-                        #print("cartes accessibles")
-                        #print([carte.coord for carte in self.plateau_jeu.cartes_accessibles1(i)])
                         pygame.event.pump()
                         joueur.carte_position = i
                         information=self.plateau_jeu.compte_points(j,i)
@@ -378,16 +381,19 @@ class mine_hantee():
                         pygame.event.pump()
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                     
-                    #print("fin")
+                    
                 #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
                 joueur.cartes_explorees = [carte_actuelle]
                 joueur.capture_fantome = False
 
-                
+                #Si l'utilisateur a lancé les instructions de sortie, on sort de la boucle des tours
                 if self.dico_stop["test_carte"]==False and self.dico_stop["test_entree"]==False and self.dico_stop["rester_jeu"]==False:
                     break
-            
+        
+        #Conditions à réunir pour lancer la méthode de fin de jeu
         if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
+            
+            #Récupération des scores
             scores=[]
             for j in self.plateau_jeu.dico_joueurs:
                 joueur=self.plateau_jeu.dico_joueurs[j]
