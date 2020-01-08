@@ -580,17 +580,22 @@ class mine_hantee():
             #Actualisation de l'écran
             pygame.display.flip()    
             
-            for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+            #On parcoure la liste de tous les événements reçus
+            for event in pygame.event.get():   
                 
+                #Gestion des évènements liés aux boutons
                 lancer_partie_button.handle_event(event,self.game)
                 
                 retour.handle_event(event,self.charger_partie)
                 
-                if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                #Instruction de sortie du jeu
+                if event.type == QUIT :
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
 
         
     def charger_partie(self):
+        '''
+        '''
         
         self.dico_stop = dict.fromkeys(self.dico_stop, False)
         self.dico_stop["charger"]=True
