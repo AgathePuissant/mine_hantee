@@ -81,7 +81,7 @@ class joueur(object):
         self.niveau = niveau
         self.fantome_target = fantome_target
         self.carte_position = carte_position
-        self.nb_joker=0
+        self.nb_joker=1
         self.points = 0
         self.cartes_explorees = [carte_position]
         self.capture_fantome = False
