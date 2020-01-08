@@ -507,16 +507,13 @@ class mine_hantee():
         #Activation de la méthode
         self.dico_stop["pause"]=True
         
-        #Initialisation du texte en cas de sauvegarde
-        texte_sauv=""
-        
         #Création des boutons pour lancer la méthode sauvegarder et la méthode menu.
         sauvegarder_button=Bouton(550,350,200,50,"Sauvegarder")
         retour_menu_button=Bouton(550,450,200,50,"Retour au menu")
         
         while self.dico_stop["pause"]==True :
                     
-            
+            #Affichage de l'écran de pause
             self.fenetre.blit(self.fond_uni,(0,0))
         
             self.fenetre.blit(self.police.render("Pause",True,pygame.Color("#000000")),(600,200))
@@ -524,27 +521,33 @@ class mine_hantee():
             sauvegarder_button.draw(self.fenetre)
             retour_menu_button.draw(self.fenetre)
                                       
-            self.fenetre.blit(self.police.render(texte_sauv,True,pygame.Color("#000000")),(550,550))
                                                                     
             pygame.display.flip() #Update l'écran
             
-            for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+            for event in pygame.event.get():   #On parcoure la liste de tous les événements reçus
                 
+                #Gestion des évènements liés aux boutons
                 sauvegarder_button.handle_event(event,self.sauvegarder)
                 retour_menu_button.handle_event(event,self.menu)
                     
+                #Sortie de la pause
                 if event.type == KEYDOWN and event.key == K_SPACE :
                     self.dico_stop["pause"]=False
                     
-                if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                #Instructions de sortie de jeu
+                if event.type == QUIT:     
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
                     
     
                     
     def sauvegarder(self):
+        '''
+        Méthode qui permet de sauvegarder la partie en cours dans un fichier binaire grâce au module pickle.
+        Affiche que la partie a été sauvegardée sur l'interface de pause.
+        '''
         
         pickle.dump(self.plateau_jeu,open("sauvegarde "+str(self.num_partie),"wb"))
-        texte_sauv="Partie sauvegardée"
+        self.fenetre.blit(self.police.render("Partie sauvegardée",True,pygame.Color("#000000")),(550,550))
         
     def afficher_partie(self,num) :
         
