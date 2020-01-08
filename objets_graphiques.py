@@ -310,6 +310,18 @@ class ChoiceBox:
         
     
 def affiche_plateau(plat,fenetre):
+    """
+    Fonction permettant d'afficher une instance de la classe plateau 
+    dans la fenêtre pyGame. 
+    
+    Prend en entrée :
+        - plat : plateau de jeu (plateau).
+        - fenetre : fenetre pyGame (fenetre). 
+    
+    Charge l'ensembles des objets graphiques nécessaires au plateau dans pyGame
+    et affiche place ces objets dans la fenêtre en fonction des paramètres
+    du plateau. 
+    """
     
     #Création des images nécesssaires au plateau
     #fond = pygame.image.load("fond.jpg").convert()
@@ -328,7 +340,6 @@ def affiche_plateau(plat,fenetre):
     fleche2= pygame.image.load("fleche2.png").convert_alpha()
     fleche3= pygame.image.load("fleche3.png").convert_alpha()
     fleche4= pygame.image.load("fleche4.png").convert_alpha()
-
     
     #Chargement du fond dans la fenetre 
     fenetre.blit(fond_ext,(0,0))
@@ -380,17 +391,18 @@ def affiche_plateau(plat,fenetre):
     #Création de la police du jeu
     police = pygame.font.SysFont("calibri", int(20*7/N), bold=True) #Load font object.
     
+    #Affichage des cases du plateau
     for i in range(len(plat.position)) :
         for j in range(len(plat.position)) :
             x=plat.dico_cartes[plat.position[i,j]].coord[0]*int(100*7/N)
             y=plat.dico_cartes[plat.position[i,j]].coord[1]*int(100*7/N)
             fenetre.blit(fond_a_jouer,(y,x))
 
-# Si on veut ajouter un graphisme pour les cartes déplaçables et indéplaçables
-                       
+            # Ajout d'un graphisme pour les cartes déplaçables et indéplaçable   
             if plat.dico_cartes[plat.position[i,j]].deplacable==False :
                 fenetre.blit(indeplacable,(y,x))
             
+            # Affichage des murs
             for k in range(len(plat.dico_cartes[plat.position[i,j]].orientation)) :
                 #fenetre.blit(fond_a_jouer,(y,x))
                 if plat.dico_cartes[plat.position[i,j]].orientation[k]==1 :
@@ -403,16 +415,22 @@ def affiche_plateau(plat,fenetre):
                     elif k==3 :
                         fenetre.blit(mur3,(y,x))
                        
-                       
+            #affichage des pépites           
             if plat.dico_cartes[plat.position[i,j]].presence_pepite==True:
                 fenetre.blit(pepite,(y,x))
+                
+            #affichage des fantomes
             if plat.dico_cartes[plat.position[i,j]].id_fantome!=0 :
                 if plat.dico_cartes[plat.position[i,j]].id_fantome == plat.id_dernier_fantome+1 :
+                    #le fantome cible est affiché en rouge
                     fenetre.blit(fantome_cible,(y,x))
                 else :
+                    #les autres fantomes sont affichés en orange
                     fenetre.blit(fantome,(y,x))
+                #les numréos des fantomes sont affichés à côté de chaque fantome
                 fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(y+10,x+30))
-     #On met des flèches là ou les insertions sont possibles
+    
+    #On met des flèches là ou les insertions sont possibles
     for i in plat.insertions_possibles :
         if i[0]==0 :
             x=i[0]*int(100*7/N)+((((100*7/N))/2)-int(x_fleche1*(7/N))/2)
@@ -436,10 +454,11 @@ def affiche_plateau(plat,fenetre):
         y=plat.dico_joueurs[i].carte_position.coord[1]*int(100*7/N)+((((100*7/N))/2)-int(y_joueur*(7/N))/2)
         fenetre.blit(liste_im_joueur[i],(y,x))                   
         
-#on place la carte à jouer dans le coin droite haut du plateau 
+    #on place la carte à jouer dans le coin droite haut du plateau 
     x=750
     y=50
     fenetre.blit(fond_a_jouer,(x,y))
+    #avec ses murs
     for k in range(len(plat.carte_a_jouer.orientation)):
         if plat.carte_a_jouer.orientation[k]==1 :
             if k==0 :
@@ -450,42 +469,55 @@ def affiche_plateau(plat,fenetre):
                fenetre.blit(mur2,(x,y))
             elif k==3 :
                fenetre.blit(mur3,(x,y))
-    
+    #et sa pépite éventuellement
     if plat.carte_a_jouer.presence_pepite==True:
         fenetre.blit(pepite,(x,y))
                
                
 def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte):
     """
-    fonction pour actualiser l'affichage dans la fonction jeu
+    Fonction permettant d'actualiser l'affichage du plateau 
+    dans la fonction jeu (game). 
+    
+    Prend en entrée :
+        - plateau : plateau de jeu (plateau).
+        - fenetre : fenetre pyGame (fenetre). 
+        - joueur : joueur dont c'est le tour (joueur). 
+        - info : message d'erreur ou d'information de jeu (string). 
+        - bouton : bouton permettant d'afficher les commandes (bouton). 
+        - etape_texte : message contenant l'étape du jeu (string). 
     """
+    #affichage du plateau
     affiche_plateau(plateau,fenetre)
+    
+    #affichage des avatars des joueurs
     liste_im_joueur = [pygame.image.load("joueur"+str(i)+".png").convert_alpha() for i in range(1,5)]
     for i in range (4) :
         x_joueur = 60
         y_joueur = 60
         liste_im_joueur[i] = pygame.transform.scale(liste_im_joueur[i], (int(x_joueur),int(y_joueur)))
-
+    
+    #Informations sur les joueurs (scores, ordres de mission, jokers). 
     for i in range(len(plateau.dico_joueurs)) :
                 fenetre.blit(liste_im_joueur[i],(1030,320+i*80))
                 fenetre.blit(police_small.render(str(plateau.dico_joueurs[i].nom) + " : ",False,pygame.Color("#000000")),(800,340+i*75))
                 fenetre.blit(police1.render("Score : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(800,340+i*75+15))
                 fenetre.blit(police1.render("Ordre de mission : "+str(sorted(plateau.dico_joueurs[i].fantome_target)),False,pygame.Color("#000000")),(800,340+i*75+30))
                 fenetre.blit(police1.render("Jokers restants : "+str(plateau.dico_joueurs[i].nb_joker),False,pygame.Color("#000000")),(800,340+i*75+45))
-
-                                           
-                #test texte pour afficher le joueur qui joue
+                
+    #test texte pour afficher le joueur qui joue
     fenetre.blit(police.render("C'est a "+str(joueur.nom)+" de jouer",False,pygame.Color(0,0,0)),(800,240))
  
     #affichage du message d'erreur
     for i in range(len(info)) :                       
         fenetre.blit(police.render(info[i],False,pygame.Color("#000000")),(760,180+i*20))
-                                   
+    #affichage de l'étape de jeu                               
     fenetre.blit(police.render(etape_texte,False,pygame.Color("#000000")),(760,160))
                                                              
-                                                             
+    #dessin du bouton                                                        
     bouton.draw(fenetre)
-                                                             
+    
+    #actualisation de la fenêtre                                                         
     pygame.display.flip()
                 
 pygame.display.quit()
