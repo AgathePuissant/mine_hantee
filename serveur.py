@@ -10,6 +10,7 @@ import PodSixNet.Server
 from time import sleep
 import copy as copy
 
+
 from moteur import *
 from objets_graphiques import *
 from parametrisation import *
@@ -28,9 +29,9 @@ class ClientChannel(PodSixNet.Channel.Channel):
         
         
     def Network_rotation(self, data):
+        print("serveur rotation recue")
         num = data["num"]
         self.gameid = data["gameid"]
-        print("recu")
         
         self._server.rotation(data,self.gameid, num)
  
@@ -49,9 +50,9 @@ class ClientChannel(PodSixNet.Channel.Channel):
         self._server.deplacement(data,self.gameid, num, event)
         
     def Network_changejoueur(self, data):
+        print("recu change joueur")
         num = data["num"]
         self.gameid = data["gameid"]
-        print("recu change joueur")
         self._server.changejoueur(data,self.gameid, num)
     
     def Network_fin(self, data):
@@ -84,9 +85,11 @@ class MineServer(PodSixNet.Server.Server):
             self.currentIndex+=1
             channel.gameid=self.currentIndex
             self.queue.append(channel)
+            print(self.queue)
         else:
             channel.gameid=self.currentIndex
             self.queue.append(channel)
+            print(self.queue)
             jeu = Game(self.queue, self.currentIndex)
             plat = jeu.plateau_jeu
             self.games.append(jeu)
@@ -126,7 +129,6 @@ class MineServer(PodSixNet.Server.Server):
         
     
     def rotation(self, data, gameid, num):
-        print("recu2")
         game = [a for a in self.games if a.gameid==gameid]
         if len(game)==1:
             game[0].rotation(data, num)
@@ -171,16 +173,17 @@ class Game:
         dico_parametres = {'dimensions_plateau': '7', 'nb_fantomes': '21', 'nb_joueurs': '2', 'mode_joueur_1': 'manuel', 'mode_joueur_2': 'manuel', 'mode_joueur_3': 'manuel', 'mode_joueur_4': 'manuel', 'niveau_ia_1': '1', 'niveau_ia_2': '1', 'niveau_ia_3': '1', 'niveau_ia_4': '1', 'pseudo_joueur_1': 0, 'pseudo_joueur_2': 1, 'pseudo_joueur_3': '', 'pseudo_joueur_4': '', 'nb_fantomes_mission': '3', 'nb_joker': '1', 'points_pepite': '1', 'points_fantome': '5', 'points_fantome_mission': '20', 'bonus_mission': '40'}
         self.plateau_jeu=plateau(2,[0,1],[0,0],7,dico_parametres)
         #initialize the players including the one who started the game
-        self.joueur_0= queue[0]
+        self.joueur_0=queue[0]
         self.joueur_1=queue[1]
         #gameid of game
         self.gameid=currentIndex
         
     
     def rotation(self,data,num):
-        print("renvoie")
+        print("serveur rotation recue 3")
         if num==self.turn:
             self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
+            print("tour",0)
             if self.turn == 0:
                 self.joueur_1.Send(data)
             else:
@@ -213,16 +216,18 @@ class Game:
             
     def changejoueur(self,data, num):
         
+        print("recu change joueur 3")
+        print(self.joueur_1,self.joueur_0)
         if num==self.turn:
             if self.turn == 0:
                 self.turn = 1
-                self.joueur_1.Send({"action":"yourturn", "tour":True})
-                self.joueur_0.Send({"action":"yourturn", "tour":False})
+                self.joueur_1.Send({"action":"changejoueur", "tour":True})
+                self.joueur_0.Send({"action":"changejoueur", "tour":False})
                 
             else:
                 self.turn = 0
-                self.joueur_0.Send({"action":"yourturn", "tour":True})
-                self.joueur_1.Send({"action":"yourturn", "tour":False})
+                self.joueur_0.Send({"action":"changejoueur", "tour":True})
+                self.joueur_1.Send({"action":"changejoueur", "tour":False})
             
 
             
@@ -253,26 +258,6 @@ MineServe=MineServer(localaddr=(host, int(port)))
 #MineServe=MineServer()
 while True:
     MineServe.Pump()
-    sleep(0.001)
+    sleep(0.01)
     
     
-#dico_parametres = {'dimensions_plateau': '7', 'nb_fantomes': '21', 'nb_joueurs': '2', 'mode_joueur_1': 'manuel', 'mode_joueur_2': 'manuel', 'mode_joueur_3': 'manuel', 'mode_joueur_4': 'manuel', 'niveau_ia_1': '1', 'niveau_ia_2': '1', 'niveau_ia_3': '1', 'niveau_ia_4': '1', 'pseudo_joueur_1': 0, 'pseudo_joueur_2': 1, 'pseudo_joueur_3': '', 'pseudo_joueur_4': '', 'nb_fantomes_mission': '3', 'nb_joker': '1', 'points_pepite': '1', 'points_fantome': '5', 'points_fantome_mission': '20', 'bonus_mission': '40'}
-#plat=plateau(2,[0,1],[0,0],7,dico_parametres)
-#
-#data0 = {"action": "startgame","joueur_id":0}
-#data1 = {"action": "startgame","joueur_id":1}
-#fant_target0 = plat.dico_joueurs[0].fantome_target
-#fant_target1 = plat.dico_joueurs[1].fantome_target
-#data0["fant_target"] = fant_target0
-#data1["fant_target"] = fant_target1
-##print(plat.__dict__)
-#for i in range((plat.N)**2):
-#    orientation = list(plat.dico_cartes[i].orientation)
-#    fantome = int(plat.dico_cartes[i].id_fantome)
-#    print(orientation,type(orientation))
-#    print(fantome,type(fantome))
-#    data0["_carteor"] = orientation
-#    data1["_carteor"] = orientation
-#    data0["_cartefant"] = fantome
-#    data1["_cartefant"] = fantome
-#print(data0)
