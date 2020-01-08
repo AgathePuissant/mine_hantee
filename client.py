@@ -412,10 +412,6 @@ class mine_hantee(ConnectionListener):
                                 self.Pump()
                                 connection.Pump()
                                 self.dico_stop["test_carte"]=False
-                                
-    
-                    elif event.type == KEYDOWN and event.key == K_SPACE :
-                        self.pause()
                     
                     elif event.type == QUIT:
                         self.dico_stop = dict.fromkeys(self.dico_stop, False)
@@ -470,10 +466,6 @@ class mine_hantee(ConnectionListener):
                         self.Pump()
                         connection.Pump()
                         information=""
-                    
-                        
-                    elif event.type == KEYDOWN and event.key == K_SPACE :
-                        pause()
                         
                     elif event.type == QUIT:
                         self.dico_stop = dict.fromkeys(self.dico_stop, False)
@@ -528,43 +520,7 @@ class mine_hantee(ConnectionListener):
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
              
                 
-                
-    def pause(self) :
-        
-        self.nouvelle="jeu en pause"
-        
-        self.dico_stop["pause"]=True
-        
-        texte_sauv=""
-        
-        sauvegarder_button=Bouton(550,350,200,50,"Sauvegarder")
-        retour_menu_button=Bouton(550,450,200,50,"Retour au menu")
-        
-        while self.dico_stop["pause"]==True :
-                    
-            self.fenetre.blit(self.fond_uni,(0,0))
-        
-            self.fenetre.blit(self.police.render("Pause",True,pygame.Color("#000000")),(600,200))
-                                                                 
-            sauvegarder_button.draw(self.fenetre)
-            retour_menu_button.draw(self.fenetre)
-                                      
-            self.fenetre.blit(self.police.render(texte_sauv,True,pygame.Color("#000000")),(550,550))
-                                                                    
-            pygame.display.flip() #Update l'écran
-            
-            for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
-                
-                sauvegarder_button.handle_event(event,self.sauvegarder)
-                retour_menu_button.handle_event(event,self.menu)
-                    
-                if event.type == KEYDOWN and event.key == K_SPACE :
-                    self.dico_stop["pause"]=False
-                    
-                if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
-                    
-  
+   
     
 
 
