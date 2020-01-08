@@ -387,6 +387,8 @@ class mine_hantee():
             IA = IA_simple(joueur.id,self.plateau_jeu, output_type="alea")
         elif joueur.niveau == 2:
             IA = IA_simple(joueur.id,self.plateau_jeu, output_type="single")
+            #IA = jouer_minmax(self.plateau_jeu,joueur_id, profondeur= 4)
+            #IA=IA[1],IA[0],IA[2]
         elif joueur.niveau == 3 or joker==True:
             coups=IA_simple(joueur.id,self.plateau_jeu, output_type="liste")
             IA=IA_monte_carlo(self.plateau_jeu, joueur.id, reps=100, liste_coups=coups, profondeur=3)
