@@ -622,7 +622,8 @@ class mine_hantee():
                 
                 for i in range(len(self.liste_sauv)) :
                     boutons_charger_partie[i].draw(self.fenetre)
-                                                                      
+               
+            #Si il n'y a pas de partie sauvegardée, on affiche pas les boutons mais un message                                                       
             else :
                 
                 self.fenetre.blit(self.fond_uni,(0,0))  #On colle le fond du menu
@@ -630,9 +631,11 @@ class mine_hantee():
             
             retour_menu_button.draw(self.fenetre)
                 
-            pygame.display.flip() #Update l'écran
+            #Actualisation de l'écran
+            pygame.display.flip() 
             
-            for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+            #On parcoure la liste de tous les événements reçus
+            for event in pygame.event.get():  
                 
                 if self.liste_sauv!=[] :
                     for i in range(len(self.liste_sauv)) :
@@ -677,7 +680,7 @@ class mine_hantee():
         
         #lecture du fichier de paramétrisation
         dico_parametres=lecture(fichier)
-        #on stoque le choix entre les boutons dans le dictionnaire choix_final
+        #on stocke le choix entre les boutons dans le dictionnaire choix_final
         choix_final={}
         choix_final["fonction"]=self.parametrisation_1
         choix_final["nb_joueurs"]=dico_parametres['nb_joueurs'] 
