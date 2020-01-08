@@ -281,6 +281,7 @@ class mine_hantee():
                         IA = IA_simple(j,self.plateau_jeu, output_type="single")
                     elif joueur.niveau == 3:
                         coups=IA_simple(j,self.plateau_jeu, output_type="liste")
+                        print(len(coups))
                         IA=IA_monte_carlo(self.plateau_jeu, j, reps=100, liste_coups=coups, profondeur=5)
                         IA=IA[1],IA[0],IA[2]
 
@@ -306,10 +307,6 @@ class mine_hantee():
                     #print("deplacement")
                     #deplacement du joueur et decompte des points
                     information=""
-                    print("chemin :")
-                    print([carte.coord for carte in chemin])
-                    print([carte for carte in chemin])
-                    print(self.plateau_jeu.carte_a_jouer)
                     for i in chemin :
                         #print("cartes accessibles")
                         #print([carte.coord for carte in self.plateau_jeu.cartes_accessibles1(i)])
