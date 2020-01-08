@@ -735,3 +735,11 @@ class plateau(object):
                     joueur.capture_fantome = True
                     self.id_dernier_fantome += 1
                     nv_carte.id_fantome = 0
+        #actualiser l'etape de jeu
+        #on recupere le joueur suivant :
+        index=[joueur.nom for joueur in self.dico_joueurs.values()].index
+        try:
+            self.etape_jeu=[joueur.nom for joueur in self.dico_joueurs.values()][index+1]+"_"+"inserer-carte"
+        except:
+            self.etape_jeu=[joueur.nom for joueur in self.dico_joueurs.values()][0]+"_"+"inserer-carte"
+        
