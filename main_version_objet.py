@@ -175,18 +175,16 @@ class mine_hantee():
         else :
             pass
         
+        
+        
         #Au début du jeu, on affiche automatiquement les commandes.
         self.afficher_commandes(debut=True)
-        
         #Création du bouton qui permet d'afficher les commandes à tout moment.
         afficher_commandes_button=Bouton(725,5,150,40,"Commandes")
-    
-        #Pour une facilité d'écriture
         N = self.plateau_jeu.N
         
-        #Activation de la méthode
+        #tant que dico_stop["rester_jeu"] est True, on reste en jeu
         self.dico_stop["rester_jeu"]=True
-        
         #Chargement de l'animation en cas de capture de fantome
         clip = VideoFileClip('animation.mp4')
         
@@ -195,46 +193,48 @@ class mine_hantee():
         while self.plateau_jeu.id_dernier_fantome!=self.plateau_jeu.nbre_fantomes and self.dico_stop["rester_jeu"]==True:
     
             #Tours de jeu
-            
-            #on parcoure chaque joueur à chaque tours.
+            #on parcourt chaque joueur à chaque tours.
             for j in self.plateau_jeu.dico_joueurs :
-                
                 #Initialisation du texte d'information et du texte qui informe de l'étape
                 information="" 
                 etape="" 
-                
-                #Pour facilité d'écriture
                 joueur=self.plateau_jeu.dico_joueurs[j]
-                
                 #actualisation de la fenêtre à chaque début de tour
                 actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
     
-                #Si le joueur est un joueur réel, il y'a 2 étapes dans le tour gérée par dico_stop
+    
+                #Si le joueur est un joueur réel, il y'a 2 étapes dans le tour gérées par dico_stop
                 #et le plateau est modifié selon les actions de l'opérateur
                 if joueur.niveau == 0 :
-                    
                     #Première etape : rotation et insertion de la carte
-                    #On parcoure la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
+                    #On parcourt la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
                     self.dico_stop["test_carte"]=True
                     #On active aussi l'étape suivante qui se déroulera quand la carte aura été insérée
                     self.dico_stop["test_entree"]=True
                     
                     
                     while self.dico_stop["test_carte"]!=False:
-                        
                         #Mise à jour de l'étape du jeu et du message d'étape
                         self.plateau_jeu.etape_jeu=joueur.nom+"_"+"inserer-carte"
-                        etape="Tourner la carte avec R, cliquer pour insérer"
+                        etape="Tourner la carte avec R, cliquer pour insérer, ou appuyer sur J pour utiliser le joker"
                         
                         #Récupération des actions de l'opérateur
                         for event in pygame.event.get():   
-                            
                             #gestion des évènements liés au bouton 
                             afficher_commandes_button.handle_event(event,self.afficher_commandes)
-                            
                             #Si on appuie sur R, rotation de la carte à jouer
                             if event.type == KEYDOWN and event.key == K_r: 
                                 self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
+                            #Si on appuie sur J et qu'il reste un joker au joueur, déclenchement du joker
+                            if event.type== KEYDOWN and event.key == K_j:
+                                if joueur.nb_joker==0:
+                                    information="Vous n'avez plus de joker"
+                                #Si le joueur a un joker, on joue son tour avec une IA et on passe au joueur suivant
+                                else:
+                                    self.joker(joueur, information, afficher_commandes_button, etape)
+                                    self.dico_stop["test_carte"]=False
+                                    self.dico_stop["test_entree"]=False
+                                    joueur.nb_joker=0
                             
                             #ajouter la carte lorsque l'utilisateur clique dans le plateau
                             elif event.type == MOUSEBUTTONDOWN : 
@@ -242,7 +242,7 @@ class mine_hantee():
                                 #clic gauche : insertion de la carte à jouer
                                 if event.button==1: 
                                     
-                                    #Test de si le clic est dans le plateau ou en dehors et mise à jour du message d'erreur
+                                    #Test si le clic est dans le plateau ou en dehors et mise à jour du message d'erreur
                                     coord=[int(math.floor(event.pos[1]/700*self.plateau_jeu.N)),int(math.floor(event.pos[0]/700*self.plateau_jeu.N))]
 
                                     test_inser=self.plateau_jeu.deplace_carte(coord)
@@ -394,6 +394,44 @@ class mine_hantee():
                 scores=scores+[[joueur.nom,joueur.points,joueur.fantome_target]]
             self.fin_du_jeu(scores)
             
+            
+            
+            
+            
+    def joker(self, joueur, information, afficher_commandes_button, etape):
+        
+        #recuperer le coup à jouer
+        coups=IA_simple(joueur.id,self.plateau_jeu, output_type="liste")
+        IA=IA_monte_carlo(self.plateau_jeu, joueur.id, reps=100, liste_coups=coups, profondeur=5)
+        IA=IA[1],IA[0],IA[2]
+        coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
+        
+
+        #Rotation de la carte
+        for i in range(orientation):
+            pygame.event.pump()
+            self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
+            pygame.time.wait(200)
+            pygame.event.pump()
+            actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
+        
+        #Insertion
+        self.plateau_jeu.deplace_carte(coord_inser)
+        pygame.time.wait(200)
+        pygame.event.pump()
+        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
+        pygame.event.pump()
+
+        #deplacement du joueur et decompte des points
+        information=""
+        for i in chemin :
+            pygame.event.pump()
+            joueur.carte_position = i
+            information=self.plateau_jeu.compte_points(joueur.id,i)
+            pygame.time.wait(200)
+            pygame.event.pump()
+            actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
+      
             
             
     def fin_du_jeu(self,scores) :
