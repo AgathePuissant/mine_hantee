@@ -190,10 +190,12 @@ class plateau(object):
         pool_fantomes = [i for i in range(1,self.nbre_fantomes+1)]
         pool_fantomes = np.random.permutation(pool_fantomes)
         
+        #On prend au hasard parmi les 3 types de cartes pour les cartes déplaçables
         while len(pool)<nb_deplacable:
             pool.append(rd.choice([rd.choice(pool1),rd.choice(pool2),rd.choice(pool3)]))
         pool=np.random.permutation(pool)
         
+        #Parcours du plateau et initialisation des cartes
         for ligne in range(N):
             for colonne in range(N):
                 
@@ -266,15 +268,19 @@ class plateau(object):
         
         
         #La carte qui reste dans pool est la carte à l'exterieur du plateau
-        self.carte_a_jouer=carte(compte_id,pool[compte_deplacable],["",""],True)
+        #On lui assigne comme coordonnées N²,N² pour être sûr qu'elle ne soient jamais voisine
+        #des autres cartes
+        self.carte_a_jouer=carte(compte_id,pool[compte_deplacable],[N**2,N**2],True)
         self.dico_cartes[compte_id] = self.carte_a_jouer
         
         #Initialisation des joueurs
         #Création des entités de joueurs
         pool_fantomes = np.random.permutation(pool_fantomes)   #On remélange les fantômes
         
+        #attribution au hasard des fantômes pour la mission
         nb_fantomes_mission=int(dico_parametres['nb_fantomes_mission'])
         nb_joker=int(dico_parametres['nb_joker'])
+        #attribution des cibles des missions au joueurs et initialistion des joueurs
         compte_fantomes = 0
         for i in range(nb_joueurs):
             
@@ -299,77 +305,81 @@ class plateau(object):
         Renvoie True si la carte a pu être insérée, False sinon.
         """
         
+        #coordonnées d'entree
         x=coord[0]
         y=coord[1]
         
+        #Si le clic est en dehors des endroits où l'insertion est possible, on renvoie une False
         if [x,y] not in self.insertions_possibles:
             out=False
         
+        #Sinon, on déplace la carte :
         else:
-            
             out=True
-        
             self.dico_cartes[self.carte_a_jouer.id].coord=[x,y]
             
-            #Traite tous les cas possible : carte insérée de chaque côté
-            
-            if x==0 : #carte insérée en haut
-                
-                carte_sauvegardee=self.dico_cartes[self.position[self.N-1,y]] #on sauvegarde la carte qui va sortir du plateau
-                
+            #On tous les cas possible : carte insérée de chaque côté
+            #carte insérée en haut
+            if x==0 : 
+                #on sauvegarde la carte qui va sortir du plateau
+                carte_sauvegardee=self.dico_cartes[self.position[self.N-1,y]] 
                 for i in range(1,self.N):
-                    
+                    #mise à jour des coordonnées des cartes de la ligne
                     self.dico_cartes[self.position[self.N-i-1,y]].coord[0]+=1
                     #en partant du bas, on change la carte pour la carte d'avant jusqu'à la première carte
                     self.position[self.N-i,y]=self.position[self.N-i-1,y]
-                                
-            elif x==self.N-1: #carte insérée en bas
-                
-                carte_sauvegardee=self.dico_cartes[self.position[0,y]] #on sauvegarde la carte qui va sortir du plateau
-                
+            
+            #carte insérée en bas                    
+            elif x==self.N-1: 
+                #on sauvegarde la carte qui va sortir du plateau
+                carte_sauvegardee=self.dico_cartes[self.position[0,y]] 
                 for i in range(1,self.N):
-                    
+                    #mise à jour des coordonnées des cartes de la ligne
                     self.dico_cartes[self.position[i,y]].coord[0]-=1
                     #en partant du haut, on change la carte pour la carte d'après jusqu'à la dernière carte
                     self.position[i-1,y]=self.position[i,y]
-                
-            elif y==0: #carte insérée sur le côté gauche
-                
-                carte_sauvegardee=self.dico_cartes[self.position[x,self.N-1]] #on sauvegarde la carte qui va sortir du plateau
-                
+            
+            #carte insérée sur le côté gauche    
+            elif y==0: 
+                #on sauvegarde la carte qui va sortir du plateau
+                carte_sauvegardee=self.dico_cartes[self.position[x,self.N-1]] 
                 for i in range(1,self.N):
-                    
+                    #mise à jour des coordonnées des cartes de la ligne
                     self.dico_cartes[self.position[x,self.N-i-1]].coord[1]+=1
                     #en partant de la droite, on change la carte pour la carte d'avant jusqu'à la première carte
                     self.position[x,self.N-i]=self.position[x,self.N-i-1]
-                
-            elif y==self.N-1: #carte insérée sur le côté droit
-                
-                carte_sauvegardee=self.dico_cartes[self.position[x,0]] #on sauvegarde la carte qui va sortir du plateau
-                
+            
+            
+            #carte insérée sur le côté droit    
+            elif y==self.N-1: 
+                #on sauvegarde la carte qui va sortir du plateau
+                carte_sauvegardee=self.dico_cartes[self.position[x,0]] 
                 for i in range(1,self.N):
-                    
+                    #mise à jour des coordonnées des cartes de la ligne
                     self.dico_cartes[self.position[x,i]].coord[1]-=1
                     #en partant de la gauche, on change la carte pour la carte d'après jusqu'à la dernière carte
                     self.position[x,i-1]=self.position[x,i]
                     
             else :
                 return False
-                    
+            
+            #On met à jour la position du plateau
             self.position[x,y]=self.carte_a_jouer.id
-                    
-            if carte_sauvegardee.id_fantome!=0 : #si il y'a un fantome sur la carte sortie
-                    
-                    self.dico_cartes[self.position[x,y]].id_fantome=carte_sauvegardee.id_fantome #on déplace ce fantôme à l'autre bout du plateau
-                    
-                    carte_sauvegardee.id_fantome=0 #on supprime le fantôme de la carte sortie
-                    
+            
+            #si il y'a un fantome sur la carte sortie, on le place sur la carte entrante        
+            if carte_sauvegardee.id_fantome!=0 : 
+                    #on déplace ce fantôme à l'autre bout du plateau
+                    self.dico_cartes[self.position[x,y]].id_fantome=carte_sauvegardee.id_fantome 
+                    #on supprime le fantôme de la carte sortie
+                    carte_sauvegardee.id_fantome=0 
+            
+            #De même avec les joueurs
             for i in range(len(self.dico_joueurs)) : 
                 if carte_sauvegardee.id==self.dico_joueurs[i].carte_position.id :
                     self.dico_joueurs[i].carte_position=self.dico_cartes[self.position[x,y]]
                         
-                
-            self.carte_a_jouer=carte_sauvegardee #update la carte à jouer
+            #update la carte_a_jouer avec la carte sortante   
+            self.carte_a_jouer=carte_sauvegardee 
             self.carte_a_jouer.coord=[self.N**2,self.N**2]
             
         return out
@@ -387,8 +397,8 @@ class plateau(object):
         Renvoie la liste des entités de carte qui sont accessibles à partir de 
         la carte d'entrée.
         """
-        
-        cartes_accessibles=[] #liste des entitÃ©s des cartes accessibles
+        #liste des entitÃ©s des cartes accessibles
+        cartes_accessibles=[] 
         coord=carte.coord
                     
         if ((coord[1]-1)>=0 and carte.orientation[3]==0): 
@@ -398,6 +408,7 @@ class plateau(object):
             for i in self.dico_cartes.values():
                 if i.coord == [coord[0],coord[1]-1]:
                     carte_access = i
+            #Le try permet d'éviter les erreurs si aucune carte n'est accessible
             try:
                 if carte_access.orientation[1] == 0: #Si aucun mur de la carte accessible ne barre le passage
                     cartes_accessibles.append(carte_access)
@@ -452,7 +463,7 @@ class plateau(object):
         n'a pas pu être fait sous forme de string sinon (liste)
         
         """
-
+        #instance de la carte de départ du joueur
         carte_depart=self.dico_joueurs[id_joueur].carte_position
         retour=[]
             
@@ -485,12 +496,13 @@ class plateau(object):
                 #On vérifie que le joueur n'est pas déjà passé par cette carte pendant ce tour
                 if nv_carte in self.dico_joueurs[id_joueur].cartes_explorees:
                     retour.append("Cette case a déjà été explorée.")
-                
+                #Si c'est bon, on déplace le joueur et on ajoute la carte aux cartes explorées
                 else:
-                    self.dico_joueurs[id_joueur].carte_position = nv_carte #On déplace le joueur
+                    self.dico_joueurs[id_joueur].carte_position = nv_carte
                     self.dico_joueurs[id_joueur].cartes_explorees.append(nv_carte)
                     retour = nv_carte
             else:
+                #Sinon, on spécifie que le déplacement est impossible pour l'affichage
                 retour.append("Ce déplacement est impossible.")
                 
 
@@ -535,8 +547,10 @@ class plateau(object):
                 self.dico_joueurs[id_joueur].points += self.points_fantome
                 retour.append("Vous avez capturé un fantôme !")
             
+            #mise à jour de capture_fantôme pour ce tour et de l'id du dernier fantôme
             self.dico_joueurs[id_joueur].capture_fantome = True
             self.id_dernier_fantome += 1
+            #On retire le fantôme de la carte
             nv_carte.id_fantome = 0
 
         return retour
@@ -592,18 +606,21 @@ class plateau(object):
         if self.etape_jeu!="":
             etape_jeu=self.etape_jeu
             nom_joueur, etape=etape_jeu.split("_")
+        #Compteur permet de commencer à n'importe quel joueur, puis de continuer dans le while
         liste_noms=[truc.nom for truc in self.dico_joueurs.values()]
         compteur=liste_noms.index(nom_joueur)
         
         #decompte des tours
         tours=0
         #Boucle du jeu. On joue tant qu'il reste des fantômes à attraper ou jusqu'a atteindre la profondeur cible
+        
         while self.id_dernier_fantome!=self.nbre_fantomes and tours<profondeur:
             tours+=1       
             #Tours de jeu
             #on parcours chaque joueur à chaque tours.
             while compteur<len(self.dico_joueurs):
                 joueur=self.dico_joueurs[compteur]
+                
                 
                 #On teste l'etape de jeu :
                 if etape=="inserer-carte":                
@@ -615,13 +632,13 @@ class plateau(object):
                     #ajouter la carte
                     coord=rd.choice(self.insertions_possibles)
                     self.deplace_carte(coord)
+                    #on passe à l'étape de déplacement
                     etape="deplacement"                                                         
                     
 
                 if etape=="deplacement":
                     #2e etape : Deplacement du joueur
-                    #initialisation à la position du joueur
-                    
+                    #initialisation à la position du joueur et récupération des déplacements possibles
                     carte_actuelle=joueur.carte_position
                     chemins=self.chemins_possibles(carte_actuelle)
                     chemin=rd.choice(chemins)
@@ -634,13 +651,14 @@ class plateau(object):
                         joueur.cartes_explorees.append(nv_carte)
                         self.compte_points(joueur.id, nv_carte)
         
-
+                    #Mise à jour de étape : on passe au tour suivant
                     etape="inserer-carte"
                             
                 #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
                 joueur.cartes_explorees = [carte_actuelle]
                 joueur.capture_fantome = False
                 compteur+=1
+            #Lorsqu'on a parcouru tous les joueurs, on remet le compteur à 0 et on recommence un tour
             compteur=0
             
             
@@ -659,18 +677,21 @@ class plateau(object):
         liste_coups=[]
         rotations=list(range(4))
         coord_insertions=copie.insertions_possibles
-        #on boucle sur les rotations possibles, puis sur les coordonnees d'insertion possible
+        #on boucle sur les rotations possibles, puis sur les coordonnees d'insertions possibles
         for rota in rotations:
             liste1=[rota]
             
             for coord in coord_insertions:
-                #pour chaque rotation, on re-copie le plateau pour prendre en compte l'insertion de la carte
+                #pour chaque insertion, on re-copie le plateau pour prendre en compte l'insertion de la carte
                 sub_copie=copy.deepcopy(copie)
+                #on stocke la rotation et coordonnées d'insertion
                 liste2=liste1+[coord]
+                #on insere la carte et on récupère les déplacements disponibles
                 sub_copie.deplace_carte(coord)
                 joueur=sub_copie.dico_joueurs[joueur_id]
                 carte_actuelle=joueur.carte_position
                 chemins=sub_copie.chemins_possibles(carte_actuelle)
+                
                 #finalement on recupere les deplacements possibles
                 for chemin in chemins:
                     chemin.remove(carte_actuelle)
@@ -678,7 +699,8 @@ class plateau(object):
                     chemin=[carte.coord for carte in chemin]
                     liste3=liste2+[chemin]
                     liste_coups.append(liste3)
-        #recuperer les instances de carte du plateau en cours
+                    
+        #recuperer les instances de carte du plateau en cours grâce à plateau.position
         for coup in liste_coups:
             chemin=coup[2]
             chemin_bon=[]
@@ -687,6 +709,7 @@ class plateau(object):
                 ID=self.position[x,y]
                 chemin_bon.append(self.dico_cartes[ID])
             coup[2]=chemin_bon
+        #On renvoie la liste des coups possibles
         return(liste_coups)
         
     
