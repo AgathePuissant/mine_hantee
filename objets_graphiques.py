@@ -512,7 +512,7 @@ def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte,joker):
     for i in range(len(info)) :                       
         fenetre.blit(police.render(info[i],False,pygame.Color("#000000")),(760,180+i*20))
     if joker!="IA" :
-        fenetre.blit(police.render("Joker restants : "+str(joker)+" (J pour activer)",False,pygame.Color("#000000")),(760,180+len(info)*20))
+        fenetre.blit(police.render("J pour activer le joker",False,pygame.Color("#000000")),(760,180+len(info)*20))
     #affichage de l'étape de jeu                               
     fenetre.blit(police.render(etape_texte,False,pygame.Color("#000000")),(760,160))
                                                              
