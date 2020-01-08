@@ -284,8 +284,10 @@ class plateau(object):
                 compte_fantomes += 1
                 
             position = positions_initiales[i]
-            self.dico_joueurs[i] = joueur(i,liste_noms[i],liste_niveaux[i],fantomes_target,position,nb_joker)
-    
+            if liste_niveaux[i]==0 :
+                self.dico_joueurs[i] = joueur(i,liste_noms[i],liste_niveaux[i],fantomes_target,position,nb_joker)
+            else :
+                self.dico_joueurs[i] = joueur(i,liste_noms[i],liste_niveaux[i],fantomes_target,position,"IA")
     
         
     def deplace_carte(self,coord) :

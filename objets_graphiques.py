@@ -474,7 +474,7 @@ def affiche_plateau(plat,fenetre):
         fenetre.blit(pepite,(x,y))
                
                
-def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte):
+def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte,joker):
     """
     Fonction permettant d'actualiser l'affichage du plateau 
     dans la fonction jeu (game). 
@@ -511,6 +511,8 @@ def actualise_fenetre(plateau,fenetre,joueur,info,bouton,etape_texte):
     #affichage du message d'erreur
     for i in range(len(info)) :                       
         fenetre.blit(police.render(info[i],False,pygame.Color("#000000")),(760,180+i*20))
+    if joker!="IA" :
+        fenetre.blit(police.render("Joker restants : "+str(joker)+" (J pour activer)",False,pygame.Color("#000000")),(760,180+len(info)*20))
     #affichage de l'étape de jeu                               
     fenetre.blit(police.render(etape_texte,False,pygame.Color("#000000")),(760,160))
                                                              

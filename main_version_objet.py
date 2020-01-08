@@ -196,11 +196,11 @@ class mine_hantee():
             #on parcourt chaque joueur à chaque tours.
             for j in self.plateau_jeu.dico_joueurs :
                 #Initialisation du texte d'information et du texte qui informe de l'étape
-                information="" 
+                information=[""]
                 etape="" 
                 joueur=self.plateau_jeu.dico_joueurs[j]
                 #actualisation de la fenêtre à chaque début de tour
-                actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
+                actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
     
     
                 #Si le joueur est un joueur réel, il y'a 2 étapes dans le tour gérées par dico_stop
@@ -216,7 +216,7 @@ class mine_hantee():
                     while self.dico_stop["test_carte"]!=False:
                         #Mise à jour de l'étape du jeu et du message d'étape
                         self.plateau_jeu.etape_jeu=joueur.nom+"_"+"inserer-carte"
-                        etape="Tourner la carte avec R, cliquer pour insérer, J pour joker"
+                        etape="Tourner la carte avec R, cliquer pour insérer"
                         
                         #Récupération des actions de l'opérateur
                         for event in pygame.event.get():   
@@ -228,7 +228,7 @@ class mine_hantee():
                             #Si on appuie sur J et qu'il reste un joker au joueur, déclenchement du joker
                             if event.type== KEYDOWN and event.key == K_j:
                                 if joueur.nb_joker==0:
-                                    information="Vous n'avez plus de joker"
+                                    information=["Vous n'avez plus de joker"]
                                 #Si le joueur a un joker, on joue son tour avec une IA et on passe au joueur suivant
                                 else:
                                     self.tour_IA(joueur,information, afficher_commandes_button, etape, joker=True)
@@ -265,7 +265,7 @@ class mine_hantee():
                                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
                         
                         #actualisation de la fenêtre
-                        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
+                        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
                        
 
                     #2e etape : On parcours les évènements tant que le joueur n'a pas appuyé sur entrée ou tant qu'il peut encore se déplacer
@@ -332,7 +332,7 @@ class mine_hantee():
                                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
                                 
                         #Update l'écran                                                                
-                        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
+                        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
         
                 
                 ##Retour au test du niveau du joueur : si le joueur est une IA (joueur.niveau!=0)
@@ -380,7 +380,7 @@ class mine_hantee():
             etape = "Le Joker réfléchit !"
         else :
             etape = "L'"+joueur.nom+" réfléchit..."
-        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
+        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
         
         #recuperer le coup à jouer en fonction du niveau de l'IA
         if joueur.niveau == 1:
@@ -399,7 +399,7 @@ class mine_hantee():
             etape = "Joker de "+str(joueur.nom)+"..."
         else :
             etape = "l'"+str(joueur.nom)+" joue.."
-        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
+        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
         
         
         #Rotation de la carte
@@ -408,13 +408,13 @@ class mine_hantee():
             self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
             pygame.time.wait(200)
             pygame.event.pump()
-            actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
+            actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
         
         #Insertion
         self.plateau_jeu.deplace_carte(coord_inser)
         pygame.time.wait(200)
         pygame.event.pump()
-        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
+        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
         pygame.event.pump()
 
         #deplacement du joueur et decompte des points
@@ -426,7 +426,7 @@ class mine_hantee():
             information=self.plateau_jeu.compte_points(joueur.id,i)
             pygame.time.wait(200)
             pygame.event.pump()
-            actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
+            actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
 
             
             
@@ -504,6 +504,7 @@ class mine_hantee():
             self.fenetre.blit(self.police2.render("Flèches directionnelles : déplacer le joueur.",False,pygame.Color("#000000")),(100,300))
             self.fenetre.blit(self.police2.render("Entrée : finir le tour.",False,pygame.Color("#000000")),(100,350))
             self.fenetre.blit(self.police2.render("Espace : mettre en pause/Retour au jeu.",False,pygame.Color("#000000")),(100,400))
+            self.fenetre.blit(self.police2.render("J : utiliser un joker.",False,pygame.Color("#000000")),(100,400))
             
             #Affichage différent si on est au début du jeu ou non
             if debut==False:                                                                                         
