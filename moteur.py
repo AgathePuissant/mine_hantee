@@ -674,8 +674,19 @@ class plateau(object):
                 #finalement on recupere les deplacements possibles
                 for chemin in chemins:
                     chemin.remove(carte_actuelle)
+                    #pour eviter les conflits d'instances liés aux copies, on passe par les coordonnees
+                    chemin=[carte.coord for carte in chemin]
                     liste3=liste2+[chemin]
                     liste_coups.append(liste3)
+        #recuperer les instances de carte du plateau en cours
+        for coup in liste_coups:
+            chemin=coup[2]
+            chemin_bon=[]
+            for coord in chemin:
+                x,y=coord
+                ID=self.position[x,y]
+                chemin_bon.append(self.dico_cartes[ID])
+            coup[2]=chemin_bon
         return(liste_coups)
         
     
