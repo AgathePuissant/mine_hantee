@@ -81,7 +81,7 @@ class joueur(object):
         self.niveau = niveau
         self.fantome_target = fantome_target
         self.carte_position = carte_position
-        self.nb_joker=1
+        self.nb_joker=0
         self.points = 0
         self.cartes_explorees = [carte_position]
         self.capture_fantome = False
@@ -290,10 +290,7 @@ class plateau(object):
                 compte_fantomes += 1
                 
             position = positions_initiales[i]
-            if liste_niveaux[i]==0 :
-                self.dico_joueurs[i] = joueur(i,liste_noms[i],liste_niveaux[i],fantomes_target,position,nb_joker)
-            else :
-                self.dico_joueurs[i] = joueur(i,liste_noms[i],liste_niveaux[i],fantomes_target,position,"IA")
+            self.dico_joueurs[i] = joueur(i,liste_noms[i],liste_niveaux[i],fantomes_target,position,nb_joker)
     
         
     def deplace_carte(self,coord) :

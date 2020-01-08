@@ -504,7 +504,7 @@ class mine_hantee():
             self.fenetre.blit(self.police2.render("Flèches directionnelles : déplacer le joueur.",False,pygame.Color("#000000")),(100,300))
             self.fenetre.blit(self.police2.render("Entrée : finir le tour.",False,pygame.Color("#000000")),(100,350))
             self.fenetre.blit(self.police2.render("Espace : mettre en pause/Retour au jeu.",False,pygame.Color("#000000")),(100,400))
-            self.fenetre.blit(self.police2.render("J : utiliser un joker.",False,pygame.Color("#000000")),(100,400))
+            self.fenetre.blit(self.police2.render("J : utiliser un joker.",False,pygame.Color("#000000")),(100,450))
             
             #Affichage différent si on est au début du jeu ou non
             if debut==False:                                                                                         
