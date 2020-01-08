@@ -48,7 +48,7 @@ pseudo_joueur_4=zodj
 nb_fantomes_mission=3
 
 #Nombre de jokers pour chaque joueur
-nb_joker=1
+nb_joker=10
 
 #########################
 #	CALCUL DES POINTS	#

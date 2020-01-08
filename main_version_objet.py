@@ -234,7 +234,7 @@ class mine_hantee():
                                     self.tour_IA(joueur,information, afficher_commandes_button, etape, joker=True)
                                     self.dico_stop["test_carte"]=False
                                     self.dico_stop["test_entree"]=False
-                                    joueur.nb_joker=0
+                                    joueur.nb_joker-=1
                             
                             #ajouter la carte lorsque l'utilisateur clique dans le plateau
                             elif event.type == MOUSEBUTTONDOWN : 
