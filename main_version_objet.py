@@ -23,10 +23,25 @@ from IA import *
 #---------------------------------------Défintion des instructions graphiques------------------------------
     
 class mine_hantee():
+    '''
+    Classe qui contient les attributs et méthodes nécessaires à l'affichage 
+    et à l'enchaînement des interfaces de jeu.
+    Possède en attribut les objets pygame nécessaires au graphismes et les
+    variables nécessaires au contrôle de l'enchaînement des méthodes.
+    Chaque méthode correspond à une interface du jeu.
+    '''
     
     def __init__(self):
+        '''
+        Méthode d'initialisation de la classe.
+        Initialise les attributs servant aux graphismes du jeu (fenetre, les différents fonds,
+        les différents polices, les couleurs nécessaires) selon des fichiers présents dans le 
+        dossier racine ou des valeurs fixées.
+        Initialise un dictionnaire vide à la variable qui contrôles l'activation des méthodes (dico_stop).
+        '''
     
-        pygame.init()
+        #Initialisation de pygame
+        pygame.init() 
     
         #Ouverture de la fenêtre Pygame
         self.fenetre = pygame.display.set_mode((1200, 700),pygame.RESIZABLE)
@@ -49,6 +64,7 @@ class mine_hantee():
         self.police2=pygame.font.SysFont('calibri', 25)
         self.police3=pygame.font.SysFont('calibri', 35)
         
+        #Initialisation du dictionnaire qui contrôle l'activation des méthodes
         self.dico_stop={}
     
     def menu(self):
@@ -58,35 +74,51 @@ class mine_hantee():
         ou charger une nouvelle partie par l'intermédiaire de boutons. 
         """
         
-        #en cours de modification
-        if self.dico_stop=={} : 
+        #Activation du menu par l'intermédiraire du dico_stop
+        #Différente selon que l'on soit au début du jeu ou revenu au menu
+        
+        #Si c'est le début du jeu, on commence le dictionnaire par la clé intro
+        if self.dico_stop=={} :
             self.dico_stop={"intro" : True}
+            
+        #Si c'est un retour au menu, on désactive toutes les méthodes
+        #Sauf le menu via la clé intro
         elif any(value == True for value in self.dico_stop.values()):
             self.dico_stop = dict.fromkeys(self.dico_stop, False)
             self.dico_stop["intro"]=True
+            
+        #Sinon, fermeture des interfaces.
         else :
             self.dico_stop = dict.fromkeys(self.dico_stop, False)
         
-        #définition des boutons
+        #définition des boutons pour lancer une nouvelle partie, ou en chrger une
         nouvelle_partie_button=Bouton(500,350,200,50,"Nouvelle partie")
         charger_partie_button=Bouton(500,450,200,50,"Charger une partie")
         
+        #l'attribut qui indique si on est dans une nouvelle partie est remis à False
+        #à chaque fois qu'on revient au menu
         self.nouvelle=False
+        
+        #l'attribut qui liste les parties sauvegardées est remis à jour
+        #à chaque fois qu'on passe par le menu
+        self.liste_sauv=glob.glob("sauvegarde*")
+        self.liste_sauv=[int(self.liste_sauv[i][-1]) for i in range(len(self.liste_sauv))]
   
+        #Tant que la méthode est activiée via la variable intro du dico_stop
+        #on affiche le menu et les boutons du menu
         while self.dico_stop["intro"]==True:
         
-            #actualisation de l'écran        
+            #actualisation de l'écran      
             pygame.display.flip()
+            
             #fond du menu
             self.fenetre.blit(self.fond_menu,(0,0))
-            
-            self.liste_sauv=glob.glob("sauvegarde*")
-            self.liste_sauv=[int(self.liste_sauv[i][-1]) for i in range(len(self.liste_sauv))]
             
             #dessin des boutons
             nouvelle_partie_button.draw(self.fenetre)
             charger_partie_button.draw(self.fenetre)
             
+            #A tout moment, on récupère les interactions avec les opérateurs
             for event in pygame.event.get():
                 
                 #gestion des événements liés aux boutons
@@ -101,20 +133,31 @@ class mine_hantee():
             
     
     def game(self) :
+        '''
+        Méthode qui gère le déroulement du jeu.
+        Cette méthode initialise le plateau ou le charge selon ce que l'opérateur a choisit.
+        Elle passe ensuite les tours pour chaque joueur et gère les étapes de jeu grâce à dico_stop.
+        En fonction du type de joueur, soit les actions de l'opérateur sont requises pour le tour de jeu,
+        soit la méthode fait appel aux fonctions du fichier IA.
+        Quand les conditions de fin de jeu sont réunies, la méthode fin_du_jeu est appelée.
+        '''
 
         #Initialisation d'une nouvelle partie ou chargement d'une ancienne partie
         if self.nouvelle==False :
             self.plateau_jeu=pickle.load(open("sauvegarde "+str(self.num_partie),"rb"))
+            #Désactivation de la méthode précédente
             self.dico_stop["aff_partie"]=False
+            
         elif self.nouvelle==True :
             #Création d'un nouveau plateau
+            
             #Lecture du fichier de paramétrage et initialisation des paramètres
             dico_parametres=lecture(fichier)
             nb_joueurs=int(dico_parametres['nb_joueurs'])
             dimensions_plateau=int(dico_parametres['dimensions_plateau'])
             liste_noms=[dico_parametres['pseudo_joueur_1'],dico_parametres['pseudo_joueur_2'],dico_parametres['pseudo_joueur_3'],dico_parametres['pseudo_joueur_4']]
             
-            #liste des niveaux
+            #création de la liste des niveaux pour pouvoir gérer différement les IA des joueurs réels
             liste_niveaux=[]
             for joueur in range(1,nb_joueurs+1):
                 mode='mode_joueur_'+str(joueur)
@@ -128,18 +171,23 @@ class mine_hantee():
             
             self.plateau_jeu=plateau(nb_joueurs,liste_noms,liste_niveaux,dimensions_plateau,dico_parametres)
 
+        #Si on retourne au jeu depuis la pause, rien n'est fait.
         else :
             pass
         
+        #Au début du jeu, on affiche automatiquement les commandes.
         self.afficher_commandes(debut=True)
         
+        #Création du bouton qui permet d'afficher les commandes à tout moment.
         afficher_commandes_button=Bouton(725,5,150,40,"Commandes")
     
+        #Pour une facilité d'écriture
         N = self.plateau_jeu.N
         
-        
+        #Activation de la méthode
         self.dico_stop["rester_jeu"]=True
-        #in charge l'animation en cas de capture de fantome
+        
+        #Chargement de l'animation en cas de capture de fantome
         clip = VideoFileClip('animation.mp4')
         
         
@@ -147,31 +195,41 @@ class mine_hantee():
         while self.plateau_jeu.id_dernier_fantome!=self.plateau_jeu.nbre_fantomes and self.dico_stop["rester_jeu"]==True:
     
             #Tours de jeu
-            #on parcours chaque joueur à chaque tours.
+            
+            #on parcoure chaque joueur à chaque tours.
             for j in self.plateau_jeu.dico_joueurs :
                 
+                #Initialisation du texte d'information et du texte qui informe de l'étape
+                information="" 
+                etape="" 
                 
-                information="" #Initialisation du texte d'erreur
-                etape=""
-                
+                #Pour facilité d'écriture
                 joueur=self.plateau_jeu.dico_joueurs[j]
-    
+                
+                #actualisation de la fenêtre à chaque début de tour
                 actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
     
+                #Si le joueur est un joueur réel, il y'a 2 étapes dans le tour gérée par dico_stop
+                #et le plateau est modifié selon les actions de l'opérateur
                 if joueur.niveau == 0 :
-                    #premiere etape : rotation et insertion de la carte
-                    #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
+                    
+                    #Première etape : rotation et insertion de la carte
+                    #On parcoure la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
                     self.dico_stop["test_carte"]=True
+                    #On active aussi l'étape suivante qui se déroulera quand la carte aura été insérée
                     self.dico_stop["test_entree"]=True
                     
                     
                     while self.dico_stop["test_carte"]!=False:
                         
+                        #Mise à jour de l'étape du jeu et du message d'étape
                         self.plateau_jeu.etape_jeu=joueur.nom+"_"+"inserer-carte"
                         etape="Tourner la carte avec R, cliquer pour insérer"
                         
+                        #Récupération des actions de l'opérateur
                         for event in pygame.event.get():   
                             
+                            #gestion des évènements liés au bouton 
                             afficher_commandes_button.handle_event(event,self.afficher_commandes)
                             
                             #Si on appuie sur R, rotation de la carte à jouer
@@ -179,32 +237,34 @@ class mine_hantee():
                                 self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
                             
                             #ajouter la carte lorsque l'utilisateur clique dans le plateau
-                            
                             elif event.type == MOUSEBUTTONDOWN : 
+                                
                                 #clic gauche : insertion de la carte à jouer
                                 if event.button==1: 
-        
+                                    
+                                    #Test de si le clic est dans le plateau ou en dehors et mise à jour du message d'erreur
                                     coord=[int(math.floor(event.pos[1]/700*self.plateau_jeu.N)),int(math.floor(event.pos[0]/700*self.plateau_jeu.N))]
 
                                     test_inser=self.plateau_jeu.deplace_carte(coord)
-
-                                   
+                                    
                                     if test_inser==False :
                                         information=["Insertion impossible"]
+                                    
                                     #Sinon, on finit cette section du tour
-        
                                     else :
                                         information=""
                                        
                                         self.dico_stop["test_carte"]=False
                                         
-        
+                            #Si la touche espace est enfoncée, lancement de la méthode de pause
                             elif event.type == KEYDOWN and event.key == K_SPACE :
                                 self.pause()
                             
+                            #Instructions de sortie
                             elif event.type == QUIT:
                                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
-                                
+                        
+                        #actualisation de la fenêtre
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
                        
 
@@ -281,6 +341,7 @@ class mine_hantee():
                         IA = IA_simple(j,self.plateau_jeu, output_type="single")
                     elif joueur.niveau == 3:
                         coups=IA_simple(j,self.plateau_jeu, output_type="liste")
+                        print(len(coups))
                         IA=IA_monte_carlo(self.plateau_jeu, j, reps=100, liste_coups=coups, profondeur=5)
                         IA=IA[1],IA[0],IA[2]
 
@@ -306,10 +367,6 @@ class mine_hantee():
                     #print("deplacement")
                     #deplacement du joueur et decompte des points
                     information=""
-                    print("chemin :")
-                    print([carte.coord for carte in chemin])
-                    print([carte for carte in chemin])
-                    print(self.plateau_jeu.carte_a_jouer)
                     for i in chemin :
                         #print("cartes accessibles")
                         #print([carte.coord for carte in self.plateau_jeu.cartes_accessibles1(i)])
