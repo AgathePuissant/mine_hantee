@@ -538,7 +538,6 @@ class mine_hantee():
                 if event.type == QUIT:     
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
                     
-    
                     
     def sauvegarder(self):
         '''
@@ -569,8 +568,6 @@ class mine_hantee():
         
         #Affichage de la partie sélectionnée
         self.fenetre.blit(police.render("Partie "+str(self.num_partie)+" sélectionnée",True,pygame.Color("#000000")),(800,100))
-        
-                                
                                         
         while self.dico_stop["aff_partie"]==True :
             
@@ -585,7 +582,6 @@ class mine_hantee():
                 
                 #Gestion des évènements liés aux boutons
                 lancer_partie_button.handle_event(event,self.game)
-                
                 retour.handle_event(event,self.charger_partie)
                 
                 #Instruction de sortie du jeu
@@ -615,17 +611,12 @@ class mine_hantee():
             
         while self.dico_stop["charger"] ==True:
                     
-                    
             if self.liste_sauv!=[] :
-                
                 self.fenetre.blit(self.fond_uni,(0,0))  #On colle le fond du menu
-                
                 for i in range(len(self.liste_sauv)) :
                     boutons_charger_partie[i].draw(self.fenetre)
-               
             #Si il n'y a pas de partie sauvegardée, on affiche pas les boutons mais un message                                                       
             else :
-                
                 self.fenetre.blit(self.fond_uni,(0,0))  #On colle le fond du menu
                 self.fenetre.blit(police.render("Aucune partie sauvegardée",True,pygame.Color("#000000")),(450,100))
             
