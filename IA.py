@@ -173,17 +173,17 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
         heur_triees = [v for k, v in sorted(dico_heuristique.items(), key=lambda item: item[1])]
         
         
-        #On cherche les 5 valeurs d'heuristiques maximales si il y a au moins 5 valeurs
+        #On cherche les 2 valeurs d'heuristiques maximales si il y a au moins 2 valeurs
         #différentes
         max_heur = []
         j=0
-        while j<len(heur_triees) and len(max_heur)<3:
+        while j<len(heur_triees) and len(max_heur)<2:
             if heur_triees[len(heur_triees)-j-1] not in max_heur :
                 max_heur.append(heur_triees[len(heur_triees)-j-1])
             j += 1
         
         
-        #On trouve le/les chemin(s) correspondant aux 3 heuristiques maximales
+        #On trouve le/les chemin(s) correspondant aux 2 heuristiques maximales
         for triplet in dico_heuristique.keys():
             if dico_heuristique[triplet] in max_heur :
                 chemins_opti.append(chemins_possibles_total[triplet[0]][triplet[1]][triplet[2]])
@@ -192,7 +192,7 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
                 orientation_opti.append(triplet[1])
                 
             
-        #Retourner un coup parmi les 3 ayant les meilleures heuristiques
+        #Retourner un coup parmi les 2 ayant les meilleures heuristiques
         if output_type=="alea":
             #Les instances de cartes stockées dans les chemins possibles correspondent
             #aux instances du plateau dupliqué, il faut donc retrouver les instances qui
@@ -206,7 +206,7 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
             out=[inser_opti[rang], orientation_opti[rang],chemin_plateau]
     
     
-        #Ou retourner une liste contenant les coups des 5 meilleures heuristiques
+        #Ou retourne une liste contenant les coups de meilleures heuristiques
         elif output_type=="liste" :
             #On recupere une liste de triplets inser_opti, orientation_opti, chemin_plateau
             meilleurs_chemins=[]
