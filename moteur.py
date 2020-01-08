@@ -525,7 +525,7 @@ class plateau(object):
             if nv_carte.id_fantome in self.dico_joueurs[id_joueur].fantome_target : 
                 self.dico_joueurs[id_joueur].points += self.points_fantome_mission
                 self.dico_joueurs[id_joueur].fantome_target.remove(nv_carte.id_fantome)
-                retour.append("Vous avez capturé un fantôme sur votre ordre de mission !")
+                retour.append("Capture d'un fantôme de votre mission !")
                 #Si l'ordre de mission est totalement rempli, le joueur gagne 40 points
                 if self.dico_joueurs[id_joueur].fantome_target==[]:
                     self.dico_joueurs[id_joueur].points += self.bonus_mission
