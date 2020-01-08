@@ -216,7 +216,7 @@ class mine_hantee():
                     while self.dico_stop["test_carte"]!=False:
                         #Mise à jour de l'étape du jeu et du message d'étape
                         self.plateau_jeu.etape_jeu=joueur.nom+"_"+"inserer-carte"
-                        etape="Tourner la carte avec R, cliquer pour insérer, ou appuyer sur J pour utiliser le joker"
+                        etape="Tourner la carte avec R, cliquer pour insérer, J pour joker"
                         
                         #Récupération des actions de l'opérateur
                         for event in pygame.event.get():   
@@ -231,7 +231,7 @@ class mine_hantee():
                                     information="Vous n'avez plus de joker"
                                 #Si le joueur a un joker, on joue son tour avec une IA et on passe au joueur suivant
                                 else:
-                                    self.joker(joueur, information, afficher_commandes_button, etape)
+                                    self.tour_IA(joueur,information, afficher_commandes_button, etape, joker=True)
                                     self.dico_stop["test_carte"]=False
                                     self.dico_stop["test_entree"]=False
                                     joueur.nb_joker=0
@@ -271,9 +271,12 @@ class mine_hantee():
                     #2e etape : On parcours les évènements tant que le joueur n'a pas appuyé sur entrée ou tant qu'il peut encore se déplacer
                     #initialisation à la position du joueur
                     
+                    #On récupère la carte sur laquelle est le joueur, et on initialise les cartes explorées
                     carte_actuelle=joueur.carte_position
                     joueur.cartes_explorees=[carte_actuelle]
                     cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
+                    
+                    #mise à jour de l'étape de jeu
                     self.plateau_jeu.etape_jeu=joueur.nom+"_"+"deplacement"
                     information=""
                     
@@ -283,8 +286,10 @@ class mine_hantee():
                     #Tant que le joueur ne passe pas son tour et peut encore se deplacer
                     while self.dico_stop["test_entree"]==True and len(cartes_accessibles)>0:
                         
+                        #mise à jour de l'étape
                         etape="Déplacer avec les flèches, entrée pour finir"
                         
+                        #parcours des entrées clavier/souris
                         for event in pygame.event.get():
                             
                             #Correction pour supprimer les cartes explorees des cartes accessibles
@@ -294,100 +299,58 @@ class mine_hantee():
                                     
                             afficher_commandes_button.handle_event(event,self.afficher_commandes)
                             
-                            #deplacement
+                            #deplacement du joueur si il appuie sur une flèche directionnelle
                             if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
                                 deplace = self.plateau_jeu.deplace_joueur(j,event.key)
                                 if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
                                     information=self.plateau_jeu.compte_points(j,deplace)
                                     #si le joueur capture un fantome, on lance l'animation de capture
                                     if joueur.capture_fantome == True and premiere_capture==True:
-                                        #clip.preview()
+                                        clip.preview()
                                         premiere_capture=False
-                                else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
+                                #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
+                                else: 
                                     information=deplace
-
-                                
+                                    
+                                #On met à jour les cartes explorées et la carte actuelle où se trouve le joueur
                                 joueur.cartes_explorees.append(carte_actuelle)
                                 carte_actuelle=joueur.carte_position
                                 cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
                                 
                             
-
-                                
-                            #fin de tour
+                            #fin de tour : "test_entree" est assigné à False, on sort de la boucle de deplacement
                             if event.type == KEYDOWN and (event.key== K_RETURN):
                                 self.dico_stop["test_entree"]=False
                                 information=""
                             
                                 
-                                
+                            #Si on appuie sur entrée, déclenchement de la pause   
                             elif event.type == KEYDOWN and event.key == K_SPACE :
                                 pause()
-                                
+                            #Si on appuie sur quitter, fin du jeu   
                             elif event.type == QUIT:
                                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
                                 
                         #Update l'écran                                                                
                         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
         
-                            
+                
+                ##Retour au test du niveau du joueur : si le joueur est une IA (joueur.niveau!=0)
                 else:
-                    self.plateau_jeu.etape_jeu=joueur.nom+"_"+"inserer-carte"
-           
+                    #on joue le tour de l'IA
+                    self.tour_IA(joueur,information, afficher_commandes_button, etape, joker=False)
                     
-                    if joueur.niveau == 1:
-                        IA = IA_simple(j,self.plateau_jeu, output_type="alea")
-                    elif joueur.niveau == 2:
-                        IA = IA_simple(j,self.plateau_jeu, output_type="single")
-                    elif joueur.niveau == 3:
-                        coups=IA_simple(j,self.plateau_jeu, output_type="liste")
-                        print(len(coups))
-                        IA=IA_monte_carlo(self.plateau_jeu, j, reps=100, liste_coups=coups, profondeur=5)
-                        IA=IA[1],IA[0],IA[2]
-
-
-    
-                    coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
-                    #print("insertion : "+str(coord_inser))
-                    #print("chemin :"+str([carte.coord for carte in chemin]))
-                    #On tourne la carte
-                    for i in range(orientation):
-                        pygame.event.pump()
-                        self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
-                        pygame.time.wait(200)
-                        pygame.event.pump()
-                        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
-                    
-                    #print("insertion")
-                    self.plateau_jeu.deplace_carte(coord_inser) #On l'insère
-                    pygame.time.wait(200)
-                    pygame.event.pump()
-                    actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
-                    pygame.event.pump()
-                    #print("deplacement")
-                    #deplacement du joueur et decompte des points
-                    information=""
-                    for i in chemin :
-                        #print("cartes accessibles")
-                        #print([carte.coord for carte in self.plateau_jeu.cartes_accessibles1(i)])
-                        pygame.event.pump()
-                        joueur.carte_position = i
-                        information=self.plateau_jeu.compte_points(j,i)
-    
-                        pygame.time.wait(200)
-                        pygame.event.pump()
-                        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
-                    
-                    #print("fin")
-                #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
+                #Fin du tour : On ré-initialise cartes_explorees et capture_fantome
                 joueur.cartes_explorees = [carte_actuelle]
                 joueur.capture_fantome = False
 
-                
+                #On remet test_carte et test_entrée à False pour la prochaine boucle
                 if self.dico_stop["test_carte"]==False and self.dico_stop["test_entree"]==False and self.dico_stop["rester_jeu"]==False:
                     break
-            
+        
+        #Si on a capturé tous les fantômes :
         if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
+            #On récupère les scores, pour les afficher avec fin_du_jeu
             scores=[]
             for j in self.plateau_jeu.dico_joueurs:
                 joueur=self.plateau_jeu.dico_joueurs[j]
@@ -398,15 +361,47 @@ class mine_hantee():
             
             
             
-    def joker(self, joueur, information, afficher_commandes_button, etape):
+    def tour_IA(self, joueur, information, afficher_commandes_button, etape, joker=False):
+        """
+        Méthode permettant à une IA de jouer son tour et d'afficher le tour de jeu de l'IA.
+        Si Joker=True, cette méthode permet de jouer le Joker d'un joueur (en fait seuls les
+        messages affichés changent..).
+        Prend en entrée :
+            - joueur une instance de type joueur
+            - joker booléen True ou False
+            - information, afficher_commandes_button et etape : inputs permettant le bon affichage
+            des éléments déplacés par l'IA dans la fenêtre de jeu
+        """
+        #Mise à jour de l'étape du jeu
+        self.plateau_jeu.etape_jeu=joueur.nom+"_"+"inserer-carte"
+
+        #Affichage de l'étape, suivant si le coup est une IA ou un joker
+        if joker==True:
+            etape = "Le Joker réfléchit !"
+        else :
+            etape = "L'"+joueur.nom+" réfléchit..."
+        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
         
-        #recuperer le coup à jouer
-        coups=IA_simple(joueur.id,self.plateau_jeu, output_type="liste")
-        IA=IA_monte_carlo(self.plateau_jeu, joueur.id, reps=100, liste_coups=coups, profondeur=5)
-        IA=IA[1],IA[0],IA[2]
+        #recuperer le coup à jouer en fonction du niveau de l'IA
+        if joueur.niveau == 1:
+            IA = IA_simple(joueur.id,self.plateau_jeu, output_type="alea")
+        elif joueur.niveau == 2:
+            IA = IA_simple(joueur.id,self.plateau_jeu, output_type="single")
+        elif joueur.niveau == 3 or joker==True:
+            coups=IA_simple(joueur.id,self.plateau_jeu, output_type="liste")
+            IA=IA_monte_carlo(self.plateau_jeu, joueur.id, reps=100, liste_coups=coups, profondeur=3)
+            IA=IA[1],IA[0],IA[2]
+        #découpage du coup
         coord_inser, orientation, chemin = IA[0],IA[1],IA[2]
         
-
+        #Mise à jour de l'affichage de etape
+        if joker==True:
+            etape = "Joker de "+str(joueur.nom)+"..."
+        else :
+            etape = "l'"+str(joueur.nom)+" joue.."
+        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
+        
+        
         #Rotation de la carte
         for i in range(orientation):
             pygame.event.pump()
@@ -423,6 +418,7 @@ class mine_hantee():
         pygame.event.pump()
 
         #deplacement du joueur et decompte des points
+        self.plateau_jeu.etape_jeu=joueur.nom+"_"+"deplacement"
         information=""
         for i in chemin :
             pygame.event.pump()
@@ -431,7 +427,8 @@ class mine_hantee():
             pygame.time.wait(200)
             pygame.event.pump()
             actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape)
-      
+
+            
             
             
     def fin_du_jeu(self,scores) :
@@ -445,15 +442,18 @@ class mine_hantee():
         L'utilisateur peut alors choisir de quitter le jeu ou de revenir au menu de départ. 
         """
 
+        #Toutes les méthodes sont désactivées sauf celle de fin du jeu.
         self.dico_stop = dict.fromkeys(self.dico_stop, False)
         self.dico_stop["fin"]=True
 
+        #Fonction pour le tri par clé
         def getKey(elem):
             return elem[1]
         
-        #tri des scores pour établir le classement
+        #tri des scores et des nom par ordre croissant de scores pour établir le classement
         scores.sort(key=getKey,reverse=True)
         
+        #Affichage des scores et du gagnant
         self.fenetre.blit(self.fond_uni,(0,0))
         self.fenetre.blit(self.police3.render("Fin du jeu !",True,pygame.Color("#000000")),(500,50))
         self.fenetre.blit(self.police3.render(scores[0][0]+" a gagné!",False,pygame.Color("#000000")),(425,120))
@@ -491,10 +491,12 @@ class mine_hantee():
         L'utilisateur peut revenir à la partie en appuyant sur 'Espace' 
         """
     
+        #Activation de la méthode par le dico_stop
         self.dico_stop["comm"]=True
         
         while self.dico_stop["comm"]==True :
         
+            #Affichage des commandes
             self.fenetre.blit(self.fond_uni,(0,0))
             self.fenetre.blit(self.police3.render("Commandes",True,pygame.Color("#000000")),(100,100))
             self.fenetre.blit(self.police2.render("R : tourner la carte.",False,pygame.Color("#000000")),(100,200))
@@ -503,6 +505,7 @@ class mine_hantee():
             self.fenetre.blit(self.police2.render("Entrée : finir le tour.",False,pygame.Color("#000000")),(100,350))
             self.fenetre.blit(self.police2.render("Espace : mettre en pause/Retour au jeu.",False,pygame.Color("#000000")),(100,400))
             
+            #Affichage différent si on est au début du jeu ou non
             if debut==False:                                                                                         
                 self.fenetre.blit(self.police2.render("Appuyez sur espace pour revenir au jeu.",False,pygame.Color("#000000")),(100,500))
             else:
@@ -521,18 +524,25 @@ class mine_hantee():
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
                 
     def pause(self) :
+        '''
+        Méthode d'affichage qui permet de lancer les méthodes pour sauvegarder la partie en cours ou revenir au menu.
+        Reste active tant que l'utilisateur n'a pas appuyé sur la touche espace, et quand elle est désactivée permet de revenir au jeu en cours à l'endroit précis 
+        ou la méthode game en était.
+        '''
         
+        #Permet de ne pas changer le plateau quand on revient dans la méthode game
         self.nouvelle="jeu en pause"
         
+        #Activation de la méthode
         self.dico_stop["pause"]=True
         
-        texte_sauv=""
-        
+        #Création des boutons pour lancer la méthode sauvegarder et la méthode menu.
         sauvegarder_button=Bouton(550,350,200,50,"Sauvegarder")
         retour_menu_button=Bouton(550,450,200,50,"Retour au menu")
         
         while self.dico_stop["pause"]==True :
                     
+            #Affichage de l'écran de pause
             self.fenetre.blit(self.fond_uni,(0,0))
         
             self.fenetre.blit(self.police.render("Pause",True,pygame.Color("#000000")),(600,200))
@@ -540,64 +550,89 @@ class mine_hantee():
             sauvegarder_button.draw(self.fenetre)
             retour_menu_button.draw(self.fenetre)
                                       
-            self.fenetre.blit(self.police.render(texte_sauv,True,pygame.Color("#000000")),(550,550))
                                                                     
             pygame.display.flip() #Update l'écran
             
-            for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+            for event in pygame.event.get():   #On parcoure la liste de tous les événements reçus
                 
+                #Gestion des évènements liés aux boutons
                 sauvegarder_button.handle_event(event,self.sauvegarder)
                 retour_menu_button.handle_event(event,self.menu)
                     
+                #Sortie de la pause
                 if event.type == KEYDOWN and event.key == K_SPACE :
                     self.dico_stop["pause"]=False
                     
-                if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                #Instructions de sortie de jeu
+                if event.type == QUIT:     
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
                     
-    
                     
     def sauvegarder(self):
+        '''
+        Méthode qui permet de sauvegarder la partie en cours dans un fichier binaire grâce au module pickle.
+        Affiche que la partie a été sauvegardée sur l'interface de pause.
+        '''
         
         pickle.dump(self.plateau_jeu,open("sauvegarde "+str(self.num_partie),"wb"))
-        texte_sauv="Partie sauvegardée"
+        self.fenetre.blit(self.police.render("Partie sauvegardée",True,pygame.Color("#000000")),(550,550))
         
     def afficher_partie(self,num) :
+        '''
+        Méthode qui prend en argument le numéro de la partie qu'on veut charger, et attribue cette valeur à l'attribut num_partie de la classe ce qui permettra
+        par la suite de charger le fichier correspondant pour initialiser le plateau.
+        Cette méthode permet de lancer la méthode game ou bien de revenir en arrière pour choisir une autre partie à lancer.
+        '''
         
+        #Attribution du numéro de partie choisie à l'attribut permettant de charger le bon plateau
         self.num_partie=num
         
+        #Désactivation de la méthode précédente et activation de cette méthode là
         self.dico_stop["charger"]=False
         self.dico_stop["aff_partie"]=True
         
+        #Création des boutons permettant de lancer la méthode game, et permettant de revenir à la méthode précédente.
         lancer_partie_button=Bouton(800,300,200,50,"Lancer la partie")
         retour=Bouton(400,300,300,50,"Sélectionner autre partie")
         
+        #Affichage de la partie sélectionnée
         self.fenetre.blit(police.render("Partie "+str(self.num_partie)+" sélectionnée",True,pygame.Color("#000000")),(800,100))
-        
-        pygame.display.flip() #Update l'écran                                
                                         
         while self.dico_stop["aff_partie"]==True :
             
             lancer_partie_button.draw(self.fenetre) 
             retour.draw(self.fenetre)
             
-            pygame.display.flip() #Update l'écran
+            #Actualisation de l'écran
+            pygame.display.flip()    
             
-            for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+            #On parcoure la liste de tous les événements reçus
+            for event in pygame.event.get():   
                 
+                #Gestion des évènements liés aux boutons
                 lancer_partie_button.handle_event(event,self.game)
-                
                 retour.handle_event(event,self.charger_partie)
                 
-                if event.type == QUIT:     #Si un de ces événements est de type QUIT
+                #Instruction de sortie du jeu
+                if event.type == QUIT :
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
 
         
     def charger_partie(self):
+        '''
+        Méthode affichant la liste des parties sauvegardées sous forme de fichier binaire dans le dossier de base, et permettant de sélectionner la partie
+        que l'on veut charger. Une fois qu'une des partie a été sélectionnée, lance la méthode suivante afficher_partie en lui passant en argument le numéro
+        de la partie sélectionnée.
+        '''
         
+        #Activation de la méthode et désactivation de toute autre méthode
+        self.dico_stop = dict.fromkeys(self.dico_stop, False)
         self.dico_stop["charger"]=True
+        
+        #Création du bouton de retour au menu
         retour_menu_button=Bouton(500,300,200,50,"Retour au menu")
         
+        #Création des boutons permettant de sélectionner la partie voulue à partir de l'attribut contenant les numéros de partie
         if self.liste_sauv!=[] :
             boutons_charger_partie=[]
             for i in range(len(self.liste_sauv)) :
@@ -605,24 +640,22 @@ class mine_hantee():
             
         while self.dico_stop["charger"] ==True:
                     
-                    
             if self.liste_sauv!=[] :
-                
                 self.fenetre.blit(self.fond_uni,(0,0))  #On colle le fond du menu
-                
                 for i in range(len(self.liste_sauv)) :
                     boutons_charger_partie[i].draw(self.fenetre)
-                                                                      
+            #Si il n'y a pas de partie sauvegardée, on affiche pas les boutons mais un message                                                       
             else :
-                
                 self.fenetre.blit(self.fond_uni,(0,0))  #On colle le fond du menu
                 self.fenetre.blit(police.render("Aucune partie sauvegardée",True,pygame.Color("#000000")),(450,100))
             
             retour_menu_button.draw(self.fenetre)
                 
-            pygame.display.flip() #Update l'écran
+            #Actualisation de l'écran
+            pygame.display.flip() 
             
-            for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
+            #On parcoure la liste de tous les événements reçus
+            for event in pygame.event.get():  
                 
                 if self.liste_sauv!=[] :
                     for i in range(len(self.liste_sauv)) :
@@ -667,7 +700,7 @@ class mine_hantee():
         
         #lecture du fichier de paramétrisation
         dico_parametres=lecture(fichier)
-        #on stoque le choix entre les boutons dans le dictionnaire choix_final
+        #on stocke le choix entre les boutons dans le dictionnaire choix_final
         choix_final={}
         choix_final["fonction"]=self.parametrisation_1
         choix_final["nb_joueurs"]=dico_parametres['nb_joueurs'] 
