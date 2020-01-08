@@ -76,7 +76,7 @@ class mine_hantee(ConnectionListener):
             self.Pump()
             connection.Pump()
             sleep(0.01)
-
+            
 
     def Network_startgame(self, data):
         
@@ -117,18 +117,17 @@ class mine_hantee(ConnectionListener):
         self.turn = data["tour"]
         
     def Network_rotation(self, data):
-        if data["num"] != joueur_id:
-            self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
-        print("client recoie")
-        
+        #if data["num"] != self.joueur_id:
+        self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
+            
     def Network_insertion(self, data):
-        if data["num"] != joueur_id:
-            self.plateau_jeu.deplace_carte(data["coord"])
+        #if data["num"] != self.joueur_id:
+        self.plateau_jeu.deplace_carte(data["coord"])
     
     def Network_deplacement(self, data):
-        if data["num"] != joueur_id:
-            deplace = self.plateau_jeu.deplace_joueur(data["num"],data["event"])
-            self.plateau_jeu.compte_points(data["num"],deplace)
+        #if data["num"] != self.joueur_id:
+        deplace = self.plateau_jeu.deplace_joueur(data["num"],data["event"])
+        self.plateau_jeu.compte_points(data["num"],deplace)
 
     def Network_victoire(self,data):
         
@@ -346,19 +345,22 @@ class mine_hantee(ConnectionListener):
 
     def game(self):
         
+        self.Pump()
+        connection.Pump()
         information="" #Initialisation du texte d'erreur
         etape=""
         #self.afficher_commandes(debut=True)
         afficher_commandes_button=Bouton(725,5,150,40,"Commandes")
-            
+        self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
                 
         if self.turn == False:
             self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
             pygame.event.pump()
-            connection.Pump()
-            self.Pump()
+            #connection.Pump()
+            #self.Pump()
             
         else:
+            
             
             self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
     
@@ -373,16 +375,19 @@ class mine_hantee(ConnectionListener):
                 self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"inserer-carte"
                 etape="Tourner la carte avec R, cliquer pour insérer"
                 
+
                 for event in pygame.event.get():   
-                    
+
                     afficher_commandes_button.handle_event(event,self.afficher_commandes)
                     
                     #Si on appuie sur R, rotation de la carte à jouer
                     if event.type == KEYDOWN and event.key == K_r: 
                         self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
-                        self.Send({"action": "rotation", "num": self.joueur_id, "gameid": self.gameid})
-    
-                        
+                        connection.Send({"action": "rotation", "num": self.joueur_id, "gameid": self.gameid})
+                        #connection.Send({"action": "myaction", "blah": 123, "things": [3, 4, 3, 4, 7]})
+                        self.Pump()
+                        connection.Pump()
+                        print('rotation')
                     #ajouter la carte lorsque l'utilisateur clique dans le plateau
                     
                     elif event.type == MOUSEBUTTONDOWN : 
@@ -399,13 +404,10 @@ class mine_hantee(ConnectionListener):
     
                             else :
                                 information=""
-                                self.Send({"action": "insertion", "coord":coord, "num": self.joueur_id, "gameid": self.gameid})
-    
+                                connection.Send({"action": "insertion", "coord":coord, "num": self.joueur_id, "gameid": self.gameid})
+                                self.Pump()
+                                connection.Pump()
                                 self.dico_stop["test_carte"]=False
-                                
-    
-                    elif event.type == KEYDOWN and event.key == K_SPACE :
-                        self.pause()
                     
                     elif event.type == QUIT:
                         self.dico_stop = dict.fromkeys(self.dico_stop, False)
@@ -426,34 +428,10 @@ class mine_hantee(ConnectionListener):
             premiere_capture=True
             #parcours des evenements
             #Tant que le joueur ne passe pas son tour et peut encore se deplacer
-            while self.dico_stop["test_entree"]==True and len(cartes_accessibles)>0:
+            while self.dico_stop["test_entree"]==True:
                 
                 etape="Déplacer avec les flèches, entrée pour finir"
-
-                #deplacement
-                if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
-                    deplace = self.plateau_jeu.deplace_joueur(self.joueur_ent.id,event.key)
-                    if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
-                        information=self.plateau_jeu.compte_points(self.joueur_ent.id,deplace)
-                        self.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
-                        #si le joueur capture un fantome, on lance l'animation de capture
-                        if self.joueur_ent.capture_fantome == True and premiere_capture==True:
-                            clip.preview()
-                            premiere_capture=False
-                    else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
-                        information=deplace
-                    
-                    self.joueur_ent.cartes_explorees.append(carte_actuelle)
-                    carte_actuelle=self.joueur_ent.carte_position
-                    cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
-                    
-                #fin de tour
-                if event.type == KEYDOWN and (event.key== K_RETURN):
-                    self.dico_stop["test_entree"]=False
-                    self.Send({"action": "changejoueur", "num": self.joueur_id, "gameid": self.gameid})
-
-                    information=""
-               
+                
                 for event in pygame.event.get():
                     
                     #Correction pour supprimer les cartes explorees des cartes accessibles
@@ -465,10 +443,12 @@ class mine_hantee(ConnectionListener):
                     
                     #deplacement
                     if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
-                        deplace = self.plateau_jeu.deplace_joueur(j,event.key)
+                        deplace = self.plateau_jeu.deplace_joueur(self.joueur_id,event.key)
                         if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
-                            information=self.plateau_jeu.compte_points(j,deplace)
+                            information=self.plateau_jeu.compte_points(self.joueur_id,deplace)
                             self.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
+                            self.Pump()
+                            connection.Pump()
                             #si le joueur capture un fantome, on lance l'animation de capture
                             if self.joueur_ent.capture_fantome == True and premiere_capture==True:
                                 clip.preview()
@@ -484,12 +464,9 @@ class mine_hantee(ConnectionListener):
                     if event.type == KEYDOWN and (event.key== K_RETURN):
                         self.dico_stop["test_entree"]=False
                         self.Send({"action": "changejoueur", "num": self.joueur_id, "gameid": self.gameid})
-    
+                        self.Pump()
+                        connection.Pump()
                         information=""
-                    
-                        
-                    elif event.type == KEYDOWN and event.key == K_SPACE :
-                        pause()
                         
                     elif event.type == QUIT:
                         self.dico_stop = dict.fromkeys(self.dico_stop, False)
@@ -507,7 +484,8 @@ class mine_hantee(ConnectionListener):
                 
                 #self.fin_du_jeu([[j.nom,j.points] for j in self.plateau_jeu.dico_joueurs])
                 self.Send({"action": "fin", "gameid": self.gameid})
-                
+                self.Pump()
+                connection.Pump()
 
 
                  
@@ -541,45 +519,6 @@ class mine_hantee(ConnectionListener):
                     
                 if event.type == pygame.QUIT :
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
-             
-                
-                
-    def pause(self) :
-        
-        self.nouvelle="jeu en pause"
-        
-        self.dico_stop["pause"]=True
-        
-        texte_sauv=""
-        
-        sauvegarder_button=Bouton(550,350,200,50,"Sauvegarder")
-        retour_menu_button=Bouton(550,450,200,50,"Retour au menu")
-        
-        while self.dico_stop["pause"]==True :
-                    
-            self.fenetre.blit(self.fond_uni,(0,0))
-        
-            self.fenetre.blit(self.police.render("Pause",True,pygame.Color("#000000")),(600,200))
-                                                                 
-            sauvegarder_button.draw(self.fenetre)
-            retour_menu_button.draw(self.fenetre)
-                                      
-            self.fenetre.blit(self.police.render(texte_sauv,True,pygame.Color("#000000")),(550,550))
-                                                                    
-            pygame.display.flip() #Update l'écran
-            
-            for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
-                
-                sauvegarder_button.handle_event(event,self.sauvegarder)
-                retour_menu_button.handle_event(event,self.menu)
-                    
-                if event.type == KEYDOWN and event.key == K_SPACE :
-                    self.dico_stop["pause"]=False
-                    
-                if event.type == QUIT:     #Si un de ces événements est de type QUIT
-                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
-                    
-  
     
 
 

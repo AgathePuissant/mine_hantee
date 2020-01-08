@@ -52,6 +52,11 @@ class mine_hantee():
         self.dico_stop={}
     
     def menu(self):
+        """
+        Méthode permettant de créer et d'afficher le menu du jeu dans la fenêtre. 
+        A partir de ce menu, l'utilisateur peut lancer une nouvelle partie
+        ou charger une nouvelle partie par l'intermédiaire de boutons. 
+        """
         
         #en cours de modification
         if self.dico_stop=={} : 
@@ -61,32 +66,37 @@ class mine_hantee():
             self.dico_stop["intro"]=True
         else :
             self.dico_stop = dict.fromkeys(self.dico_stop, False)
-    
+        
+        #définition des boutons
         nouvelle_partie_button=Bouton(500,350,200,50,"Nouvelle partie")
         charger_partie_button=Bouton(500,450,200,50,"Charger une partie")
         
         self.nouvelle=False
+  
+        while self.dico_stop["intro"]==True:
         
-    
-        while self.dico_stop["intro"]==True: #Boucle infinie
-                    
-            pygame.display.flip() #Update l'écran
-            self.fenetre.blit(self.fond_menu,(0,0))  #On colle le fond du menu
+            #actualisation de l'écran        
+            pygame.display.flip()
+            #fond du menu
+            self.fenetre.blit(self.fond_menu,(0,0))
             
             self.liste_sauv=glob.glob("sauvegarde*")
             self.liste_sauv=[int(self.liste_sauv[i][-1]) for i in range(len(self.liste_sauv))]
+            
+            #dessin des boutons
             nouvelle_partie_button.draw(self.fenetre)
             charger_partie_button.draw(self.fenetre)
             
-            for event in pygame.event.get(): #Instructions de sortie
+            for event in pygame.event.get():
                 
+                #gestion des événements liés aux boutons
                 nouvelle_partie_button.handle_event(event,self.nouvelle_partie)
                 charger_partie_button.handle_event(event,self.charger_partie)
                 
+                #instructions de sortie
                 if event.type == pygame.QUIT:
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
-                    pygame.display.quit()
-                    pygame.quit()
+                    
         
             
     
@@ -321,54 +331,77 @@ class mine_hantee():
                     break
             
         if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
-            
-            self.fin_du_jeu([[j.nom,j.points] for j in self.plateau_jeu.dico_joueurs])
+            scores=[]
+            for j in self.plateau_jeu.dico_joueurs:
+                joueur=self.plateau_jeu.dico_joueurs[j]
+                scores=scores+[[joueur.nom,joueur.points,joueur.fantome_target]]
+            self.fin_du_jeu(scores)
             
             
             
     def fin_du_jeu(self,scores) :
+        """
+        Méthode permettant d'afficher dans la fenêtre un message de fin de jeu contenant : 
+        - le vainqueur de la partie.
+        - le classement des joueurs.
+        - les scores de chaque joueur.
+        - les ordres de mission complétés.
         
+        L'utilisateur peut alors choisir de quitter le jeu ou de revenir au menu de départ. 
+        """
+
         self.dico_stop = dict.fromkeys(self.dico_stop, False)
         self.dico_stop["fin"]=True
-        
+
         def getKey(elem):
             return elem[1]
         
+        #tri des scores pour établir le classement
         scores.sort(key=getKey,reverse=True)
         
         self.fenetre.blit(self.fond_uni,(0,0))
+        self.fenetre.blit(self.police3.render("Fin du jeu !",True,pygame.Color("#000000")),(500,50))
+        self.fenetre.blit(self.police3.render(scores[0][0]+" a gagné!",False,pygame.Color("#000000")),(425,120))
+        self.fenetre.blit(self.police3.render("Scores des joueurs : ",True,pygame.Color("#000000")),(200,200))
         
-        self.fenetre.blit(self.police3.render(scores[0][0]+" a gagné!",False,pygame.Color("#000000")),(500,100))
-        
+        #définition et dessin du bouton
         retour_menu_button=Bouton(500,600,200,50,"Retour au menu")
-        
         retour_menu_button.draw(self.fenetre)
         
+        #affichage des scores de joueurs
         for i in range(len(scores)) :
-            self.fenetre.blit(self.police3.render("Score du joueur "+str(scores[i][0])+" : "+str(scores[i][1]),False,pygame.Color("#000000")),(500,200+i*100))
-    
-        pygame.display.flip()
+            self.fenetre.blit(self.police2.render(str(scores[i][0])+" : ",False,pygame.Color("#000000")),(200,275+i*100))
+            self.fenetre.blit(self.police2.render("Score : "+str(scores[i][1]),False,pygame.Color("#000000")),(400,275+i*100))
+            if len(scores[i][2])==0:
+                self.fenetre.blit(self.police2.render("Ordre de mission complété",False,pygame.Color("#000000")),(600,275+i*100))
+            else:
+                self.fenetre.blit(self.police2.render("Ordre de mission non complété",False,pygame.Color("#000000")),(600,275+i*100))
         
+        #actualisation de la fenêtre
+        pygame.display.flip()
+
         while self.dico_stop["fin"]==True :
-            
             for event in pygame.event.get() :
-                
+                #gestion des évènements liés au bouton
                 retour_menu_button.handle_event(event,self.menu)
-                    
+                #sortie du jeu
                 if event.type == pygame.QUIT :
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
                     
                     
     def afficher_commandes(self,debut=False) :
+        """
+        Méthode permettant d'afficher dans la fenêtre les details des 
+        commandes du jeu. 
+        L'utilisateur peut revenir à la partie en appuyant sur 'Espace' 
+        """
     
         self.dico_stop["comm"]=True
         
         while self.dico_stop["comm"]==True :
         
             self.fenetre.blit(self.fond_uni,(0,0))
-            
             self.fenetre.blit(self.police3.render("Commandes",True,pygame.Color("#000000")),(100,100))
-            
             self.fenetre.blit(self.police2.render("R : tourner la carte.",False,pygame.Color("#000000")),(100,200))
             self.fenetre.blit(self.police2.render("Clic sur une carte déplaçable en périphérie du plateau : insérer la carte extérieure.",False,pygame.Color("#000000")),(100,250))
             self.fenetre.blit(self.police2.render("Flèches directionnelles : déplacer le joueur.",False,pygame.Color("#000000")),(100,300))
@@ -378,15 +411,17 @@ class mine_hantee():
             if debut==False:                                                                                         
                 self.fenetre.blit(self.police2.render("Appuyez sur espace pour revenir au jeu.",False,pygame.Color("#000000")),(100,500))
             else:
+                #les commandes sont affichées en début de partie
                 self.fenetre.blit(self.police2.render("Appuyez sur espace pour commencer le jeu.",False,pygame.Color("#000000")),(100,500))                                                                                             
             
+            #actualisation de l'écran
             pygame.display.flip() 
                                                             
             for event in pygame.event.get() :
-                
+                #retour ou lancement de la partie
                 if event.type == KEYDOWN and event.key == K_SPACE :
                     self.dico_stop["comm"]=False
-                    
+                #sortie du jeu   
                 if event.type == pygame.QUIT :
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
                 
@@ -506,12 +541,16 @@ class mine_hantee():
     
                     
     def nouvelle_partie(self):
-        '''
-        Fonction de paramétrisation simple 1
-        demande le nombre de joueurs pour la partie (entre 2,3 et 4) 
-        '''
+        """
+        Méthode de paramétrisation d'une nouvelle partie : étape 1.
+        Demande à l'utilisateur de choisir le nombre de joueurs.
+        L'utilisateur peut valider son choix pour passer à la 
+        deuxième étape de paramétrisation 
+        ou revenir au menu principal. 
+        """
         
         self.nouvelle=True
+        
         #attribution du numéro de la partie
         if self.liste_sauv!=[]:
             self.num_partie=np.max(self.liste_sauv)+1
@@ -583,7 +622,18 @@ class mine_hantee():
     
     def parametrisation_1(self,dico_erreurs={}):
         """
-        Fonction qui lance la paramétrisation des joueurs
+        Méthode de paramétrisation d'une nouvelle partie : étape 2.
+        Demande à l'utilisateur de renseigner les paramètres des 
+        différents joueurs. 
+        
+        Prend en argument : 
+            - dico_erreurs : dictionnaire contenant les paramètres 
+            pour lesquels l'utilisateur a commis une erreur de saisie 
+            ainsi que le type d'erreur (dictionnaire). Par défaut, 
+            l'utilisateur n'a pas commis d'erreurs.
+            
+        L'utilisateur peut valider son choix pour passer à la 3ème étape 
+        de paramétrisation ou revenir à l'étape précédente. 
         """
         
         self.dico_stop['nouvellepartie']=False
@@ -756,11 +806,21 @@ class mine_hantee():
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
     
     def parametrisation_2(self,dico_erreurs={}):
-        '''
-        Fonction qui lance la paramétrisation des paramètres avancés de la partie
-        '''    
-
+        """
+        Méthode de paramétrisation d'une nouvelle partie : étape 3.
+        Demande à l'utilisateur de renseigner les paramètres avancés 
+        de la partie. 
         
+        Prend en argument : 
+            - dico_erreurs : dictionnaire contenant les paramètres 
+            pour lesquels l'utilisateur a commis une erreur de saisie 
+            ainsi que le type d'erreur (dictionnaire). Par défaut, 
+            l'utilisateur n'a pas commis d'erreurs.
+            
+        L'utilisateur peut valider son choix et lancer la partie 
+        ou revenir à l'étape précédente. 
+        """
+       
         self.dico_stop['parametrisation1']=False
         self.dico_stop['parametrisation2']=True
         
@@ -899,4 +959,5 @@ mn = mine_hantee()
 
 mn.menu()
 
+pygame.display.quit()
 pygame.quit()

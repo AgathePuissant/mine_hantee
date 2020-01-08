@@ -18,9 +18,14 @@ from IA import *
 
 #Each time a client connects, a new Channel based class will be created
 class ClientChannel(PodSixNet.Channel.Channel):
+    
+    
     def Network(self, data):
         print(data)
     
+    def Network_myaction(self, data):
+        print("myaction:", data)
+        
         
     def Network_rotation(self, data):
         num = data["num"]
@@ -46,7 +51,7 @@ class ClientChannel(PodSixNet.Channel.Channel):
     def Network_changejoueur(self, data):
         num = data["num"]
         self.gameid = data["gameid"]
-        
+        print("recu change joueur")
         self._server.changejoueur(data,self.gameid, num)
     
     def Network_fin(self, data):
@@ -82,9 +87,9 @@ class MineServer(PodSixNet.Server.Server):
         else:
             channel.gameid=self.currentIndex
             self.queue.append(channel)
-            self.games.append(self.queue)
-            plat = Game(self.queue, self.currentIndex).plateau_jeu
-            
+            jeu = Game(self.queue, self.currentIndex)
+            plat = jeu.plateau_jeu
+            self.games.append(jeu)
             data0 = {"action": "startgame", "gameid": self.currentIndex}
             
             fant_target0 = plat.dico_joueurs[0].fantome_target
@@ -121,10 +126,11 @@ class MineServer(PodSixNet.Server.Server):
         
     
     def rotation(self, data, gameid, num):
+        print("recu2")
         game = [a for a in self.games if a.gameid==gameid]
         if len(game)==1:
             game[0].rotation(data, num)
-        print("recu2")
+        
     
     def insertion(self, data, gameid, num, coord):
         game = [a for a in self.games if a.gameid==gameid]
@@ -172,20 +178,25 @@ class Game:
         
     
     def rotation(self,data,num):
+        print("renvoie")
         if num==self.turn:
             self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
+            if self.turn == 0:
+                self.joueur_1.Send(data)
+            else:
+                self.joueur_0.Send(data)
             
-            self.joueur_0.Send(data)
-            self.joueur_1.Send(data)
-        print("renvoie")
         
         
     def insertion(self,data, num, coord):
         if num==self.turn:
             self.plateau_jeu.deplace_carte(coord)
             
-            self.joueur_0.Send(data)
-            self.joueur_1.Send(data)
+            if self.turn == 0:
+                self.joueur_1.Send(data)
+            else:
+                self.joueur_0.Send(data)
+            
     
     def deplacement(self,data, num, event):
         
@@ -193,16 +204,26 @@ class Game:
             deplace = self.plateau_jeu.deplace_joueur(num,event)
             self.plateau_jeu.compte_points(num,deplace)
             
-            self.joueur_0.Send(data)
-            self.joueur_1.Send(data)
+            if self.turn == 0:
+                self.joueur_1.Send(data)
+            else:
+                self.joueur_0.Send(data)
+            
             
             
     def changejoueur(self,data, num):
         
         if num==self.turn:
-            self.turn = 0 if self.turn else 1
-            self.joueur_0.Send({"action":"yourturn", "tour":True if self.turn==1 else False})
-            self.joueur_1.Send({"action":"yourturn", "tour":True if self.turn==0 else False})
+            if self.turn == 0:
+                self.turn = 1
+                self.joueur_1.Send({"action":"yourturn", "tour":True})
+                self.joueur_0.Send({"action":"yourturn", "tour":False})
+                
+            else:
+                self.turn = 0
+                self.joueur_0.Send({"action":"yourturn", "tour":True})
+                self.joueur_1.Send({"action":"yourturn", "tour":False})
+            
 
             
     def fin(self,data):
@@ -232,7 +253,7 @@ MineServe=MineServer(localaddr=(host, int(port)))
 #MineServe=MineServer()
 while True:
     MineServe.Pump()
-    sleep(0.01)
+    sleep(0.001)
     
     
 #dico_parametres = {'dimensions_plateau': '7', 'nb_fantomes': '21', 'nb_joueurs': '2', 'mode_joueur_1': 'manuel', 'mode_joueur_2': 'manuel', 'mode_joueur_3': 'manuel', 'mode_joueur_4': 'manuel', 'niveau_ia_1': '1', 'niveau_ia_2': '1', 'niveau_ia_3': '1', 'niveau_ia_4': '1', 'pseudo_joueur_1': 0, 'pseudo_joueur_2': 1, 'pseudo_joueur_3': '', 'pseudo_joueur_4': '', 'nb_fantomes_mission': '3', 'nb_joker': '1', 'points_pepite': '1', 'points_fantome': '5', 'points_fantome_mission': '20', 'bonus_mission': '40'}
