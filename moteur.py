@@ -697,7 +697,6 @@ class plateau(object):
             - coordonnées les coordonnées d'insertion de la carte : list(int,int)
             - deplacement une liste d'objets cartes non séparés par un mur
         """
-        print(coup)
         #recuperer les inputs
         rotations, coord, chemin=coup
         joueur=self.dico_joueurs[id_joueur]
