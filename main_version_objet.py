@@ -550,12 +550,20 @@ class mine_hantee():
         self.fenetre.blit(self.police.render("Partie sauvegardée",True,pygame.Color("#000000")),(550,550))
         
     def afficher_partie(self,num) :
+        '''
+        Méthode qui prend en argument le numéro de la partie qu'on veut charger, et attribue cette valeur à l'attribut num_partie de la classe ce qui permettra
+        par la suite de charger le fichier correspondant pour initialiser le plateau.
+        Cette méthode permet de lancer la méthode game ou bien de revenir en arrière pour choisir une autre partie à lancer.
+        '''
         
+        #Attribution du numéro de partie choisie à l'attribut permettant de charger le bon plateau
         self.num_partie=num
         
+        #Désactivation de la méthode précédente et activation de cette méthode là
         self.dico_stop["charger"]=False
         self.dico_stop["aff_partie"]=True
         
+        #Création des boutons permettant de lancer la méthode game, et permettant de revenir à la méthode précédente.
         lancer_partie_button=Bouton(800,300,200,50,"Lancer la partie")
         retour=Bouton(400,300,300,50,"Sélectionner autre partie")
         
@@ -582,6 +590,7 @@ class mine_hantee():
         
     def charger_partie(self):
         
+        self.dico_stop = dict.fromkeys(self.dico_stop, False)
         self.dico_stop["charger"]=True
         retour_menu_button=Bouton(500,300,200,50,"Retour au menu")
         
