@@ -413,15 +413,18 @@ class mine_hantee():
         L'utilisateur peut alors choisir de quitter le jeu ou de revenir au menu de départ. 
         """
 
+        #Toutes les méthodes sont désactivées sauf celle de fin du jeu.
         self.dico_stop = dict.fromkeys(self.dico_stop, False)
         self.dico_stop["fin"]=True
 
+        #Fonction pour le tri par clé
         def getKey(elem):
             return elem[1]
         
-        #tri des scores pour établir le classement
+        #tri des scores et des nom par ordre croissant de scores pour établir le classement
         scores.sort(key=getKey,reverse=True)
         
+        #Affichage des scores et du gagnant
         self.fenetre.blit(self.fond_uni,(0,0))
         self.fenetre.blit(self.police3.render("Fin du jeu !",True,pygame.Color("#000000")),(500,50))
         self.fenetre.blit(self.police3.render(scores[0][0]+" a gagné!",False,pygame.Color("#000000")),(425,120))
@@ -459,10 +462,12 @@ class mine_hantee():
         L'utilisateur peut revenir à la partie en appuyant sur 'Espace' 
         """
     
+        #Activation de la méthode par le dico_stop
         self.dico_stop["comm"]=True
         
         while self.dico_stop["comm"]==True :
         
+            #Affichage des commandes
             self.fenetre.blit(self.fond_uni,(0,0))
             self.fenetre.blit(self.police3.render("Commandes",True,pygame.Color("#000000")),(100,100))
             self.fenetre.blit(self.police2.render("R : tourner la carte.",False,pygame.Color("#000000")),(100,200))
@@ -471,6 +476,7 @@ class mine_hantee():
             self.fenetre.blit(self.police2.render("Entrée : finir le tour.",False,pygame.Color("#000000")),(100,350))
             self.fenetre.blit(self.police2.render("Espace : mettre en pause/Retour au jeu.",False,pygame.Color("#000000")),(100,400))
             
+            #Affichage différent si on est au début du jeu ou non
             if debut==False:                                                                                         
                 self.fenetre.blit(self.police2.render("Appuyez sur espace pour revenir au jeu.",False,pygame.Color("#000000")),(100,500))
             else:
@@ -489,18 +495,28 @@ class mine_hantee():
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
                 
     def pause(self) :
+        '''
+        Méthode d'affichage qui permet de lancer les méthodes pour sauvegarder la partie en cours ou revenir au menu.
+        Reste active tant que l'utilisateur n'a pas appuyé sur la touche espace, et quand elle est désactivée permet de revenir au jeu en cours à l'endroit précis 
+        ou la méthode game en était.
+        '''
         
+        #Permet de ne pas changer le plateau quand on revient dans la méthode game
         self.nouvelle="jeu en pause"
         
+        #Activation de la méthode
         self.dico_stop["pause"]=True
         
+        #Initialisation du texte en cas de sauvegarde
         texte_sauv=""
         
+        #Création des boutons pour lancer la méthode sauvegarder et la méthode menu.
         sauvegarder_button=Bouton(550,350,200,50,"Sauvegarder")
         retour_menu_button=Bouton(550,450,200,50,"Retour au menu")
         
         while self.dico_stop["pause"]==True :
                     
+            
             self.fenetre.blit(self.fond_uni,(0,0))
         
             self.fenetre.blit(self.police.render("Pause",True,pygame.Color("#000000")),(600,200))
