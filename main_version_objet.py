@@ -567,16 +567,18 @@ class mine_hantee():
         lancer_partie_button=Bouton(800,300,200,50,"Lancer la partie")
         retour=Bouton(400,300,300,50,"Sélectionner autre partie")
         
+        #Affichage de la partie sélectionnée
         self.fenetre.blit(police.render("Partie "+str(self.num_partie)+" sélectionnée",True,pygame.Color("#000000")),(800,100))
         
-        pygame.display.flip() #Update l'écran                                
+                                
                                         
         while self.dico_stop["aff_partie"]==True :
             
             lancer_partie_button.draw(self.fenetre) 
             retour.draw(self.fenetre)
             
-            pygame.display.flip() #Update l'écran
+            #Actualisation de l'écran
+            pygame.display.flip()    
             
             for event in pygame.event.get():   #On parcours la liste de tous les événements reçus
                 
