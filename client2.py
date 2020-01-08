@@ -80,6 +80,8 @@ class mine_hantee(ConnectionListener):
 
     def Network_startgame(self, data):
         
+        print("startgame")
+        
         self.running=True
         self.joueur_id=data["joueur_id"]
         self.gameid=data["gameid"]
@@ -113,13 +115,15 @@ class mine_hantee(ConnectionListener):
     def Network_close(self, data):
         exit()
         
-    def Network_yourturn(self, data):
+    def Network_changejoueur(self, data):
         self.turn = data["tour"]
+        print("c'est mon tour")
         
     def Network_rotation(self, data):
         #if data["num"] != self.joueur_id:
         self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
-            
+        print("rotation recue")
+        
     def Network_insertion(self, data):
         #if data["num"] != self.joueur_id:
         self.plateau_jeu.deplace_carte(data["coord"])
@@ -128,6 +132,7 @@ class mine_hantee(ConnectionListener):
         #if data["num"] != self.joueur_id:
         deplace = self.plateau_jeu.deplace_joueur(data["num"],data["event"])
         self.plateau_jeu.compte_points(data["num"],deplace)
+
 
     def Network_victoire(self,data):
         
@@ -371,14 +376,14 @@ class mine_hantee(ConnectionListener):
         self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
                 
         if self.turn == False:
+            for event in pygame.event.get(): 
+                afficher_commandes_button.handle_event(event,self.afficher_commandes)
             self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
             pygame.event.pump()
-            #connection.Pump()
-            #self.Pump()
             
+
         else:
-            
-            
+              
             self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
     
             #premiere etape : rotation et insertion de la carte
@@ -441,8 +446,6 @@ class mine_hantee(ConnectionListener):
             self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"deplacement"
             information=""
             
-            #initialiser un marqueur pour l'animation de capture du fantôme
-            premiere_capture=True
             #parcours des evenements
             #Tant que le joueur ne passe pas son tour et peut encore se deplacer
             while self.dico_stop["test_entree"]==True:
@@ -463,13 +466,10 @@ class mine_hantee(ConnectionListener):
                         deplace = self.plateau_jeu.deplace_joueur(self.joueur_id,event.key)
                         if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
                             information=self.plateau_jeu.compte_points(self.joueur_id,deplace)
-                            self.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
+                            connection.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
                             self.Pump()
                             connection.Pump()
-                            #si le joueur capture un fantome, on lance l'animation de capture
-                            if self.joueur_ent.capture_fantome == True and premiere_capture==True:
-                                clip.preview()
-                                premiere_capture=False
+
                         else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
                             information=deplace
                         
@@ -480,7 +480,7 @@ class mine_hantee(ConnectionListener):
                     #fin de tour
                     if event.type == KEYDOWN and (event.key== K_RETURN):
                         self.dico_stop["test_entree"]=False
-                        self.Send({"action": "changejoueur", "num": self.joueur_id, "gameid": self.gameid})
+                        connection.Send({"action": "changejoueur", "num": self.joueur_id, "gameid": self.gameid})
                         self.Pump()
                         connection.Pump()
                         information=""
@@ -503,6 +503,9 @@ class mine_hantee(ConnectionListener):
                 self.Send({"action": "fin", "gameid": self.gameid})
                 self.Pump()
                 connection.Pump()
+                
+        self.Pump()
+        connection.Pump()  
 
 
                  
