@@ -12,11 +12,8 @@ import pygame
 from pygame.locals import *
 import numpy as np
 import random as rd
-import pickle
-import glob
 import copy as copy
 import math
-from moviepy.editor import *
 
 from moteur import *
 from objets_graphiques import *
@@ -26,10 +23,16 @@ from IA import *
 #---------------------------------------Défintion des instructions graphiques------------------------------
     
 class mine_hantee(ConnectionListener):
-    
+    """
+    Classe représentant la partie d'un joueur.
+    """
     
     def __init__(self):
-    
+        """
+        Initialise les paramètres graphiques et permet la connection au serveur.
+        Tant que la méthode startgame n'est pas déclenchée, est à l'écoute d'un
+        message du serveur.
+        """
         pygame.init()
         
         #Ouverture de la fenêtre Pygame
@@ -56,7 +59,9 @@ class mine_hantee(ConnectionListener):
         self.dico_stop={}
         
         self.Connect()
-        address=input("Address of Server: ")
+        #En appuyant sur entrée sans préciser d'adresse, le client se connecte automatiquement
+        #au localhost.
+        address=input("Adresse du serveur : ")
         try:
             if not address:
                 host, port="localhost", 8000
@@ -64,12 +69,13 @@ class mine_hantee(ConnectionListener):
                 host,port=address.split(":")
             self.Connect((host, int(port)))
         except:
-            print("Error Connecting to Server")
-            print("Usage:", "host:port")
-            print("e.g.", "localhost:31425")
+            print("Erreur lors de la connextion au serveur")
+            print("Utilisation:", "host:port")
+            print("exemple : ", "localhost:31425")
             exit()
+        
             
-        print("Labyrinthe client 1 started")
+        print("Joueur connecté")
         
         self.running=False
         while not self.running:
@@ -79,13 +85,26 @@ class mine_hantee(ConnectionListener):
             
 
     def Network_startgame(self, data):
+        """
+        Prend en entrée data : dictionnaire des infos envoyées par le serveur.
         
-        print("startgame")
+        Méthode activée lorsque 2 joueurs se sont connectés à la même partie.
+        Initialise :
+            - joueur_id : l'identifiant du joueur (0 ou 1) (int)
+            - joueur_ent : entité du joueur
+            - gameid : l'identifiant de la partie (int)
+            - turn : booleen permettant de savoir si c'est le tour de ce joueur
+            (True) ou non (False)
+            - plateau_jeu : plateau du jeu. Etant donné que certains paramètres
+            sont aléatoires lors de la création d'un plateau, on reprend les 
+            paramètres du plateau créé par le serveur.
+            
+        """
+        print("La partie peut commencer !")
         
         self.running=True
         self.joueur_id=data["joueur_id"]
         self.gameid=data["gameid"]
-
 
         if self.joueur_id==0:
             self.turn=True
@@ -113,28 +132,73 @@ class mine_hantee(ConnectionListener):
 
         
     def Network_close(self, data):
+        """
+        Prend en entrée data : dictionnaire des infos envoyées par le serveur.
+        Méthode pouvant être activée par le serveur et qui ferme la partie.
+        """
         exit()
         
     def Network_changejoueur(self, data):
+        """
+        Prend en entrée data : dictionnaire des infos envoyées par le serveur.
+        Méthode pouvant être activée par le serveur et qui change de joueur.
+        """
+        
         self.turn = data["tour"]
-        print("c'est mon tour")
+
         
     def Network_rotation(self, data):
+        """
+        Prend en entrée data : dictionnaire des infos envoyées par le serveur.
+        Méthode activée par le serveur quand l'autre joueur tourne une carte et 
+        qui tourne la carte sur le plateau de ce joueur.
+        """
+        
         #if data["num"] != self.joueur_id:
         self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
-        print("rotation recue")
+
         
     def Network_insertion(self, data):
-        #if data["num"] != self.joueur_id:
+        """
+        Prend en entrée data : dictionnaire des infos envoyées par le serveur.
+        Méthode activée par le serveur quand l'autre joueur insère une carte et 
+        qui insère la carte au même endroit sur le plateau de ce joueur.
+        """
         self.plateau_jeu.deplace_carte(data["coord"])
     
     def Network_deplacement(self, data):
-        #if data["num"] != self.joueur_id:
+        """
+        Prend en entrée data : dictionnaire des infos envoyées par le serveur.
+        Méthode activée par le serveur quand l'autre joueur se déplace sur son
+        plateau et fait se déplacer le joueur adversaire sur le plateau de ce joueur.
+        """
+        
         deplace = self.plateau_jeu.deplace_joueur(data["num"],data["event"])
         self.plateau_jeu.compte_points(data["num"],deplace)
+        
+    def Network_abandonadversaire(self, data):
+        """
+        Prend en entrée data : dictionnaire des infos envoyées par le serveur.
+        Méthode activée par le serveur quand l'autre joueur ferme sa partie.
+        """
+        
+        print("abandon adversaire")
+        self.fenetre.blit(self.fond_uni,(0,0))
+        self.fenetre.blit(self.police3.render("Votre adversaire a quitté la partie",False,pygame.Color("#000000")),(500,100))
+        
+        for event in pygame.event.get() :
+                
+            if event.type == pygame.QUIT :
+                self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                exit()
 
 
     def Network_victoire(self,data):
+        """
+        Prend en entrée data : dictionnaire des infos envoyées par le serveur.
+        Méthode activée par le serveur quand la partie est finie et que le joueur
+        a gagné.
+        """
         
         self.dico_stop = dict.fromkeys(self.dico_stop, False)
         self.dico_stop["fin"]=True
@@ -147,9 +211,16 @@ class mine_hantee(ConnectionListener):
                 
             if event.type == pygame.QUIT :
                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                exit()
 
 
     def Network_echec(self,data):
+        
+        """
+        Prend en entrée data : dictionnaire des infos envoyées par le serveur.
+        Méthode activée par le serveur quand la partie est finie et que le joueur
+        a perdu.
+        """
         
         self.dico_stop = dict.fromkeys(self.dico_stop, False)
         self.dico_stop["fin"]=True
@@ -162,6 +233,7 @@ class mine_hantee(ConnectionListener):
                 
             if event.type == pygame.QUIT :
                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                exit()
 
 
     def affiche_plateau(self,plat,fenetre):
@@ -381,6 +453,9 @@ class mine_hantee(ConnectionListener):
     
 
     def game(self):
+        """
+        Méthode qui permet le déroulement du jeu. 
+        """
         
         self.Pump()
         connection.Pump()
@@ -391,13 +466,21 @@ class mine_hantee(ConnectionListener):
         
         self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
                 
+        #Si ce n'est pas le tour du joueur, on actualise seulement la fenêtre 
         if self.turn == False:
             for event in pygame.event.get(): 
                 afficher_commandes_button.handle_event(event,self.afficher_commandes)
+                if event.type == pygame.QUIT :
+                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                    connection.Send({"action":"quitter","num":self.joueur_id,"gameid": self.gameid})
+                    self.Pump()
+                    connection.Pump()
+                    exit()
             self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
             pygame.event.pump()
 
 
+        #Si c'est le tour du joueur, il peut effectuer des actions.
         else:
               
             self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
@@ -407,7 +490,7 @@ class mine_hantee(ConnectionListener):
             self.dico_stop["test_carte"]=True
             self.dico_stop["test_entree"]=True
             
-            
+            #Tant que le joueur n'a pas inséré la carte extérieure
             while self.dico_stop["test_carte"]!=False:
                 
                 self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"inserer-carte"
@@ -421,11 +504,11 @@ class mine_hantee(ConnectionListener):
                     #Si on appuie sur R, rotation de la carte à jouer
                     if event.type == KEYDOWN and event.key == K_r: 
                         self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
+                        #Si la carte est tournée, on envoie l'information au serveur
                         connection.Send({"action": "rotation", "num": self.joueur_id, "gameid": self.gameid})
-                        #connection.Send({"action": "myaction", "blah": 123, "things": [3, 4, 3, 4, 7]})
                         self.Pump()
                         connection.Pump()
-                        print('rotation')
+                        
                     #ajouter la carte lorsque l'utilisateur clique dans le plateau
                     
                     elif event.type == MOUSEBUTTONDOWN : 
@@ -442,13 +525,20 @@ class mine_hantee(ConnectionListener):
     
                             else :
                                 information=""
+                                #Si la carte est insérée, on envoie l'information au serveur
                                 connection.Send({"action": "insertion", "coord":coord, "num": self.joueur_id, "gameid": self.gameid})
                                 self.Pump()
                                 connection.Pump()
                                 self.dico_stop["test_carte"]=False
                     
                     elif event.type == QUIT:
+                        #Si le joueur quitte la partie, on envoie l'information
+                        #au serveur et on ferme la fenêtre.
                         self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                        connection.Send({"action":"quitter","num":self.joueur_id,"gameid": self.gameid})
+                        self.Pump()
+                        connection.Pump()
+                        exit()
                         
                 self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
 
@@ -463,7 +553,7 @@ class mine_hantee(ConnectionListener):
             information=""
             
             #parcours des evenements
-            #Tant que le joueur ne passe pas son tour et peut encore se deplacer
+            #Tant que le joueur ne passe pas son tour
             while self.dico_stop["test_entree"]==True:
                 
                 etape="Déplacer avec les flèches, entrée pour finir"
@@ -482,6 +572,7 @@ class mine_hantee(ConnectionListener):
                         deplace = self.plateau_jeu.deplace_joueur(self.joueur_id,event.key)
                         if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
                             information=self.plateau_jeu.compte_points(self.joueur_id,deplace)
+                            #Si le joueur se déplace, on envoie l'information au serveur
                             connection.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
                             self.Pump()
                             connection.Pump()
@@ -496,13 +587,20 @@ class mine_hantee(ConnectionListener):
                     #fin de tour
                     if event.type == KEYDOWN and (event.key== K_RETURN):
                         self.dico_stop["test_entree"]=False
+                        #Si le joueur décide de terminer son tour, on envoie l'information au serveur
                         connection.Send({"action": "changejoueur", "num": self.joueur_id, "gameid": self.gameid})
                         self.Pump()
                         connection.Pump()
                         information=""
                         
                     elif event.type == QUIT:
+                        #Si le joueur quitte la partie, on envoie l'information
+                        #au serveur et on ferme la fenêtre.
                         self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                        connection.Send({"action":"quitter","num":self.joueur_id,"gameid": self.gameid})
+                        self.Pump()
+                        connection.Pump()
+                        exit()
                         
                 #Update l'écran                                                                
                 self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
@@ -514,8 +612,8 @@ class mine_hantee(ConnectionListener):
             
     
             if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
-                
-                #self.fin_du_jeu([[j.nom,j.points] for j in self.plateau_jeu.dico_joueurs])
+                #Si le dernier fantôme a été capturé, c'est la fin du jeu.
+                #On envoie l'information au serveur.
                 self.Send({"action": "fin", "gameid": self.gameid})
                 self.Pump()
                 connection.Pump()
@@ -557,10 +655,13 @@ class mine_hantee(ConnectionListener):
     
 
 
+
+
 mn = mine_hantee()
 while 1:
     if mn.game()==1:
         break
 mn.finished()
 
-
+pygame.display.quit()
+pygame.quit()
