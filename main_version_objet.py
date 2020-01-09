@@ -48,6 +48,7 @@ class mine_hantee():
         
         #Creation des images du menu
         self.fond_menu = pygame.image.load("fond_menu.png").convert()
+        self.fond_menu = pygame.transform.scale(self.fond_menu, (1200,700))
         self.fond_uni = pygame.image.load("fond_uni.png").convert()
         
         #Création de la police du jeu
@@ -73,7 +74,9 @@ class mine_hantee():
         A partir de ce menu, l'utilisateur peut lancer une nouvelle partie
         ou charger une nouvelle partie par l'intermédiaire de boutons. 
         """
-        
+        #lancer la musique du menu
+        pygame.mixer.music.load("musiqueretro.mp3")
+
         #Activation du menu par l'intermédiraire du dico_stop
         #Différente selon que l'on soit au début du jeu ou revenu au menu
         
@@ -107,6 +110,9 @@ class mine_hantee():
         #Tant que la méthode est activiée via la variable intro du dico_stop
         #on affiche le menu et les boutons du menu
         while self.dico_stop["intro"]==True:
+            #on lance la musique
+            pygame.mixer.music.play()
+
         
             #actualisation de l'écran      
             pygame.display.flip()
