@@ -35,7 +35,7 @@ niveau_ia_4=1
 
 #Peudos des joueurs (4 joueurs au maximum)
 
-pseudo_joueur_1=Elodie
+pseudo_joueur_1=Agathe
 pseudo_joueur_2=Ordinateur2
 pseudo_joueur_3=Ordinateur3
 pseudo_joueur_4=zodj
@@ -48,7 +48,7 @@ pseudo_joueur_4=zodj
 nb_fantomes_mission=3
 
 #Nombre de jokers pour chaque joueur
-nb_joker=1
+nb_joker=10
 
 #########################
 #	CALCUL DES POINTS	#
