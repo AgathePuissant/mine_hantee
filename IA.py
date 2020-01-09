@@ -44,7 +44,7 @@ def IA_monte_carlo(plateau_en_cours,joueur_id, reps, liste_coups=[], profondeur=
 
 
 
-def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
+def IA_simple(id_joueur,plateau_en_cours, output_type="single", nb_heur=2, nb_eval=10):
     """
     Fonction permettant pour un joueur automatique de niveau débutant de savoir 
     quel coup jouer à un moment donné du jeu.
@@ -76,6 +76,9 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
     Où coordonneés = coordonnées d'insertion de la carte extérieure (liste), 
     orientation = entier correspondant au nombre de fois qu'il faut tourner la carte et
     deplacement = liste d'entités de carte.
+    
+    Les arguments optionnels nb_heur et nb_eval permettent de gérer le nombre d'heuristiques considérées,
+    et le nombre de coups maximal renvoyé en sortie
     """
     
     #On duplique l'entité du plateau en cours pour faire des simulations de déplacement
@@ -179,13 +182,13 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
         #différentes
         max_heur = []
         j=0
-        while j<len(heur_triees) and len(max_heur)<2:
+        while j<len(heur_triees) and len(max_heur)<nb_heur:
             if heur_triees[len(heur_triees)-j-1] not in max_heur :
                 max_heur.append(heur_triees[len(heur_triees)-j-1])
             j += 1
         
         
-        #On trouve le/les chemin(s) correspondant aux 2 heuristiques maximales
+        #On trouve le/les chemin(s) correspondant aux nb_heur heuristiques maximales
         for triplet in dico_heuristique.keys():
             if dico_heuristique[triplet] in max_heur :
                 chemins_opti.append(chemins_possibles_total[triplet[0]][triplet[1]][triplet[2]])
@@ -194,7 +197,7 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
                 orientation_opti.append(triplet[1])
                 
             
-        #Retourner un coup parmi les 2 ayant les meilleures heuristiques
+        #Retourner un coup parmi les nb_heur ayant les meilleures heuristiques
         if output_type=="alea":
             #Les instances de cartes stockées dans les chemins possibles correspondent
             #aux instances du plateau dupliqué, il faut donc retrouver les instances qui
@@ -220,8 +223,8 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
                 meilleurs_chemins.append([orientation_opti[rang],inser_opti[rang],chemin_plateau])
             out=meilleurs_chemins
             #reduire le nombre de coups testes
-            if len(out)>10:
-                out=rd.sample(out, 10)
+            if len(out)>nb_eval:
+                out=rd.sample(out, nb_eval)
         
 
     #Ou bien retourner le coup correspondant à la meilleure heuristique
