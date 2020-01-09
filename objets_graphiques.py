@@ -336,6 +336,7 @@ def affiche_plateau(plat,fenetre):
     fantome_cible = pygame.image.load("fantome_cible.png").convert_alpha()
     pepite = pygame.image.load("pepite.png").convert_alpha()
     indeplacable = pygame.image.load("indeplacable.png").convert_alpha()
+    accessible = pygame.image.load("accessible.png").convert_alpha()
     fleche1= pygame.image.load("fleche1.png").convert_alpha()
     fleche2= pygame.image.load("fleche2.png").convert_alpha()
     fleche3= pygame.image.load("fleche3.png").convert_alpha()
@@ -371,6 +372,9 @@ def affiche_plateau(plat,fenetre):
     x_indeplacable = indeplacable.get_width()
     y_indeplacable = indeplacable.get_height()
     indeplacable  = pygame.transform.scale(indeplacable, (int(x_indeplacable*(7/N)),int(y_indeplacable*(7/N))))
+    x_accessible = accessible.get_width()
+    y_accessible = accessible.get_height()
+    accessible  = pygame.transform.scale(accessible, (int(x_accessible*(7/N)),int(y_accessible*(7/N))))
     x_fleche1 = 40
     y_fleche1 = 40
     fleche1 = pygame.transform.scale(fleche1, (int(x_fleche1*(7/N)),int(y_fleche1*(7/N))))
@@ -391,6 +395,21 @@ def affiche_plateau(plat,fenetre):
     #Création de la police du jeu
     police = pygame.font.SysFont("calibri", int(20*7/N), bold=True) #Load font object.
     
+    #On recupere les cartes accessibles du joueur dont c'est le tour, si le jeu a commencé
+    if plat.etape_jeu!="":
+        joueur=plat.etape_jeu.split("_")[0]
+        joueur_index=[joueur.nom for joueur in plat.dico_joueurs.values()].index(joueur)
+        joueur=plat.dico_joueurs[joueur_index]
+        carte_actuelle=joueur.carte_position
+        cartes_explorees=joueur.cartes_explorees
+        cartes_accessibles=plat.cartes_accessibles1(carte_actuelle)
+        if len(cartes_explorees)>0:
+            for carte in cartes_explorees:
+                try:
+                    cartes_accessibles.remove(carte)
+                except:
+                    pass
+    
     #Affichage des cases du plateau
     for i in range(len(plat.position)) :
         for j in range(len(plat.position)) :
@@ -401,6 +420,10 @@ def affiche_plateau(plat,fenetre):
             # Ajout d'un graphisme pour les cartes déplaçables et indéplaçable   
             if plat.dico_cartes[plat.position[i,j]].deplacable==False :
                 fenetre.blit(indeplacable,(y,x))
+                
+            # Ajout d'un graphisme pour les cartes accessibles
+            if plat.etape_jeu!="" and plat.dico_cartes[plat.position[i,j]] in cartes_accessibles:
+                fenetre.blit(accessible, (y,x))
             
             # Affichage des murs
             for k in range(len(plat.dico_cartes[plat.position[i,j]].orientation)) :
