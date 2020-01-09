@@ -358,12 +358,6 @@ class mine_hantee(ConnectionListener):
                     #les numréos des fantomes sont affichés à côté de chaque fantome
                     fenetre.blit(police.render(str(plat.dico_cartes[plat.position[i,j]].id_fantome),True,pygame.Color("#FFFFFF")),(y+10,x+30))
 
-                           
-        for i in range(len(plat.dico_joueurs)) :
-            x=plat.dico_joueurs[i].carte_position.coord[0]*int(100*7/N)
-            y=plat.dico_joueurs[i].carte_position.coord[1]*int(100*7/N)
-            fenetre.blit(liste_im_joueur[i],(y,x))
-
 
         #On met des flèches là ou les insertions sont possibles
         for i in plat.insertions_possibles :
@@ -387,8 +381,6 @@ class mine_hantee(ConnectionListener):
         for i in range(len(plat.dico_joueurs)) :
             x=plat.dico_joueurs[i].carte_position.coord[0]*int(100*7/N)+((((100*7/N))/2)-int(x_joueur*(7/N))/2)
             y=plat.dico_joueurs[i].carte_position.coord[1]*int(100*7/N)+((((100*7/N))/2)-int(y_joueur*(7/N))/2)
-
-
 
             fenetre.blit(liste_im_joueur[i],(y,x))                   
             
