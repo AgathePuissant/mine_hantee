@@ -179,7 +179,7 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
         #différentes
         max_heur = []
         j=0
-        while j<len(heur_triees) and len(max_heur)<2:
+        while j<len(heur_triees) and len(max_heur)<3:
             if heur_triees[len(heur_triees)-j-1] not in max_heur :
                 max_heur.append(heur_triees[len(heur_triees)-j-1])
             j += 1
@@ -259,136 +259,137 @@ def joueur_tour(plateau_en_cours,joueur_id):
         joueur_suivant = plateau_en_cours.dico_joueurs[0]
         joueur_suivant_id = joueur_suivant.id
     return(joueur_suivant_id)
-        
-def jouer_minmax(plateau_en_cours,joueur_id,profondeur):
-    '''
-    Fonction generale de l'algorithme minmax. Elle permet de déterminer le coup optimal
-    à jouer.
-    On simule un certains nombres de tours de jeu. On suppose que quand ce n'est pas à
-    joueur_id de jouer, les joueurs "ennemis" choisissent le coup qui va minimiser le 
-    gain de joueur_id. (C'est un postulat fort)
-    Joueur_id lui choisit le maximum
-    Entrees :
-         - joueur_id : identifiant de joueur automatique (entier)
-         - plateau_en_cours : état du plateau lors du tour du joueur automatique
-         (entité de classe plateau)
-         - profondeur : nombre de tour de jeu effectués par l'algorithme. 
-         Ici un tour de jeu correspond à un joueur qui joue, pas tous les joueurs
-    Sortie :
-        coup optimal à jouer pour l'IA pour maximiser son score
-    '''
-    max_score = -10000                
-    start=time.time()
-    progression = 0
-    #recuperer la liste des coups possibles
-    liste_coups=plateau_en_cours.coups_possibles(joueur_id)
-    #print(len(liste_coups))
-    liste_coups_copy=copy.deepcopy(liste_coups)
-    joueur_initial = joueur_id
-    #print(joueur_initial)
-
-    for coup in liste_coups_copy:
-        progression+=1
-        print("progression :"+str(progression/len(liste_coups_copy)*100)+"%")
-        #print("WESH",coup)
-        copie=0
-        copie=copy.deepcopy(plateau_en_cours)
-        copie.joue_coup(coup,joueur_id)
-        #print(copie.etape_jeu)
-        #score =copie.dico_joueurs[joueur_id].points
-        joueur_suivant = joueur_tour(copie,joueur_id)
-        #print("joeur suivant1",joueur_suivant)
-        score = Min_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
-        #print(score)
-        if score > max_score :
-            max_score = score 
-            index_coup_optimal = liste_coups_copy.index(coup)
-    end=time.time()
-    print("temps de calcul : "+ str(end-start))
-    coup_optimal = liste_coups[index_coup_optimal]
-    print(coup_optimal)
-    return coup_optimal
-
     
-def Min_IA(plateau_en_cours,joueur_id, profondeur, joueur_initial):
-     '''
-    Fonction min de minmax. Elle permet de determiner le score minimum et se relance
-    recursivement si le prochain joueur n'est pas le joueur initial ou lance maximum si
-    c'est le joueur initial
-    Entrees :
-         - joueur_id : identifiant de joueur dont c'est le tour (entier)
-         - plateau_en_cours : état du plateau lors du tour du joueur 
-         (entité de classe plateau)
-         - profondeur : nombre de tour de jeu effectués par l'algorithme. 
-         Ici un tour de jeu correspond à un joueur qui joue, pas tous les joueurs
-         -joueur_initial :identifiant de joueur automatique (entier)
-    Sortie :
-        - score du joueur automatique
-    '''
-    
-    min_score = 10000
-    #Si on est arrivé à la profondeur seuil, on remonte les points du joueur automatique
-    if profondeur == 0:
-        return plateau_en_cours.dico_joueurs[joueur_initial].points
+#        
+#def jouer_minmax(plateau_en_cours,joueur_id,profondeur):
+#    '''
+#    Fonction generale de l'algorithme minmax. Elle permet de déterminer le coup optimal
+#    à jouer.
+#    On simule un certains nombres de tours de jeu. On suppose que quand ce n'est pas à
+#    joueur_id de jouer, les joueurs "ennemis" choisissent le coup qui va minimiser le 
+#    gain de joueur_id. (C'est un postulat fort)
+#    Joueur_id lui choisit le maximum
+#    Entrees :
+#         - joueur_id : identifiant de joueur automatique (entier)
+#         - plateau_en_cours : état du plateau lors du tour du joueur automatique
+#         (entité de classe plateau)
+#         - profondeur : nombre de tour de jeu effectués par l'algorithme. 
+#         Ici un tour de jeu correspond à un joueur qui joue, pas tous les joueurs
+#    Sortie :
+#        coup optimal à jouer pour l'IA pour maximiser son score
+#    '''
+#    max_score = -10000                
+#    start=time.time()
+#    progression = 0
+#    #recuperer la liste des coups possibles
+#    liste_coups=plateau_en_cours.coups_possibles(joueur_id)
+#    #print(len(liste_coups))
+#    liste_coups_copy=copy.deepcopy(liste_coups)
+#    joueur_initial = joueur_id
+#    #print(joueur_initial)
+#
+#    for coup in liste_coups_copy:
+#        progression+=1
+#        print("progression :"+str(progression/len(liste_coups_copy)*100)+"%")
+#        #print("WESH",coup)
+#        copie=0
+#        copie=copy.deepcopy(plateau_en_cours)
+#        copie.joue_coup(coup,joueur_id)
+#        #print(copie.etape_jeu)
+#        #score =copie.dico_joueurs[joueur_id].points
+#        joueur_suivant = joueur_tour(copie,joueur_id)
+#        #print("joeur suivant1",joueur_suivant)
+#        score = Min_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
+#        #print(score)
+#        if score > max_score :
+#            max_score = score 
+#            index_coup_optimal = liste_coups_copy.index(coup)
+#    end=time.time()
+#    print("temps de calcul : "+ str(end-start))
+#    coup_optimal = liste_coups[index_coup_optimal]
+#    print(coup_optimal)
+#    return coup_optimal
 
-    #Sinon
-    else :
-        liste_coups=plateau_en_cours.coups_possibles(joueur_id)
-        liste_coups_copy=copy.deepcopy(liste_coups)
-
-        for coup in liste_coups_copy:
-            copie=0
-            copie=copy.deepcopy(plateau_en_cours)
-            copie.joue_coup(coup, joueur_id)
-            joueur_suivant = joueur_tour(copie,joueur_id)
-
-            #Si le joueur est le joueur automatique on cherche à obtenir le maximum
-            if int(joueur_suivant) == int(joueur_initial) :
-                score = Max_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
-                if score < min_score :
-                    min_score = score
-            else : 
-                score = Min_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)            
-                
-    return min_score
-
-def Max_IA(plateau_en_cours,joueur_id, profondeur, joueur_initial):
-    '''
-    Fonction max de minmax. Elle permet de determiner le score maximum du joueur automatique
-    et se relance
-    recursivement si le prochain joueur n'est pas le joueur initial ou lance maximum si
-    c'est le joueur initial
-    Entrees :
-         - joueur_id : identifiant de joueur dont c'est le tour (entier)
-         - plateau_en_cours : état du plateau lors du tour du joueur 
-         (entité de classe plateau)
-         - profondeur : nombre de tour de jeu effectués par l'algorithme. 
-         Ici un tour de jeu correspond à un joueur qui joue, pas tous les joueurs
-         -joueur_initial :identifiant de joueur automatique (entier)
-    Sortie :
-        - score du joueur automatique
-    '''
-    
-    max_score = -10000
-    
-    #Si on est arrivé à la profondeur seuil, on remonte les points du joueur automatique
-
-    if profondeur == 0:
-        return plateau_en_cours.dico_joueurs[joueur_initial].points
-    #Sinon
-    else :
-        liste_coups=plateau_en_cours.coups_possibles(joueur_id)
-        liste_coups_copy=copy.deepcopy(liste_coups)
-
-        for coup in liste_coups_copy:
-            copie=0
-            copie=copy.deepcopy(plateau_en_cours)
-            copie.joue_coup(coup,joueur_id)
-            joueur_suivant = joueur_tour(copie,joueur_id)
-            
-            #au tour suivant on lance min car le joueur qui joue n'est plus le joueur initial
-            score = Min_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
-            if score > max_score :
-                max_score = score
-            
-    return max_score
+#    
+#def Min_IA(plateau_en_cours,joueur_id, profondeur, joueur_initial):
+#     '''
+#    Fonction min de minmax. Elle permet de determiner le score minimum et se relance
+#    recursivement si le prochain joueur n'est pas le joueur initial ou lance maximum si
+#    c'est le joueur initial
+#    Entrees :
+#         - joueur_id : identifiant de joueur dont c'est le tour (entier)
+#         - plateau_en_cours : état du plateau lors du tour du joueur 
+#         (entité de classe plateau)
+#         - profondeur : nombre de tour de jeu effectués par l'algorithme. 
+#         Ici un tour de jeu correspond à un joueur qui joue, pas tous les joueurs
+#         -joueur_initial :identifiant de joueur automatique (entier)
+#    Sortie :
+#        - score du joueur automatique
+#    '''
+#    
+#    min_score = 10000
+#    #Si on est arrivé à la profondeur seuil, on remonte les points du joueur automatique
+#    if profondeur == 0:
+#        return plateau_en_cours.dico_joueurs[joueur_initial].points
+#
+#    #Sinon
+#    else :
+#        liste_coups=plateau_en_cours.coups_possibles(joueur_id)
+#        liste_coups_copy=copy.deepcopy(liste_coups)
+#
+#        for coup in liste_coups_copy:
+#            copie=0
+#            copie=copy.deepcopy(plateau_en_cours)
+#            copie.joue_coup(coup, joueur_id)
+#            joueur_suivant = joueur_tour(copie,joueur_id)
+#
+#            #Si le joueur est le joueur automatique on cherche à obtenir le maximum
+#            if int(joueur_suivant) == int(joueur_initial) :
+#                score = Max_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
+#                if score < min_score :
+#                    min_score = score
+#            else : 
+#                score = Min_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)            
+#                
+#    return min_score
+#
+#def Max_IA(plateau_en_cours,joueur_id, profondeur, joueur_initial):
+#    '''
+#    Fonction max de minmax. Elle permet de determiner le score maximum du joueur automatique
+#    et se relance
+#    recursivement si le prochain joueur n'est pas le joueur initial ou lance maximum si
+#    c'est le joueur initial
+#    Entrees :
+#         - joueur_id : identifiant de joueur dont c'est le tour (entier)
+#         - plateau_en_cours : état du plateau lors du tour du joueur 
+#         (entité de classe plateau)
+#         - profondeur : nombre de tour de jeu effectués par l'algorithme. 
+#         Ici un tour de jeu correspond à un joueur qui joue, pas tous les joueurs
+#         -joueur_initial :identifiant de joueur automatique (entier)
+#    Sortie :
+#        - score du joueur automatique
+#    '''
+#    
+#    max_score = -10000
+#    
+#    #Si on est arrivé à la profondeur seuil, on remonte les points du joueur automatique
+#
+#    if profondeur == 0:
+#        return plateau_en_cours.dico_joueurs[joueur_initial].points
+#    #Sinon
+#    else :
+#        liste_coups=plateau_en_cours.coups_possibles(joueur_id)
+#        liste_coups_copy=copy.deepcopy(liste_coups)
+#
+#        for coup in liste_coups_copy:
+#            copie=0
+#            copie=copy.deepcopy(plateau_en_cours)
+#            copie.joue_coup(coup,joueur_id)
+#            joueur_suivant = joueur_tour(copie,joueur_id)
+#            
+#            #au tour suivant on lance min car le joueur qui joue n'est plus le joueur initial
+#            score = Min_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
+#            if score > max_score :
+#                max_score = score
+#            
+#    return max_score
