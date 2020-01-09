@@ -57,6 +57,7 @@ class mine_hantee(ConnectionListener):
         self.police3=pygame.font.SysFont('calibri', 35)
         
         self.dico_stop={}
+        self.fin = False
         
         self.Connect()
         #En appuyant sur entrée sans préciser d'adresse, le client se connecte automatiquement
@@ -182,6 +183,7 @@ class mine_hantee(ConnectionListener):
         """
         
         print("abandon adversaire")
+        self.fin = True
         self.fenetre.blit(self.fond_uni,(0,0))
         self.fenetre.blit(self.police3.render("Votre adversaire a quitté la partie",False,pygame.Color("#000000")),(500,100))
         
@@ -190,7 +192,7 @@ class mine_hantee(ConnectionListener):
             if event.type == pygame.QUIT :
                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
                 exit()
-
+        pygame.display.flip()
 
     def Network_victoire(self,data):
         """
@@ -199,6 +201,7 @@ class mine_hantee(ConnectionListener):
         a gagné.
         """
         
+        self.fin = True
         self.dico_stop = dict.fromkeys(self.dico_stop, False)
         self.dico_stop["fin"]=True
         
@@ -211,6 +214,8 @@ class mine_hantee(ConnectionListener):
             if event.type == pygame.QUIT :
                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
                 exit()
+                
+        pygame.display.flip()
 
 
     def Network_echec(self,data):
@@ -221,6 +226,7 @@ class mine_hantee(ConnectionListener):
         a perdu.
         """
         
+        self.fin = True
         self.dico_stop = dict.fromkeys(self.dico_stop, False)
         self.dico_stop["fin"]=True
         
@@ -233,6 +239,8 @@ class mine_hantee(ConnectionListener):
             if event.type == pygame.QUIT :
                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
                 exit()
+                
+        pygame.display.flip()
 
 
     def affiche_plateau(self,plat,fenetre):
@@ -428,11 +436,12 @@ class mine_hantee(ConnectionListener):
             liste_im_joueur[i] = pygame.transform.scale(liste_im_joueur[i], (int(x_joueur),int(y_joueur)))
 
         for i in range(len(plateau.dico_joueurs)) :
-                    fenetre.blit(liste_im_joueur[i],(1030,320+i*80))
-                    fenetre.blit(police.render(str(plateau.dico_joueurs[i].nom) + " : ",False,pygame.Color("#000000")),(800,340+i*80))
-                    fenetre.blit(police.render("Score : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(800,340+i*80+20))
-                    fenetre.blit(police.render("Ordre de mission : "+str(sorted(plateau.dico_joueurs[i].fantome_target)),False,pygame.Color("#000000")),(800,340+i*80+40))
-    
+            fenetre.blit(liste_im_joueur[i],(1030,320+i*80))
+            fenetre.blit(police_small.render(str(plateau.dico_joueurs[i].nom) + " : ",False,pygame.Color("#000000")),(800,340+i*75))
+            fenetre.blit(police1.render("Score : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(800,340+i*75+15))
+            fenetre.blit(police1.render("Ordre de mission : "+str(sorted(plateau.dico_joueurs[i].fantome_target)),False,pygame.Color("#000000")),(800,340+i*75+30))
+            fenetre.blit(police1.render("Jokers restants : "+str(plateau.dico_joueurs[i].nb_joker),False,pygame.Color("#000000")),(800,340+i*75+45))
+            
         #test texte pour afficher le joueur qui joue
         if self.turn == True :
             fenetre.blit(police.render("C'est à vous de jouer",False,pygame.Color(0,0,0)),(800,240))
@@ -455,170 +464,174 @@ class mine_hantee(ConnectionListener):
         """
         Méthode qui permet le déroulement du jeu. 
         """
-        
-        self.Pump()
-        connection.Pump()
-        information="" #Initialisation du texte d'erreur
-        etape=""
-        #self.afficher_commandes(debut=True)
-        afficher_commandes_button=Bouton(725,5,150,40,"Commandes")
-        
-        self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
-                
-        #Si ce n'est pas le tour du joueur, on actualise seulement la fenêtre 
-        if self.turn == False:
-            for event in pygame.event.get(): 
-                afficher_commandes_button.handle_event(event,self.afficher_commandes)
-                if event.type == pygame.QUIT :
-                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
-                    connection.Send({"action":"quitter","num":self.joueur_id,"gameid": self.gameid})
-                    self.Pump()
-                    connection.Pump()
-                    exit()
-            self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
-            pygame.event.pump()
-
-
-        #Si c'est le tour du joueur, il peut effectuer des actions.
-        else:
-              
-            self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
-    
-            #premiere etape : rotation et insertion de la carte
-            #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
-            self.dico_stop["test_carte"]=True
-            self.dico_stop["test_entree"]=True
+        if self.fin == False : 
+            print("game")
+            self.Pump()
+            connection.Pump()
+            information="" #Initialisation du texte d'erreur
+            etape=""
+            #self.afficher_commandes(debut=True)
+            afficher_commandes_button=Bouton(725,5,150,40,"Commandes")
             
-            #Tant que le joueur n'a pas inséré la carte extérieure
-            while self.dico_stop["test_carte"]!=False:
-                
-                self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"inserer-carte"
-                etape="Tourner la carte avec R, cliquer pour insérer"
-                
-
-                for event in pygame.event.get():   
-
+            self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
+                    
+            #Si ce n'est pas le tour du joueur, on actualise seulement la fenêtre 
+            if self.turn == False:
+                for event in pygame.event.get(): 
                     afficher_commandes_button.handle_event(event,self.afficher_commandes)
-                    
-                    #Si on appuie sur R, rotation de la carte à jouer
-                    if event.type == KEYDOWN and event.key == K_r: 
-                        self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
-                        #Si la carte est tournée, on envoie l'information au serveur
-                        connection.Send({"action": "rotation", "num": self.joueur_id, "gameid": self.gameid})
-                        self.Pump()
-                        connection.Pump()
-                        
-                    #ajouter la carte lorsque l'utilisateur clique dans le plateau
-                    
-                    elif event.type == MOUSEBUTTONDOWN : 
-                        #clic gauche : insertion de la carte à jouer
-                        if event.button==1: 
-    
-                            coord=[int(math.floor(event.pos[1]/700*self.plateau_jeu.N)),int(math.floor(event.pos[0]/700*self.plateau_jeu.N))]
-                            
-                            test_inser=self.plateau_jeu.deplace_carte(coord)
-                           
-                            if test_inser==False :
-                                information=["Insertion impossible"]
-                            #Sinon, on finit cette section du tour
-    
-                            else :
-                                information=""
-                                #Si la carte est insérée, on envoie l'information au serveur
-                                connection.Send({"action": "insertion", "coord":coord, "num": self.joueur_id, "gameid": self.gameid})
-                                self.Pump()
-                                connection.Pump()
-                                self.dico_stop["test_carte"]=False
-                    
-                    elif event.type == QUIT:
-                        #Si le joueur quitte la partie, on envoie l'information
-                        #au serveur et on ferme la fenêtre.
+                    if event.type == pygame.QUIT :
                         self.dico_stop = dict.fromkeys(self.dico_stop, False)
                         connection.Send({"action":"quitter","num":self.joueur_id,"gameid": self.gameid})
                         self.Pump()
                         connection.Pump()
                         exit()
-                        
                 self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
-
-                                    
-            #2e etape : On parcours les évènements tant que le joueur n'a pas appuyé sur entrée ou tant qu'il peut encore se déplacer
-            #initialisation à la position du joueur
-            
-            carte_actuelle=self.joueur_ent.carte_position
-            self.joueur_ent.cartes_explorees=[carte_actuelle]
-            cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
-            self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"deplacement"
-            information=""
-            
-            #parcours des evenements
-            #Tant que le joueur ne passe pas son tour
-            while self.dico_stop["test_entree"]==True:
+                pygame.event.pump()
+    
+    
+            #Si c'est le tour du joueur, il peut effectuer des actions.
+            else:
+                  
+                self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
+        
+                #premiere etape : rotation et insertion de la carte
+                #On parcours la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
+                self.dico_stop["test_carte"]=True
+                self.dico_stop["test_entree"]=True
                 
-                etape="Déplacer avec les flèches, entrée pour finir"
-                
-                for event in pygame.event.get():
+                #Tant que le joueur n'a pas inséré la carte extérieure
+                while self.dico_stop["test_carte"]!=False:
                     
-                    #Correction pour supprimer les cartes explorees des cartes accessibles
-                    for carte_ex in self.joueur_ent.cartes_explorees:
-                        if carte_ex in cartes_accessibles:
-                            cartes_accessibles.remove(carte_ex)
-                            
-                    afficher_commandes_button.handle_event(event,self.afficher_commandes)
+                    self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"inserer-carte"
+                    etape="Tourner la carte avec R, cliquer pour insérer"
                     
-                    #deplacement
-                    if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
-                        deplace = self.plateau_jeu.deplace_joueur(self.joueur_id,event.key)
-                        if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
-                            information=self.plateau_jeu.compte_points(self.joueur_id,deplace)
-                            #Si le joueur se déplace, on envoie l'information au serveur
-                            connection.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
+    
+                    for event in pygame.event.get():   
+    
+                        afficher_commandes_button.handle_event(event,self.afficher_commandes)
+                        
+                        #Si on appuie sur R, rotation de la carte à jouer
+                        if event.type == KEYDOWN and event.key == K_r: 
+                            self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
+                            #Si la carte est tournée, on envoie l'information au serveur
+                            connection.Send({"action": "rotation", "num": self.joueur_id, "gameid": self.gameid})
                             self.Pump()
                             connection.Pump()
-
-                        else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
-                            information=deplace
+                            
+                        #ajouter la carte lorsque l'utilisateur clique dans le plateau
                         
-                        self.joueur_ent.cartes_explorees.append(carte_actuelle)
-                        carte_actuelle=self.joueur_ent.carte_position
-                        cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
-                        
-                    #fin de tour
-                    if event.type == KEYDOWN and (event.key== K_RETURN):
-                        self.dico_stop["test_entree"]=False
-                        #Si le joueur décide de terminer son tour, on envoie l'information au serveur
-                        connection.Send({"action": "changejoueur", "num": self.joueur_id, "gameid": self.gameid})
-                        self.Pump()
-                        connection.Pump()
-                        information=""
-                        
-                    elif event.type == QUIT:
-                        #Si le joueur quitte la partie, on envoie l'information
-                        #au serveur et on ferme la fenêtre.
-                        self.dico_stop = dict.fromkeys(self.dico_stop, False)
-                        connection.Send({"action":"quitter","num":self.joueur_id,"gameid": self.gameid})
-                        self.Pump()
-                        connection.Pump()
-                        exit()
-                        
-                #Update l'écran                                                                
-                self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
-    
-    
-            #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
-            self.joueur_ent.cartes_explorees = [carte_actuelle]
-            self.joueur_ent.capture_fantome = False
-            
-    
-            if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
-                #Si le dernier fantôme a été capturé, c'est la fin du jeu.
-                #On envoie l'information au serveur.
-                self.Send({"action": "fin", "gameid": self.gameid})
-                self.Pump()
-                connection.Pump()
+                        elif event.type == MOUSEBUTTONDOWN : 
+                            #clic gauche : insertion de la carte à jouer
+                            if event.button==1: 
+        
+                                coord=[int(math.floor(event.pos[1]/700*self.plateau_jeu.N)),int(math.floor(event.pos[0]/700*self.plateau_jeu.N))]
+                                
+                                test_inser=self.plateau_jeu.deplace_carte(coord)
                                
-        self.Pump()
-        connection.Pump()                
+                                if test_inser==False :
+                                    information=["Insertion impossible"]
+                                #Sinon, on finit cette section du tour
+        
+                                else :
+                                    information=""
+                                    #Si la carte est insérée, on envoie l'information au serveur
+                                    connection.Send({"action": "insertion", "coord":coord, "num": self.joueur_id, "gameid": self.gameid})
+                                    self.Pump()
+                                    connection.Pump()
+                                    self.dico_stop["test_carte"]=False
+                        
+                        elif event.type == QUIT:
+                            #Si le joueur quitte la partie, on envoie l'information
+                            #au serveur et on ferme la fenêtre.
+                            self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                            connection.Send({"action":"quitter","num":self.joueur_id,"gameid": self.gameid})
+                            self.Pump()
+                            connection.Pump()
+                            exit()
+                            
+                    self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
+    
+                                        
+                #2e etape : On parcours les évènements tant que le joueur n'a pas appuyé sur entrée ou tant qu'il peut encore se déplacer
+                #initialisation à la position du joueur
+                
+                carte_actuelle=self.joueur_ent.carte_position
+                self.joueur_ent.cartes_explorees=[carte_actuelle]
+                cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
+                self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"deplacement"
+                information=""
+                
+                #parcours des evenements
+                #Tant que le joueur ne passe pas son tour
+                while self.dico_stop["test_entree"]==True:
+                    
+                    etape="Déplacer avec les flèches, entrée pour finir"
+                    
+                    for event in pygame.event.get():
+                        
+                        #Correction pour supprimer les cartes explorees des cartes accessibles
+                        for carte_ex in self.joueur_ent.cartes_explorees:
+                            if carte_ex in cartes_accessibles:
+                                cartes_accessibles.remove(carte_ex)
+                                
+                        afficher_commandes_button.handle_event(event,self.afficher_commandes)
+                        
+                        #deplacement
+                        if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
+                            deplace = self.plateau_jeu.deplace_joueur(self.joueur_id,event.key)
+                            if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
+                                information=self.plateau_jeu.compte_points(self.joueur_id,deplace)
+                                #Si le joueur se déplace, on envoie l'information au serveur
+                                connection.Send({"action": "deplacement", "event":event.key, "num": self.joueur_id, "gameid": self.gameid})
+                                self.Pump()
+                                connection.Pump()
+    
+                            else: #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
+                                information=deplace
+                            
+                            self.joueur_ent.cartes_explorees.append(carte_actuelle)
+                            carte_actuelle=self.joueur_ent.carte_position
+                            cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
+                            
+                        #fin de tour
+                        if event.type == KEYDOWN and (event.key== K_RETURN):
+                            self.dico_stop["test_entree"]=False
+                            #Si le joueur décide de terminer son tour, on envoie l'information au serveur
+                            connection.Send({"action": "changejoueur", "num": self.joueur_id, "gameid": self.gameid})
+                            self.Pump()
+                            connection.Pump()
+                            information=""
+                            
+                        elif event.type == QUIT:
+                            #Si le joueur quitte la partie, on envoie l'information
+                            #au serveur et on ferme la fenêtre.
+                            self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                            connection.Send({"action":"quitter","num":self.joueur_id,"gameid": self.gameid})
+                            self.Pump()
+                            connection.Pump()
+                            exit()
+                            
+                    #Update l'écran                                                                
+                    self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
+        
+        
+                #Fin du tour du joueur : On ré-initialise cartes_explorees et capture_fantome
+                self.joueur_ent.cartes_explorees = [carte_actuelle]
+                self.joueur_ent.capture_fantome = False
+                
+        
+                if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
+                    #Si le dernier fantôme a été capturé, c'est la fin du jeu.
+                    #On envoie l'information au serveur.
+                    self.Send({"action": "fin", "gameid": self.gameid})
+                    self.Pump()
+                    connection.Pump()
+                                   
+            self.Pump()
+            connection.Pump()   
+            
+        else:
+            pass
 
                  
     def afficher_commandes(self,debut=False) :
