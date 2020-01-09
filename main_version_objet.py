@@ -586,7 +586,6 @@ class mine_hantee():
         '''
         
         pickle.dump(self.plateau_jeu,open("sauvegarde "+str(self.num_partie),"wb"))
-        self.fenetre.blit(self.police.render("Partie sauvegardée",True,pygame.Color("#000000")),(550,550))
         
     def afficher_partie(self,num) :
         '''
