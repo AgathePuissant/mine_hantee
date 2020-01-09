@@ -355,7 +355,9 @@ class mine_hantee():
                     for j in self.plateau_jeu.dico_joueurs:
                         joueur=self.plateau_jeu.dico_joueurs[j]
                         scores=scores+[[joueur.nom,joueur.points,joueur.fantome_target]]
+                    self.dico_stop["rester_jeu"]==False
                     self.fin_du_jeu(scores)
+                    break
             
             
             
