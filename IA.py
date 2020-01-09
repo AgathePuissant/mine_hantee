@@ -311,7 +311,7 @@ def jouer_minmax(plateau_en_cours,joueur_id,profondeur):
 
     
 def Min_IA(plateau_en_cours,joueur_id, profondeur, joueur_initial):
-     '''
+    '''
     Fonction min de minmax. Elle permet de determiner le score minimum et se relance
     recursivement si le prochain joueur n'est pas le joueur initial ou lance maximum si
     c'est le joueur initial
