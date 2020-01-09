@@ -311,7 +311,7 @@ def jouer_minmax(plateau_en_cours,joueur_id,profondeur):
 
     
 def Min_IA(plateau_en_cours,joueur_id, profondeur, joueur_initial):
-     '''
+    '''
     Fonction min de minmax. Elle permet de determiner le score minimum et se relance
     recursivement si le prochain joueur n'est pas le joueur initial ou lance maximum si
     c'est le joueur initial
@@ -330,18 +330,18 @@ def Min_IA(plateau_en_cours,joueur_id, profondeur, joueur_initial):
     #Si on est arrivé à la profondeur seuil, on remonte les points du joueur automatique
     if profondeur == 0:
         return plateau_en_cours.dico_joueurs[joueur_initial].points
-
+    
     #Sinon
     else :
         liste_coups=plateau_en_cours.coups_possibles(joueur_id)
         liste_coups_copy=copy.deepcopy(liste_coups)
-
+    
         for coup in liste_coups_copy:
             copie=0
             copie=copy.deepcopy(plateau_en_cours)
             copie.joue_coup(coup, joueur_id)
             joueur_suivant = joueur_tour(copie,joueur_id)
-
+    
             #Si le joueur est le joueur automatique on cherche à obtenir le maximum
             if int(joueur_suivant) == int(joueur_initial) :
                 score = Max_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
