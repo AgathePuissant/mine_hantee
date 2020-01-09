@@ -244,7 +244,6 @@ class mine_hantee():
                                     
                                     #Test si le clic est dans le plateau ou en dehors et mise à jour du message d'erreur
                                     coord=[int(math.floor(event.pos[1]/700*self.plateau_jeu.N)),int(math.floor(event.pos[0]/700*self.plateau_jeu.N))]
-
                                     test_inser=self.plateau_jeu.deplace_carte(coord)
                                     
                                     if test_inser==False :
@@ -324,9 +323,10 @@ class mine_hantee():
                                 information=[""]
                             
                                 
-                            #Si on appuie sur entrée, déclenchement de la pause   
+                            #Si la touche espace est enfoncée, lancement de la méthode de pause
                             elif event.type == KEYDOWN and event.key == K_SPACE :
-                                pause()
+                                self.pause()
+                                
                             #Si on appuie sur quitter, fin du jeu   
                             elif event.type == QUIT:
                                 self.dico_stop = dict.fromkeys(self.dico_stop, False)
@@ -372,7 +372,7 @@ class mine_hantee():
             - information, afficher_commandes_button et etape : inputs permettant le bon affichage
             des éléments déplacés par l'IA dans la fenêtre de jeu
         """
-        #Mise à jour de l'étape du jeu
+        #Mise à jour de l'étape du jeu 
         self.plateau_jeu.etape_jeu=joueur.nom+"_"+"inserer-carte"
 
         #Affichage de l'étape, suivant si le coup est une IA ou un joker
