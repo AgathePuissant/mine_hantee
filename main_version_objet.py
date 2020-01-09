@@ -348,14 +348,14 @@ class mine_hantee():
                 if self.dico_stop["test_carte"]==False and self.dico_stop["test_entree"]==False and self.dico_stop["rester_jeu"]==False:
                     break
         
-        #Si on a capturé tous les fantômes :
-        if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
-            #On récupère les scores, pour les afficher avec fin_du_jeu
-            scores=[]
-            for j in self.plateau_jeu.dico_joueurs:
-                joueur=self.plateau_jeu.dico_joueurs[j]
-                scores=scores+[[joueur.nom,joueur.points,joueur.fantome_target]]
-            self.fin_du_jeu(scores)
+                #Si on a capturé tous les fantômes :
+                if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
+                    #On récupère les scores, pour les afficher avec fin_du_jeu
+                    scores=[]
+                    for j in self.plateau_jeu.dico_joueurs:
+                        joueur=self.plateau_jeu.dico_joueurs[j]
+                        scores=scores+[[joueur.nom,joueur.points,joueur.fantome_target]]
+                    self.fin_du_jeu(scores)
             
             
             
