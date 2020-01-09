@@ -13,9 +13,6 @@ import copy as copy
 
 from moteur import *
 from objets_graphiques import *
-from parametrisation import *
-from IA import *
-
 
 
 class ClientChannel(PodSixNet.Channel.Channel):
@@ -96,7 +93,7 @@ class ClientChannel(PodSixNet.Channel.Channel):
         Appelle la méthode quitter de la classe server en lui passant les infos
         d'entrées.
         """
-        print("recu quitter")
+
         self.gameid = data["gameid"]
         num = data["num"]
         
@@ -134,8 +131,8 @@ class MineServer(PodSixNet.Server.Server):
         self.games = []
         self.queue = []
         self.currentIndex=0
+        
     
-    #called whenever a new client connects to your server.
     def Connected(self, channel, addr):
         """
         Méthode appelée lorsqu'un client se connecte au serveur.
@@ -352,7 +349,6 @@ class Game:
         du serveur et des 2 joueurs.
         """
         
-        print("recu change joueur 3")
         print(self.joueur_1,self.joueur_0)
         if num==self.turn:
             if self.turn == 0:
@@ -387,11 +383,11 @@ class Game:
         Méthode activée quand un joueur ferme le jeu. Envoie l'information à l'autre
         joueur. 
         """
-        
-        print("recu quitter 3")
+
         if num == 0:
             self.joueur_1.Send({"action":"abandonadversaire"})
         else:
+            print("envoie joueur 0")
             self.joueur_0.Send({"action":"abandonadversaire"})
                 
             
