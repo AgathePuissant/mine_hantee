@@ -130,12 +130,6 @@ class mine_hantee(ConnectionListener):
         self.plateau_jeu.carte_a_jouer.orientation = data["carte_a_jouer_or"]
 
         
-    def Network_close(self, data):
-        """
-        Prend en entrée data : dictionnaire des infos envoyées par le serveur.
-        Méthode pouvant être activée par le serveur et qui ferme la partie.
-        """
-        exit()
         
     def Network_changejoueur(self, data):
         """
