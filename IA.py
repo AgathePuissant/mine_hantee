@@ -234,6 +234,8 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single", nb_heur=2, nb_ev
 #print(IA_simple(2,plat,"liste"))
 
 ###IA MINMAX
+
+
 def joueur_tour(plateau_en_cours,joueur_id):
     '''
     Fonction permettant de déterminer l'id du prochain joueur à joueur. Utilisee pour l'algorithme
@@ -284,7 +286,7 @@ def jouer_minmax(plateau_en_cours,joueur_id,profondeur):
     start=time.time()
     progression = 0
     #recuperer la liste des coups possibles
-    liste_coups=plateau_en_cours.coups_possibles(joueur_id)
+    liste_coups= IA_simple(joueur_id,plateau_en_cours, output_type = "liste",nb_heur = 3,nb_eval = 20)
     #print(len(liste_coups))
     liste_coups_copy=copy.deepcopy(liste_coups)
     joueur_initial = joueur_id
@@ -301,7 +303,7 @@ def jouer_minmax(plateau_en_cours,joueur_id,profondeur):
         #score =copie.dico_joueurs[joueur_id].points
         joueur_suivant = joueur_tour(copie,joueur_id)
         #print("joeur suivant1",joueur_suivant)
-        score = Min_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
+        score = Max_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
         #print(score)
         if score > max_score :
             max_score = score 
@@ -314,6 +316,7 @@ def jouer_minmax(plateau_en_cours,joueur_id,profondeur):
 
     
 def Min_IA(plateau_en_cours,joueur_id, profondeur, joueur_initial):
+    
     '''
     Fonction min de minmax. Elle permet de determiner le score minimum et se relance
     recursivement si le prochain joueur n'est pas le joueur initial ou lance maximum si
@@ -330,21 +333,22 @@ def Min_IA(plateau_en_cours,joueur_id, profondeur, joueur_initial):
     '''
     
     min_score = 10000
+
     #Si on est arrivé à la profondeur seuil, on remonte les points du joueur automatique
     if profondeur == 0:
         return plateau_en_cours.dico_joueurs[joueur_initial].points
-    
+
     #Sinon
     else :
         liste_coups=plateau_en_cours.coups_possibles(joueur_id)
         liste_coups_copy=copy.deepcopy(liste_coups)
-    
+
         for coup in liste_coups_copy:
             copie=0
             copie=copy.deepcopy(plateau_en_cours)
             copie.joue_coup(coup, joueur_id)
             joueur_suivant = joueur_tour(copie,joueur_id)
-    
+
             #Si le joueur est le joueur automatique on cherche à obtenir le maximum
             if int(joueur_suivant) == int(joueur_initial) :
                 score = Max_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
@@ -380,7 +384,7 @@ def Max_IA(plateau_en_cours,joueur_id, profondeur, joueur_initial):
         return plateau_en_cours.dico_joueurs[joueur_initial].points
     #Sinon
     else :
-        liste_coups=plateau_en_cours.coups_possibles(joueur_id)
+        liste_coups=IA_simple(joueur_id,plateau_en_cours, output_type = "liste",nb_heur = 3,nb_eval = 20)
         liste_coups_copy=copy.deepcopy(liste_coups)
 
         for coup in liste_coups_copy:
@@ -390,7 +394,7 @@ def Max_IA(plateau_en_cours,joueur_id, profondeur, joueur_initial):
             joueur_suivant = joueur_tour(copie,joueur_id)
             
             #au tour suivant on lance min car le joueur qui joue n'est plus le joueur initial
-            score = Min_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
+            score = Max_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
             if score > max_score :
                 max_score = score
             
