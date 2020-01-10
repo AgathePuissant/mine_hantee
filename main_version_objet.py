@@ -202,8 +202,8 @@ class mine_hantee():
         while self.plateau_jeu.id_dernier_fantome!=self.plateau_jeu.nbre_fantomes and self.dico_stop["rester_jeu"]==True:
     
             #Si on démarre le jeu depuis une sauvegarde, on récupère le joueur dont c'est le tour
-            joueur=self.plateau_jeu.etape_jeu.split("_")[0]
-            joueur_index=[joueur.nom for joueur in self.plateau_jeu.dico_joueurs.values()].index(joueur)
+            joueur_nom=self.plateau_jeu.etape_jeu.split("_")[0]
+            joueur_index=[joueur.nom for joueur in self.plateau_jeu.dico_joueurs.values()].index(joueur_nom)
             joueur_actuel=self.plateau_jeu.dico_joueurs[joueur_index]
             
             #Tours de jeu
@@ -352,7 +352,7 @@ class mine_hantee():
                             actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
             
                     
-<<<<<<< HEAD
+
                     ##Retour au test du niveau du joueur : si le joueur est une IA (joueur.niveau!=0)
                     else:
                         #on joue le tour de l'IA
@@ -380,9 +380,9 @@ class mine_hantee():
                             joueur=self.plateau_jeu.dico_joueurs[j]
                             scores=scores+[[joueur.nom,joueur.points,joueur.fantome_target]]
                         self.fin_du_jeu(scores)
-=======
+
                 #Fin du tour : On ré-initialise cartes_explorees et capture_fantome
-                joueur.cartes_explorees = [carte_actuelle]
+                joueur.cartes_explorees = [joueur.carte_position]
                 joueur.capture_fantome = False
 
                 #On remet test_carte et test_entrée à False pour la prochaine boucle
@@ -399,7 +399,7 @@ class mine_hantee():
                     self.dico_stop["rester_jeu"]==False
                     self.fin_du_jeu(scores)
                     break
->>>>>>> 7c57ebf0a5974e78417143b35c48c3b65c0e54e3
+
             
             
             
@@ -430,9 +430,7 @@ class mine_hantee():
         if joueur.niveau == 1:
             IA = IA_simple(joueur.id,self.plateau_jeu, output_type="alea")
         elif joueur.niveau == 2:
-            #IA = IA_simple(joueur.id,self.plateau_jeu, output_type="single")
-            IA = jouer_minmax(self.plateau_jeu,joueur.id, profondeur= 4)
-            IA=IA[1],IA[0],IA[2]
+            IA = IA_simple(joueur.id,self.plateau_jeu, output_type="single")
         elif joueur.niveau == 3 or joker==True:
             coups=IA_simple(joueur.id,self.plateau_jeu, output_type="liste")
             IA=IA_monte_carlo(self.plateau_jeu, joueur.id, reps=100, liste_coups=coups, profondeur=3)
