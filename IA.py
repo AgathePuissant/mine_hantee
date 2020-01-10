@@ -44,7 +44,7 @@ def IA_monte_carlo(plateau_en_cours,joueur_id, reps, liste_coups=[], profondeur=
 
 
 
-def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
+def IA_simple(id_joueur,plateau_en_cours, output_type="single", nb_heur=2, nb_eval=10):
     """
     Fonction permettant pour un joueur automatique de niveau débutant de savoir 
     quel coup jouer à un moment donné du jeu.
@@ -76,6 +76,9 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
     Où coordonneés = coordonnées d'insertion de la carte extérieure (liste), 
     orientation = entier correspondant au nombre de fois qu'il faut tourner la carte et
     deplacement = liste d'entités de carte.
+    
+    Les arguments optionnels nb_heur et nb_eval permettent de gérer le nombre d'heuristiques considérées,
+    et le nombre de coups maximal renvoyé en sortie
     """
     
     #On duplique l'entité du plateau en cours pour faire des simulations de déplacement
@@ -179,13 +182,14 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
         #différentes
         max_heur = []
         j=0
-        while j<len(heur_triees) and len(max_heur)<3:
+        while j<len(heur_triees) and len(max_heur)<nb_heur:
+
             if heur_triees[len(heur_triees)-j-1] not in max_heur :
                 max_heur.append(heur_triees[len(heur_triees)-j-1])
             j += 1
         
         
-        #On trouve le/les chemin(s) correspondant aux 2 heuristiques maximales
+        #On trouve le/les chemin(s) correspondant aux nb_heur heuristiques maximales
         for triplet in dico_heuristique.keys():
             if dico_heuristique[triplet] in max_heur :
                 chemins_opti.append(chemins_possibles_total[triplet[0]][triplet[1]][triplet[2]])
@@ -194,7 +198,7 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
                 orientation_opti.append(triplet[1])
                 
             
-        #Retourner un coup parmi les 2 ayant les meilleures heuristiques
+        #Retourner un coup parmi les nb_heur ayant les meilleures heuristiques
         if output_type=="alea":
             #Les instances de cartes stockées dans les chemins possibles correspondent
             #aux instances du plateau dupliqué, il faut donc retrouver les instances qui
@@ -220,8 +224,8 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
                 meilleurs_chemins.append([orientation_opti[rang],inser_opti[rang],chemin_plateau])
             out=meilleurs_chemins
             #reduire le nombre de coups testes
-            if len(out)>10:
-                out=rd.sample(out, 10)
+            if len(out)>nb_eval:
+                out=rd.sample(out, nb_eval)
         
 
     #Ou bien retourner le coup correspondant à la meilleure heuristique
@@ -231,6 +235,8 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single"):
 #print(IA_simple(2,plat,"liste"))
 
 ###IA MINMAX
+
+
 def joueur_tour(plateau_en_cours,joueur_id):
     '''
     Fonction permettant de déterminer l'id du prochain joueur à joueur. Utilisee pour l'algorithme
@@ -259,7 +265,102 @@ def joueur_tour(plateau_en_cours,joueur_id):
         joueur_suivant = plateau_en_cours.dico_joueurs[0]
         joueur_suivant_id = joueur_suivant.id
     return(joueur_suivant_id)
+
+        
+def jouer_minmax(plateau_en_cours,joueur_id,profondeur):
+    '''
+    Fonction generale de l'algorithme minmax. Elle permet de déterminer le coup optimal
+    à jouer.
+    On simule un certains nombres de tours de jeu. On suppose que quand ce n'est pas à
+    joueur_id de jouer, les joueurs "ennemis" choisissent le coup qui va minimiser le 
+    gain de joueur_id. (C'est un postulat fort)
+    Joueur_id lui choisit le maximum
+    Entrees :
+         - joueur_id : identifiant de joueur automatique (entier)
+         - plateau_en_cours : état du plateau lors du tour du joueur automatique
+         (entité de classe plateau)
+         - profondeur : nombre de tour de jeu effectués par l'algorithme. 
+         Ici un tour de jeu correspond à un joueur qui joue, pas tous les joueurs
+    Sortie :
+        coup optimal à jouer pour l'IA pour maximiser son score
+    '''
+    max_score = -10000                
+    start=time.time()
+    progression = 0
+    #recuperer la liste des coups possibles
+    liste_coups= IA_simple(joueur_id,plateau_en_cours, output_type = "liste",nb_heur = 3,nb_eval = 20)
+    #print(len(liste_coups))
+    liste_coups_copy=copy.deepcopy(liste_coups)
+    joueur_initial = joueur_id
+    #print(joueur_initial)
+
+    for coup in liste_coups_copy:
+        progression+=1
+        print("progression :"+str(progression/len(liste_coups_copy)*100)+"%")
+        #print("WESH",coup)
+        copie=0
+        copie=copy.deepcopy(plateau_en_cours)
+        copie.joue_coup(coup,joueur_id)
+        #print(copie.etape_jeu)
+        #score =copie.dico_joueurs[joueur_id].points
+        joueur_suivant = joueur_tour(copie,joueur_id)
+        #print("joeur suivant1",joueur_suivant)
+        score = Max_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
+        #print(score)
+        if score > max_score :
+            max_score = score 
+            index_coup_optimal = liste_coups_copy.index(coup)
+    end=time.time()
+    print("temps de calcul : "+ str(end-start))
+    coup_optimal = liste_coups[index_coup_optimal]
+    print(coup_optimal)
+    return coup_optimal
+
     
+def Min_IA(plateau_en_cours,joueur_id, profondeur, joueur_initial):
+    
+    '''
+    Fonction min de minmax. Elle permet de determiner le score minimum et se relance
+    recursivement si le prochain joueur n'est pas le joueur initial ou lance maximum si
+    c'est le joueur initial
+    Entrees :
+         - joueur_id : identifiant de joueur dont c'est le tour (entier)
+         - plateau_en_cours : état du plateau lors du tour du joueur 
+         (entité de classe plateau)
+         - profondeur : nombre de tour de jeu effectués par l'algorithme. 
+         Ici un tour de jeu correspond à un joueur qui joue, pas tous les joueurs
+         -joueur_initial :identifiant de joueur automatique (entier)
+    Sortie :
+        - score du joueur automatique
+    '''
+    
+    min_score = 10000
+
+    #Si on est arrivé à la profondeur seuil, on remonte les points du joueur automatique
+    if profondeur == 0:
+        return plateau_en_cours.dico_joueurs[joueur_initial].points
+
+    #Sinon
+    else :
+        liste_coups=plateau_en_cours.coups_possibles(joueur_id)
+        liste_coups_copy=copy.deepcopy(liste_coups)
+
+        for coup in liste_coups_copy:
+            copie=0
+            copie=copy.deepcopy(plateau_en_cours)
+            copie.joue_coup(coup, joueur_id)
+            joueur_suivant = joueur_tour(copie,joueur_id)
+
+            #Si le joueur est le joueur automatique on cherche à obtenir le maximum
+            if int(joueur_suivant) == int(joueur_initial) :
+                score = Max_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)
+                if score < min_score :
+                    min_score = score
+            else : 
+                score = Min_IA(copie,joueur_suivant, profondeur - 1,joueur_initial)            
+                
+    return min_score
+
 
 #        
 #def jouer_minmax(plateau_en_cours,joueur_id,profondeur):
@@ -336,6 +437,7 @@ def joueur_tour(plateau_en_cours,joueur_id):
 
 
     #Sinon
+
 #    else :
 #        liste_coups=plateau_en_cours.coups_possibles(joueur_id)
 #        liste_coups_copy=copy.deepcopy(liste_coups)
@@ -440,3 +542,4 @@ def joueur_tour(plateau_en_cours,joueur_id):
 #                max_score = score
 #            
 #    return max_score
+
