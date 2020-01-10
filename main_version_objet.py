@@ -171,6 +171,8 @@ class mine_hantee():
             
             self.plateau_jeu=plateau(nb_joueurs,liste_noms,liste_niveaux,dimensions_plateau,dico_parametres)
 
+            #initialiser l'etape de jeu :
+            self.plateau_jeu.etape_jeu=self.plateau_jeu.dico_joueurs[0].nom+"_"+"inserer-carte"
         #Si on retourne au jeu depuis la pause, rien n'est fait.
         else :
             pass
@@ -189,173 +191,188 @@ class mine_hantee():
         clip = VideoFileClip('animation.mp4')
         
         
+        
         #Boucle du jeu. On joue tant qu'il reste des fantômes à attraper
         while self.plateau_jeu.id_dernier_fantome!=self.plateau_jeu.nbre_fantomes and self.dico_stop["rester_jeu"]==True:
     
+            #Si on démarre le jeu depuis une sauvegarde, on récupère le joueur dont c'est le tour
+            joueur=self.plateau_jeu.etape_jeu.split("_")[0]
+            joueur_index=[joueur.nom for joueur in self.plateau_jeu.dico_joueurs.values()].index(joueur)
+            joueur_actuel=self.plateau_jeu.dico_joueurs[joueur_index]
+            
             #Tours de jeu
             #on parcourt chaque joueur à chaque tours.
             for j in self.plateau_jeu.dico_joueurs :
-                #Initialisation du texte d'information et du texte qui informe de l'étape
-                information=[""]
-                etape="" 
-                joueur=self.plateau_jeu.dico_joueurs[j]
-                #actualisation de la fenêtre à chaque début de tour
-                actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
-    
-    
-                #Si le joueur est un joueur réel, il y'a 2 étapes dans le tour gérées par dico_stop
-                #et le plateau est modifié selon les actions de l'opérateur
-                if joueur.niveau == 0 :
-                    #Première etape : rotation et insertion de la carte
-                    #On parcourt la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
-                    self.dico_stop["test_carte"]=True
-                    #On active aussi l'étape suivante qui se déroulera quand la carte aura été insérée
-                    self.dico_stop["test_entree"]=True
-                    
-                    
-                    while self.dico_stop["test_carte"]!=False:
-                        #Mise à jour de l'étape du jeu et du message d'étape
-                        self.plateau_jeu.etape_jeu=joueur.nom+"_"+"inserer-carte"
-                        etape="Tourner la carte avec R, cliquer pour insérer"
-                        
-                        #Récupération des actions de l'opérateur
-                        for event in pygame.event.get():   
-                            #gestion des évènements liés au bouton 
-                            afficher_commandes_button.handle_event(event,self.afficher_commandes)
-                            #Si on appuie sur R, rotation de la carte à jouer
-                            if event.type == KEYDOWN and event.key == K_r: 
-                                self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
-                            #Si on appuie sur J et qu'il reste un joker au joueur, déclenchement du joker
-                            if event.type== KEYDOWN and event.key == K_j:
-                                if joueur.nb_joker==0:
-                                    information=["Vous n'avez plus de joker"]
-                                #Si le joueur a un joker, on joue son tour avec une IA et on passe au joueur suivant
-                                else:
-                                    self.tour_IA(joueur,information, afficher_commandes_button, etape, joker=True)
-                                    self.dico_stop["test_carte"]=False
-                                    self.dico_stop["test_entree"]=False
-                                    joueur.nb_joker-=1
-                            
-                            #ajouter la carte lorsque l'utilisateur clique dans le plateau
-                            elif event.type == MOUSEBUTTONDOWN : 
-                                
-                                #clic gauche : insertion de la carte à jouer
-                                if event.button==1: 
-                                    
-                                    #Test si le clic est dans le plateau ou en dehors et mise à jour du message d'erreur
-                                    coord=[int(math.floor(event.pos[1]/700*self.plateau_jeu.N)),int(math.floor(event.pos[0]/700*self.plateau_jeu.N))]
-                                    test_inser=self.plateau_jeu.deplace_carte(coord)
-                                    
-                                    if test_inser==False :
-                                        information=["Insertion impossible"]
-                                    
-                                    #Sinon, on finit cette section du tour
-                                    else :
-                                        information=[""]
-                                       
-                                        self.dico_stop["test_carte"]=False
-                                        
-                            #Si la touche espace est enfoncée, lancement de la méthode de pause
-                            elif event.type == KEYDOWN and event.key == K_SPACE :
-                                self.pause()
-                            
-                            #Instructions de sortie
-                            elif event.type == QUIT:
-                                self.dico_stop = dict.fromkeys(self.dico_stop, False)
-                        
-                        #actualisation de la fenêtre
-                        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
-                       
-
-                    #2e etape : On parcours les évènements tant que le joueur n'a pas appuyé sur entrée ou tant qu'il peut encore se déplacer
-                    #initialisation à la position du joueur
-                    
-                    #On récupère la carte sur laquelle est le joueur, et on initialise les cartes explorées
-                    carte_actuelle=joueur.carte_position
-                    joueur.cartes_explorees=[carte_actuelle]
-                    cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
-                    
-                    #mise à jour de l'étape de jeu
-                    self.plateau_jeu.etape_jeu=joueur.nom+"_"+"deplacement"
-                    information=[""]
-                    
-                    #initialiser un marqueur pour l'animation de capture du fantôme
-                    premiere_capture=True
-                    #parcours des evenements
-                    #Tant que le joueur ne passe pas son tour et peut encore se deplacer
-                    while self.dico_stop["test_entree"]==True and len(cartes_accessibles)>0:
-                        
-                        #mise à jour de l'étape
-                        etape="Déplacer avec les flèches, entrée pour finir"
-                        
-                        #parcours des entrées clavier/souris
-                        for event in pygame.event.get():
-                            
-                            #Correction pour supprimer les cartes explorees des cartes accessibles
-                            for carte_ex in joueur.cartes_explorees:
-                                if carte_ex in cartes_accessibles:
-                                    cartes_accessibles.remove(carte_ex)
-                                    
-                            afficher_commandes_button.handle_event(event,self.afficher_commandes)
-                            
-                            #deplacement du joueur si il appuie sur une flèche directionnelle
-                            if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
-                                deplace = self.plateau_jeu.deplace_joueur(j,event.key)
-                                if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
-                                    information=self.plateau_jeu.compte_points(j,deplace)
-                                    #si le joueur capture un fantome, on lance l'animation de capture
-                                    if joueur.capture_fantome == True and premiere_capture==True:
-                                        clip.preview()
-                                        premiere_capture=False
-                                #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
-                                else: 
-                                    information=deplace
-                                    
-                                #On met à jour les cartes explorées et la carte actuelle où se trouve le joueur
-                                joueur.cartes_explorees.append(carte_actuelle)
-                                carte_actuelle=joueur.carte_position
-                                cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
-                                
-                            
-                            #fin de tour : "test_entree" est assigné à False, on sort de la boucle de deplacement
-                            if event.type == KEYDOWN and (event.key== K_RETURN):
-                                self.dico_stop["test_entree"]=False
-                                information=[""]
-                            
-                                
-                            #Si la touche espace est enfoncée, lancement de la méthode de pause
-                            elif event.type == KEYDOWN and event.key == K_SPACE :
-                                self.pause()
-                                
-                            #Si on appuie sur quitter, fin du jeu   
-                            elif event.type == QUIT:
-                                self.dico_stop = dict.fromkeys(self.dico_stop, False)
-                                
-                        #Update l'écran                                                                
-                        actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
-        
                 
-                ##Retour au test du niveau du joueur : si le joueur est une IA (joueur.niveau!=0)
-                else:
-                    #on joue le tour de l'IA
-                    self.tour_IA(joueur,information, afficher_commandes_button, etape, joker=False)
-                    
-                #Fin du tour : On ré-initialise cartes_explorees et capture_fantome
-                joueur.cartes_explorees = [carte_actuelle]
-                joueur.capture_fantome = False
-
-                #On remet test_carte et test_entrée à False pour la prochaine boucle
-                if self.dico_stop["test_carte"]==False and self.dico_stop["test_entree"]==False and self.dico_stop["rester_jeu"]==False:
-                    break
+                #Si c'est le bon joueur, on joue son tour. Sinon, on on passe au joueur suivant
+                if joueur_actuel==self.plateau_jeu.dico_joueurs[j]:
+                    #Initialisation du texte d'information et du texte qui informe de l'étape
+                    information=[""]
+                    etape="" 
+                    joueur=self.plateau_jeu.dico_joueurs[j]
+                    #actualisation de la fenêtre à chaque début de tour
+                    actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
         
-                #Si on a capturé tous les fantômes :
-                if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
-                    #On récupère les scores, pour les afficher avec fin_du_jeu
-                    scores=[]
-                    for j in self.plateau_jeu.dico_joueurs:
-                        joueur=self.plateau_jeu.dico_joueurs[j]
-                        scores=scores+[[joueur.nom,joueur.points,joueur.fantome_target]]
-                    self.fin_du_jeu(scores)
+        
+                    #Si le joueur est un joueur réel, il y'a 2 étapes dans le tour gérées par dico_stop
+                    #et le plateau est modifié selon les actions de l'opérateur
+                    if joueur.niveau == 0 :
+                        #Première etape : rotation et insertion de la carte
+                        #On parcourt la liste de tous les événements reçus tant qu'une carte n'a pas été insérée
+                        self.dico_stop["test_carte"]=True
+                        #On active aussi l'étape suivante qui se déroulera quand la carte aura été insérée
+                        self.dico_stop["test_entree"]=True
+                        
+                        
+                        while self.dico_stop["test_carte"]!=False:
+                            #Mise à jour de l'étape du jeu et du message d'étape
+                            self.plateau_jeu.etape_jeu=joueur.nom+"_"+"inserer-carte"
+                            etape="Tourner la carte avec R, cliquer pour insérer"
+                            
+                            #Récupération des actions de l'opérateur
+                            for event in pygame.event.get():   
+                                #gestion des évènements liés au bouton 
+                                afficher_commandes_button.handle_event(event,self.afficher_commandes)
+                                #Si on appuie sur R, rotation de la carte à jouer
+                                if event.type == KEYDOWN and event.key == K_r: 
+                                    self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2],self.plateau_jeu.carte_a_jouer.orientation[3]=self.plateau_jeu.carte_a_jouer.orientation[3],self.plateau_jeu.carte_a_jouer.orientation[0],self.plateau_jeu.carte_a_jouer.orientation[1],self.plateau_jeu.carte_a_jouer.orientation[2]
+                                #Si on appuie sur J et qu'il reste un joker au joueur, déclenchement du joker
+                                if event.type== KEYDOWN and event.key == K_j:
+                                    if joueur.nb_joker==0:
+                                        information=["Vous n'avez plus de joker"]
+                                    #Si le joueur a un joker, on joue son tour avec une IA et on passe au joueur suivant
+                                    else:
+                                        self.tour_IA(joueur,information, afficher_commandes_button, etape, joker=True)
+                                        self.dico_stop["test_carte"]=False
+                                        self.dico_stop["test_entree"]=False
+                                        joueur.nb_joker-=1
+                                
+                                #ajouter la carte lorsque l'utilisateur clique dans le plateau
+                                elif event.type == MOUSEBUTTONDOWN : 
+                                    
+                                    #clic gauche : insertion de la carte à jouer
+                                    if event.button==1: 
+                                        
+                                        #Test si le clic est dans le plateau ou en dehors et mise à jour du message d'erreur
+                                        coord=[int(math.floor(event.pos[1]/700*self.plateau_jeu.N)),int(math.floor(event.pos[0]/700*self.plateau_jeu.N))]
+                                        test_inser=self.plateau_jeu.deplace_carte(coord)
+                                        
+                                        if test_inser==False :
+                                            information=["Insertion impossible"]
+                                        
+                                        #Sinon, on finit cette section du tour
+                                        else :
+                                            information=[""]
+                                           
+                                            self.dico_stop["test_carte"]=False
+                                            
+                                #Si la touche espace est enfoncée, lancement de la méthode de pause
+                                elif event.type == KEYDOWN and event.key == K_SPACE :
+                                    self.pause()
+                                
+                                #Instructions de sortie
+                                elif event.type == QUIT:
+                                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                            
+                            #actualisation de la fenêtre
+                            actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
+                           
+    
+                        #2e etape : On parcours les évènements tant que le joueur n'a pas appuyé sur entrée ou tant qu'il peut encore se déplacer
+                        #initialisation à la position du joueur
+                        
+                        #On récupère la carte sur laquelle est le joueur, et on initialise les cartes explorées
+                        carte_actuelle=joueur.carte_position
+                        joueur.cartes_explorees=[carte_actuelle]
+                        cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
+                        
+                        #mise à jour de l'étape de jeu
+                        self.plateau_jeu.etape_jeu=joueur.nom+"_"+"deplacement"
+                        information=[""]
+                        
+                        #initialiser un marqueur pour l'animation de capture du fantôme
+                        premiere_capture=True
+                        #parcours des evenements
+                        #Tant que le joueur ne passe pas son tour et peut encore se deplacer
+                        while self.dico_stop["test_entree"]==True and len(cartes_accessibles)>0:
+                            
+                            #mise à jour de l'étape
+                            etape="Déplacer avec les flèches, entrée pour finir"
+                            
+                            #parcours des entrées clavier/souris
+                            for event in pygame.event.get():
+                                
+                                #Correction pour supprimer les cartes explorees des cartes accessibles
+                                for carte_ex in joueur.cartes_explorees:
+                                    if carte_ex in cartes_accessibles:
+                                        cartes_accessibles.remove(carte_ex)
+                                        
+                                afficher_commandes_button.handle_event(event,self.afficher_commandes)
+                                
+                                #deplacement du joueur si il appuie sur une flèche directionnelle
+                                if event.type == KEYDOWN and (event.key == K_UP or event.key == K_LEFT or event.key == K_DOWN or event.key == K_RIGHT) : #touches directionnelles : déplacement du joueur
+                                    deplace = self.plateau_jeu.deplace_joueur(j,event.key)
+                                    if isinstance(deplace, carte) == True: #Si le déplacement était possible, on affiche ce que le joueur a potentiellement gagné
+                                        information=self.plateau_jeu.compte_points(j,deplace)
+                                        #si le joueur capture un fantome, on lance l'animation de capture
+                                        if joueur.capture_fantome == True and premiere_capture==True:
+                                            clip.preview()
+                                            premiere_capture=False
+                                    #Sinon on affiche la raison pour laquelle le déplacement n'était pas possible
+                                    else: 
+                                        information=deplace
+                                        
+                                    #On met à jour les cartes explorées et la carte actuelle où se trouve le joueur
+                                    joueur.cartes_explorees.append(carte_actuelle)
+                                    carte_actuelle=joueur.carte_position
+                                    cartes_accessibles=self.plateau_jeu.cartes_accessibles1(carte_actuelle)
+                                    
+                                
+                                #fin de tour : "test_entree" est assigné à False, on sort de la boucle de deplacement
+                                if event.type == KEYDOWN and (event.key== K_RETURN):
+                                    self.dico_stop["test_entree"]=False
+                                    information=[""]
+                                
+                                    
+                                #Si la touche espace est enfoncée, lancement de la méthode de pause
+                                elif event.type == KEYDOWN and event.key == K_SPACE :
+                                    self.pause()
+                                    
+                                #Si on appuie sur quitter, fin du jeu   
+                                elif event.type == QUIT:
+                                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                                    
+                            #Update l'écran                                                                
+                            actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
+            
+                    
+                    ##Retour au test du niveau du joueur : si le joueur est une IA (joueur.niveau!=0)
+                    else:
+                        #on joue le tour de l'IA
+                        self.tour_IA(joueur,information, afficher_commandes_button, etape, joker=False)
+                        
+                    #Fin du tour : On ré-initialise cartes_explorees et capture_fantome
+                    joueur.cartes_explorees = [carte_actuelle]
+                    joueur.capture_fantome = False
+                    #On actualise etape_jeu pour passer au joueur suivant :
+                    try :
+                        joueur_suivant=self.plateau_jeu.dico_joueurs[joueur.id+1].nom
+                    except :
+                        joueur_suivant=self.plateau_jeu.dico_joueurs[0].nom
+                    self.plateau_jeu.etape_jeu=str(joueur_suivant)+"_"+"inserer-carte"
+    
+                    #On remet test_carte et test_entrée à False pour la prochaine boucle
+                    if self.dico_stop["test_carte"]==False and self.dico_stop["test_entree"]==False and self.dico_stop["rester_jeu"]==False:
+                        break
+            
+                    #Si on a capturé tous les fantômes :
+                    if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
+                        #On récupère les scores, pour les afficher avec fin_du_jeu
+                        scores=[]
+                        for j in self.plateau_jeu.dico_joueurs:
+                            joueur=self.plateau_jeu.dico_joueurs[j]
+                            scores=scores+[[joueur.nom,joueur.points,joueur.fantome_target]]
+                        self.fin_du_jeu(scores)
             
             
             
@@ -386,9 +403,9 @@ class mine_hantee():
         if joueur.niveau == 1:
             IA = IA_simple(joueur.id,self.plateau_jeu, output_type="alea")
         elif joueur.niveau == 2:
-            IA = IA_simple(joueur.id,self.plateau_jeu, output_type="single")
-            #IA = jouer_minmax(self.plateau_jeu,joueur_id, profondeur= 4)
-            #IA=IA[1],IA[0],IA[2]
+            #IA = IA_simple(joueur.id,self.plateau_jeu, output_type="single")
+            IA = jouer_minmax(self.plateau_jeu,joueur.id, profondeur= 4)
+            IA=IA[1],IA[0],IA[2]
         elif joueur.niveau == 3 or joker==True:
             coups=IA_simple(joueur.id,self.plateau_jeu, output_type="liste")
             IA=IA_monte_carlo(self.plateau_jeu, joueur.id, reps=100, liste_coups=coups, profondeur=3)
