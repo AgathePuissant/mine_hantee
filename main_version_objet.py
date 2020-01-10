@@ -48,6 +48,7 @@ class mine_hantee():
         
         #Creation des images du menu
         self.fond_menu = pygame.image.load("fond_menu.png").convert()
+        self.fond_menu = pygame.transform.scale(self.fond_menu, (1200,700))
         self.fond_uni = pygame.image.load("fond_uni.png").convert()
         
         #Création de la police du jeu
@@ -73,7 +74,9 @@ class mine_hantee():
         A partir de ce menu, l'utilisateur peut lancer une nouvelle partie
         ou charger une nouvelle partie par l'intermédiaire de boutons. 
         """
-        
+        #lancer la musique du menu
+        pygame.mixer.music.load("musiqueretro.mp3")
+
         #Activation du menu par l'intermédiraire du dico_stop
         #Différente selon que l'on soit au début du jeu ou revenu au menu
         
@@ -107,6 +110,9 @@ class mine_hantee():
         #Tant que la méthode est activiée via la variable intro du dico_stop
         #on affiche le menu et les boutons du menu
         while self.dico_stop["intro"]==True:
+            #on lance la musique
+            pygame.mixer.music.play()
+
         
             #actualisation de l'écran      
             pygame.display.flip()
@@ -346,6 +352,7 @@ class mine_hantee():
                             actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
             
                     
+<<<<<<< HEAD
                     ##Retour au test du niveau du joueur : si le joueur est une IA (joueur.niveau!=0)
                     else:
                         #on joue le tour de l'IA
@@ -373,6 +380,26 @@ class mine_hantee():
                             joueur=self.plateau_jeu.dico_joueurs[j]
                             scores=scores+[[joueur.nom,joueur.points,joueur.fantome_target]]
                         self.fin_du_jeu(scores)
+=======
+                #Fin du tour : On ré-initialise cartes_explorees et capture_fantome
+                joueur.cartes_explorees = [carte_actuelle]
+                joueur.capture_fantome = False
+
+                #On remet test_carte et test_entrée à False pour la prochaine boucle
+                if self.dico_stop["test_carte"]==False and self.dico_stop["test_entree"]==False and self.dico_stop["rester_jeu"]==False:
+                    break
+        
+                #Si on a capturé tous les fantômes :
+                if self.plateau_jeu.id_dernier_fantome==self.plateau_jeu.nbre_fantomes :
+                    #On récupère les scores, pour les afficher avec fin_du_jeu
+                    scores=[]
+                    for j in self.plateau_jeu.dico_joueurs:
+                        joueur=self.plateau_jeu.dico_joueurs[j]
+                        scores=scores+[[joueur.nom,joueur.points,joueur.fantome_target]]
+                    self.dico_stop["rester_jeu"]==False
+                    self.fin_du_jeu(scores)
+                    break
+>>>>>>> 7c57ebf0a5974e78417143b35c48c3b65c0e54e3
             
             
             
@@ -595,7 +622,6 @@ class mine_hantee():
         '''
         
         pickle.dump(self.plateau_jeu,open("sauvegarde "+str(self.num_partie),"wb"))
-        self.fenetre.blit(self.police.render("Partie sauvegardée",True,pygame.Color("#000000")),(550,550))
         
     def afficher_partie(self,num) :
         '''
@@ -889,8 +915,8 @@ class mine_hantee():
                 choix_automatique=choix_modes_joueurs[k-1][1]
                 choix_manuel.draw(self.fenetre)
                 #le joueur 1 est forcément manuel
-                #if k!=1:
-                choix_automatique.draw(self.fenetre)
+                if k!=1:
+                    choix_automatique.draw(self.fenetre)
                 #si le mode automatique est activé, l'utilisateur peut choisir le niveau de l'ia. 
                 #mais il ne peut pas choisir son nom
                 if choix_automatique.active:
@@ -921,8 +947,8 @@ class mine_hantee():
                     choix_automatique=choix_modes_joueurs[k-1][1]
                     choix_manuel.handle_event(event,choix_modes_joueurs[k-1])
                     #le joueur 1 est forcément manuel
-                    #if k!=1:
-                    choix_automatique.handle_event(event,choix_modes_joueurs[k-1])
+                    if k!=1:
+                        choix_automatique.handle_event(event,choix_modes_joueurs[k-1])
                     if choix_automatique.active:
                         choix_lvl_joueurs[k-1][0].handle_event(event,choix_lvl_joueurs[k-1])
                         choix_lvl_joueurs[k-1][1].handle_event(event,choix_lvl_joueurs[k-1])
