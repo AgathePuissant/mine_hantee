@@ -17,8 +17,7 @@ import math
 
 from moteur import *
 from objets_graphiques import *
-from parametrisation import *
-from IA import *
+
     
 #---------------------------------------Défintion des instructions graphiques------------------------------
     
@@ -182,17 +181,19 @@ class mine_hantee(ConnectionListener):
         Méthode activée par le serveur quand l'autre joueur ferme sa partie.
         """
         
-        print("abandon adversaire")
         self.fin = True
-        self.fenetre.blit(self.fond_uni,(0,0))
-        self.fenetre.blit(self.police3.render("Votre adversaire a quitté la partie",False,pygame.Color("#000000")),(500,100))
-        
-        for event in pygame.event.get() :
-                
-            if event.type == pygame.QUIT :
-                self.dico_stop = dict.fromkeys(self.dico_stop, False)
-                exit()
-        pygame.display.flip()
+        quitter = False
+        while quitter == False:
+            self.fenetre.blit(self.fond_uni,(0,0))
+            self.fenetre.blit(self.police3.render("Votre adversaire a quitté la partie",False,pygame.Color("#000000")),(500,100))
+            
+            for event in pygame.event.get() :
+                    
+                if event.type == pygame.QUIT :
+                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                    quitter = True
+                    exit()
+            pygame.display.flip()
 
     def Network_victoire(self,data):
         """
@@ -389,6 +390,7 @@ class mine_hantee(ConnectionListener):
         for i in range(len(plat.dico_joueurs)) :
             x=plat.dico_joueurs[i].carte_position.coord[0]*int(100*7/N)+((((100*7/N))/2)-int(x_joueur*(7/N))/2)
             y=plat.dico_joueurs[i].carte_position.coord[1]*int(100*7/N)+((((100*7/N))/2)-int(y_joueur*(7/N))/2)
+
             fenetre.blit(liste_im_joueur[i],(y,x))                   
             
 
@@ -428,10 +430,9 @@ class mine_hantee(ConnectionListener):
 
         for i in range(len(plateau.dico_joueurs)) :
             fenetre.blit(liste_im_joueur[i],(1030,320+i*80))
-            fenetre.blit(police_small.render(str(plateau.dico_joueurs[i].nom) + " : ",False,pygame.Color("#000000")),(800,340+i*75))
-            fenetre.blit(police1.render("Score : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(800,340+i*75+15))
-            fenetre.blit(police1.render("Ordre de mission : "+str(sorted(plateau.dico_joueurs[i].fantome_target)),False,pygame.Color("#000000")),(800,340+i*75+30))
-            fenetre.blit(police1.render("Jokers restants : "+str(plateau.dico_joueurs[i].nb_joker),False,pygame.Color("#000000")),(800,340+i*75+45))
+            fenetre.blit(police.render(str(plateau.dico_joueurs[i].nom) + " : ",False,pygame.Color("#000000")),(800,340+i*75))
+            fenetre.blit(police.render("Score : "+str(plateau.dico_joueurs[i].points),False,pygame.Color("#000000")),(800,340+i*75+20))
+            fenetre.blit(police.render("Ordre de mission : "+str(sorted(plateau.dico_joueurs[i].fantome_target)),False,pygame.Color("#000000")),(800,340+i*75+40))
             
         #test texte pour afficher le joueur qui joue
         if self.turn == True :
@@ -455,8 +456,8 @@ class mine_hantee(ConnectionListener):
         """
         Méthode qui permet le déroulement du jeu. 
         """
-        if self.fin == False :
-            print("game")
+        if self.fin == False : 
+
             self.Pump()
             connection.Pump()
             information="" #Initialisation du texte d'erreur
@@ -473,6 +474,7 @@ class mine_hantee(ConnectionListener):
                     if event.type == pygame.QUIT :
                         self.dico_stop = dict.fromkeys(self.dico_stop, False)
                         connection.Send({"action":"quitter","num":self.joueur_id,"gameid": self.gameid})
+                        print("quitter")
                         self.Pump()
                         connection.Pump()
                         exit()
@@ -482,7 +484,7 @@ class mine_hantee(ConnectionListener):
     
             #Si c'est le tour du joueur, il peut effectuer des actions.
             else:
-                  
+
                 self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
         
                 #premiere etape : rotation et insertion de la carte
@@ -492,7 +494,8 @@ class mine_hantee(ConnectionListener):
                 
                 #Tant que le joueur n'a pas inséré la carte extérieure
                 while self.dico_stop["test_carte"]!=False:
-                    
+                    self.Pump()
+                    connection.Pump()
                     self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"inserer-carte"
                     etape="Tourner la carte avec R, cliquer pour insérer"
                     
@@ -639,7 +642,6 @@ class mine_hantee(ConnectionListener):
             self.fenetre.blit(self.police2.render("Clic sur une carte déplaçable en périphérie du plateau : insérer la carte extérieure.",False,pygame.Color("#000000")),(100,250))
             self.fenetre.blit(self.police2.render("Flèches directionnelles : déplacer le joueur.",False,pygame.Color("#000000")),(100,300))
             self.fenetre.blit(self.police2.render("Entrée : finir le tour.",False,pygame.Color("#000000")),(100,350))
-            self.fenetre.blit(self.police2.render("Espace : mettre en pause/Retour au jeu.",False,pygame.Color("#000000")),(100,400))
             
             if debut==False:                                                                                         
                 self.fenetre.blit(self.police2.render("Appuyez sur espace pour revenir au jeu.",False,pygame.Color("#000000")),(100,500))
