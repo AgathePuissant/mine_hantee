@@ -186,6 +186,8 @@ class mine_hantee():
         
         #Au début du jeu, on affiche automatiquement les commandes.
         self.afficher_commandes(debut=True)
+        pygame.mixer.music.stop()
+
         #Création du bouton qui permet d'afficher les commandes à tout moment.
         afficher_commandes_button=Bouton(725,5,150,40,"Commandes")
         N = self.plateau_jeu.N
