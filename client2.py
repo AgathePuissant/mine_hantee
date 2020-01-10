@@ -17,8 +17,7 @@ import math
 
 from moteur import *
 from objets_graphiques import *
-from parametrisation import *
-from IA import *
+
     
 #---------------------------------------Défintion des instructions graphiques------------------------------
     
@@ -182,17 +181,19 @@ class mine_hantee(ConnectionListener):
         Méthode activée par le serveur quand l'autre joueur ferme sa partie.
         """
         
-        print("abandon adversaire")
         self.fin = True
-        self.fenetre.blit(self.fond_uni,(0,0))
-        self.fenetre.blit(self.police3.render("Votre adversaire a quitté la partie",False,pygame.Color("#000000")),(500,100))
-        
-        for event in pygame.event.get() :
-                
-            if event.type == pygame.QUIT :
-                self.dico_stop = dict.fromkeys(self.dico_stop, False)
-                exit()
-        pygame.display.flip()
+        quitter = False
+        while quitter == False:
+            self.fenetre.blit(self.fond_uni,(0,0))
+            self.fenetre.blit(self.police3.render("Votre adversaire a quitté la partie",False,pygame.Color("#000000")),(500,100))
+            
+            for event in pygame.event.get() :
+                    
+                if event.type == pygame.QUIT :
+                    self.dico_stop = dict.fromkeys(self.dico_stop, False)
+                    quitter = True
+                    exit()
+            pygame.display.flip()
 
     def Network_victoire(self,data):
         """
@@ -457,7 +458,7 @@ class mine_hantee(ConnectionListener):
         Méthode qui permet le déroulement du jeu. 
         """
         if self.fin == False : 
-            print("game")
+
             self.Pump()
             connection.Pump()
             information="" #Initialisation du texte d'erreur
@@ -474,6 +475,7 @@ class mine_hantee(ConnectionListener):
                     if event.type == pygame.QUIT :
                         self.dico_stop = dict.fromkeys(self.dico_stop, False)
                         connection.Send({"action":"quitter","num":self.joueur_id,"gameid": self.gameid})
+                        print("quitter")
                         self.Pump()
                         connection.Pump()
                         exit()
@@ -483,7 +485,7 @@ class mine_hantee(ConnectionListener):
     
             #Si c'est le tour du joueur, il peut effectuer des actions.
             else:
-                  
+
                 self.actualise_fenetre(self.plateau_jeu,self.fenetre,self.joueur_ent,information,afficher_commandes_button,etape)
         
                 #premiere etape : rotation et insertion de la carte
@@ -493,7 +495,8 @@ class mine_hantee(ConnectionListener):
                 
                 #Tant que le joueur n'a pas inséré la carte extérieure
                 while self.dico_stop["test_carte"]!=False:
-                    
+                    self.Pump()
+                    connection.Pump()
                     self.plateau_jeu.etape_jeu=self.joueur_ent.nom+"_"+"inserer-carte"
                     etape="Tourner la carte avec R, cliquer pour insérer"
                     
