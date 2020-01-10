@@ -110,16 +110,15 @@ class mine_hantee():
         #Tant que la méthode est activiée via la variable intro du dico_stop
         #on affiche le menu et les boutons du menu
         while self.dico_stop["intro"]==True:
-            #on lance la musique
-            pygame.mixer.music.play()
 
-        
             #actualisation de l'écran      
             pygame.display.flip()
             
             #fond du menu
             self.fenetre.blit(self.fond_menu,(0,0))
-            
+            #on lance la musique
+            pygame.mixer.music.play()
+
             #dessin des boutons
             nouvelle_partie_button.draw(self.fenetre)
             charger_partie_button.draw(self.fenetre)
