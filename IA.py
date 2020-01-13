@@ -235,6 +235,49 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single", nb_heur=2, nb_ev
 #print(IA_simple(2,plat,"liste"))
 
 ###IA MINMAX
+    
+    
+def IA_flex(plateau_en_cours, joueur_id, profondeur=5, nb_coups=30):
+    """
+    Cette IA choisit le meilleur coup parmi les nb_coups meilleurs coups disponibles à un tours (d'après
+    IA_simple), puis fait jouer les adversaire avec le meilleur coup d'après IA simple jusqu'à atteindre
+    la profondeur voulue, puis renvoie le coup pour lequel le joueur a le meilleur score à n tours.
+    """
+    debut=time.time()
+    liste_coups=IA_simple(joueur_id,plateau_en_cours, output_type="liste", nb_heur=3, nb_eval=50)
+    #on evalue chaque coup, et on récupère le coup pour lequel le joueur joueur_id a le meilleur score au
+    #bout de profondeur coups
+    indice_max=0
+    score_max=0
+    indice=0
+    tours=0
+    joueur_ini=joueur_id
+    liste_copiee=copy.deepcopy(liste_coups)
+    for coup in liste_copiee:
+        plateau=copy.deepcopy(plateau_en_cours)
+        plateau.joue_coup(coup, joueur_id)
+        #On joue jusqu'à atteindre profondeur
+        while int(tours/len(plateau.dico_joueurs.values()))<profondeur:
+            #on passe au tour suivant
+            tours+=1
+            #on change de joueur
+            try:
+                joueur_id=plateau.dico_joueurs[joueur_id+1].id
+            except:
+                joueur_id=plateau.dico_joueurs[0].id
+            #on récupère le meilleur coup avec la fonction d'évaluation
+            coup_a_jouer=IA_simple(joueur_id,plateau_en_cours, output_type="single")
+            coup_a_jouer=coup_a_jouer[1],coup_a_jouer[0],coup_a_jouer[2]
+            plateau.joue_coup(coup_a_jouer, joueur_id)
+        score=plateau.dico_joueurs[joueur_ini].points
+        if score>score_max:
+            score_max=score
+            indice_max=indice
+        indice+=1
+    fin=time.time()
+    print("temps de calcul : "+str(fin-debut))
+    return(liste_coups[indice_max])
+    
 
 
 def joueur_tour(plateau_en_cours,joueur_id):
