@@ -100,14 +100,6 @@ class ClientChannel(PodSixNet.Channel.Channel):
         self._server.quitter(data,self.gameid,num)
         
         
-    def Close(self):
-        """
-        Méthode activée quand le serveur est fermé.
-        Appelle la méthode close de la classe server en lui passant les infos
-        d'entrées.
-        """
-        self._server.close(self.gameid)
-        
     
     
 class MineServer(PodSixNet.Server.Server):
@@ -151,11 +143,9 @@ class MineServer(PodSixNet.Server.Server):
             self.currentIndex+=1
             channel.gameid=self.currentIndex
             self.queue.append(channel)
-            print(self.queue)
         else:
             channel.gameid=self.currentIndex
             self.queue.append(channel)
-            print(self.queue)
             jeu = Game(self.queue, self.currentIndex)
             plat = jeu.plateau_jeu
             self.games.append(jeu)
@@ -250,18 +240,6 @@ class MineServer(PodSixNet.Server.Server):
             game[0].quitter(data, num)
         
             
-    def close(self, gameid):
-        """
-        Méthode permettant de trouver la partie à laquelle se réfère la fermeture
-        du serveur et d'appeler les méthodes close chez les 2 joueurs.
-        """
-        try:
-            game = [a for a in self.games if a.gameid==gameid][0]
-            game.player0.Send({"action":"close"})
-            game.player1.Send({"action":"close"})
-        except:
-            pass
-    
 
 class Game:
     """

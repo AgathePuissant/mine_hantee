@@ -10,9 +10,11 @@ import pygame
 
 def IA_monte_carlo(plateau_en_cours,joueur_id, reps, liste_coups=[], profondeur="fin"):
     """
-    evalue les coups possibles d'un joueur et renvoie le meilleur coup à une profondeur de donnée,
-    à partir d'une frequence de victoire calculée sur un nombre de repetitions reps.
+    evalue les coups possibles d'un joueur et renvoie le meilleur coup à une 
+    profondeur de donnée, à partir d'une frequence de victoire calculée sur un 
+    nombre de repetitions reps.
     Les coups testés peuvent ou bien être tous les coups possibles, ou bien 
+    
     """
     #recuperer la liste des coups possibles
     if liste_coups==[]:
@@ -45,48 +47,50 @@ def IA_monte_carlo(plateau_en_cours,joueur_id, reps, liste_coups=[], profondeur=
 
 
 def IA_simple(id_joueur,plateau_en_cours, output_type="single", nb_heur=2, nb_eval=10):
+    
     """
-    Fonction permettant pour un joueur automatique de niveau débutant de savoir 
-    quel coup jouer à un moment donné du jeu.
+    A partir d'une copie de l'entité de plateau, génère tous les chemins possibles
+    à partir de l'emplacement du joueur en utilisant la méthode chemins_possibles
+    de plateau et en prenant en compte toutes les orientations de la carte extérieure
+    et toutes les insertions possibles.
+    Calcule pour chacun de ces chemins une valeur de fonction d'évaluation prenant en compte
+    le nombre de pépites sur le chemin, si le joueur capture un fantôme, si ce 
+    fantôme est sur son ordre de mission ou sur l'ordre de mission d'un autre joueur.
+    
     
     Prend en entrée :
          - id_joueur : identifiant de joueur automatique (entier)
          - plateau_en_cours : état du plateau lors du tour du joueur automatique
          (entité de classe plateau)
-    
-    A partir d'une copie de l'entité de plateau, génère tous les chemins possibles
-    à partir de l'emplacement du joueur en utilisant la méthode chemins_possibles
-    de plateau et en prenant en compte toutes les orientations de la carte extérieure
-    et toutes les insertions possibles.
-    
-    Calcule pour chacun de ces chemins une valeur d'heuristique prenant en compte
-    le nombre de pépites sur le chemin, si le joueur capture un fantôme, si ce 
-    fantôme est sur son ordre de mission ou sur l'ordre de mission d'un autre joueur.
-    
-    En fonction du type de output_type, la fonction renvoie :
-        - si output_type = single (par défaut), la fonction renvoie le coup correspondant
-        à la meilleure heuristique, ou bien à une heuristique au hasard parmi les meilleures
-        en cas d'égalité, sous la forme :
-        [coordonnees, orientation, deplacement]
-        - si output_type = alea, la fonction renvoie un coup au hasard parmi les 5 meilleurs,
-        sous la même forme que pour single
-        - si output_type = liste, la fonction renvoie une liste des 5 meilleurs coups, sous la forme :
+         - output_type : le type de retour souhaité (single, alea ou liste)
+         
+    En fonction du type de output_type :
+        - si output_type = single (IA intermédiaire) (par défaut), la fonction 
+        renvoie un des coups correspondant à la meilleure valeur de fonction 
+        d'évaluation sous la forme : [coordonnees, orientation, deplacement]
+        - si output_type = alea (IA débutant), la fonction renvoie un coup au 
+        hasard parmi les nb_heur meilleures valeurs de la fonction d'évaluation, sous 
+        la même forme que pour single
+        - si output_type = liste (utilisation dans le montecarlo), la fonction 
+        renvoie une liste de coups correspondant aux nb_heur  meilleures valeurs 
+        de la fonction d'évaluation, sous la forme :
             liste ([orientation, coordonnées, deplacement])
-    
-    Où coordonneés = coordonnées d'insertion de la carte extérieure (liste), 
+            
+    Où coordonnées = coordonnées d'insertion de la carte extérieure (liste), 
     orientation = entier correspondant au nombre de fois qu'il faut tourner la carte et
     deplacement = liste d'entités de carte.
-    
-    Les arguments optionnels nb_heur et nb_eval permettent de gérer le nombre d'heuristiques considérées,
-    et le nombre de coups maximal renvoyé en sortie
+            
+        - nb_heur : nombre de valeurs de la fonction d'évaluation prise en compte
+        dans l'output alea (entier, par défaut 2)
+        - nb_eval : nombre de coups retournés dans l'output liste (entier, par défaut 10)
     """
     
     #On duplique l'entité du plateau en cours pour faire des simulations de déplacement
     #de cartes sans impacter le vrai plateau
     plateau = copy.deepcopy(plateau_en_cours)
-    chemins_possibles_total = [] #Liste des listes de chemins possibles pour chaque insertion possible, donc liste de liste de liste
+    chemins_possibles_total = [] #Liste des listes de chemins possibles
     
-    #On recueille les données des adversaires i.e. leurs fantomes target
+    #On recueille les données des adversaires i.e. les fantômes de leurs ordres de mission
     target_adversaires = [] 
     for i in plateau.dico_joueurs.keys():
         if i != id_joueur : 
@@ -96,13 +100,15 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single", nb_heur=2, nb_ev
         
     #Pour toutes les insertions possibles et toutes les rotations de carte possibles,
     #on stocke tous les chemins possibles pour le joueur donné
+    
     orientation = plateau.carte_a_jouer.orientation
-    #On teste pour chaque emplacement où la carte est insérable
+    
+    #Pour chaque emplacement où la carte est insérable
     for i in plateau.insertions_possibles: 
         
         j=0
         chemins_possibles_carte = [] 
-        
+        #On génère les chemins possibles pour chaque orientation de la carte extérieure possible
         for j in range(4):
             plateau.carte_a_jouer.orientation = orientation
             plateau.deplace_carte(i)
@@ -112,9 +118,14 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single", nb_heur=2, nb_ev
             plateau = copy.deepcopy(plateau_en_cours)
             orientation[0],orientation[1],orientation[2],orientation[3]=orientation[3],orientation[0],orientation[1],orientation[2]
         
+        #chemin_possibles_carte est une liste de 4 listes, chacune correspondant
+        #à la liste des chemins possibles pour l'insertion de la carte pour une
+        #orientation donnée aux coordonnées d'insertions i
         chemins_possibles_total.append(chemins_possibles_carte)
 
-    dico_heuristique = {} #dico avec le rang (couple) d'un chemin dans chemin_possibles_total en clé et son heuristique en valeur
+    #A la fin de la boucle for, chemins_possibles_total est donc une liste de liste de liste
+    
+    dico_heuristique = {} #dico avec le rang (triplet) d'un chemin dans chemin_possibles_total en clé et son heuristique en valeur
     
 
     for k in range(len(chemins_possibles_total)): #k : rang du sous-ensemble correspondant à un endroit d'insertion possible
@@ -138,24 +149,31 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single", nb_heur=2, nb_ev
                         
                 dico_heuristique[(k,i,m)] = heuristique
     
+    
+    
     chemins_opti = []
     inser_opti = []
     orientation_opti = []
 
+    
     if output_type == "single":
         
-        max_heur = max(dico_heuristique.values())
+        max_heur = max(dico_heuristique.values()) #valeur de la fonction d'évaluation maximale
         
+        #On trouve tous les chemins correspondant à la valeur maximale de la foonction d'évaluation
         for triplet in dico_heuristique.keys():
             if dico_heuristique[triplet] == max_heur :
                 chemins_opti.append(chemins_possibles_total[triplet[0]][triplet[1]][triplet[2]])
-                #On trouve les coordonnées de l'insertion correspondant au chemin optimal trouvé
+                #On trouve les coordonnées de l'insertion correspondant au chemin optimal trouvé et l'orientation de la carte
                 inser_opti.append(plateau.insertions_possibles[triplet[0]])
                 orientation_opti.append(triplet[1])
         
         
-
+        #Les instances de cartes stockées dans les chemins possibles correspondent
+        #aux instances du plateau dupliqué, il faut donc retrouver les instances qui
+        #correspondent au vrai plateau utilisé
         chemin_plateau = []
+        
         #Si il n'y a qu'un seul chemin optimal, on le choisit
         if len(chemins_opti) == 1:
             #On ne prend pas la première carte du chemin, qui correspond à la carte
@@ -164,22 +182,23 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single", nb_heur=2, nb_ev
                 chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[0][j].id])
             out = [inser_opti[0],orientation_opti[0],chemin_plateau]
         
-        #Sinon on prend au hasard parmi les coups d'heuristique maximale
-        #On pourrait aussi faire le choix de prendre celui qui inclu la capture d'un fantôme par ex
+        #Sinon on prend au hasard parmi les coups de fonction d'évaluation maximale
         else:
             rang = rd.randint(0,len(chemins_opti)-1)
             for j in range(1,len(chemins_opti[rang])):
                 chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[rang][j].id])
             out = [inser_opti[rang], orientation_opti[rang],chemin_plateau]
+         
+            
             
     else :
         
-        #On créé une liste des heuristiques triée
+        #On créé une liste des valeurs de la fonction d'évaluation triées
         heur_triees = [v for k, v in sorted(dico_heuristique.items(), key=lambda item: item[1])]
         
         
-        #On cherche les 2 valeurs d'heuristiques maximales si il y a au moins 2 valeurs
-        #différentes
+        #On cherche les nb_heur valeurs de fonction d'évaluation maximales si il y 
+        #a au moins nb_heur valeurs différentes
         max_heur = []
         j=0
         while j<len(heur_triees) and len(max_heur)<nb_heur:
@@ -189,20 +208,17 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single", nb_heur=2, nb_ev
             j += 1
         
         
-        #On trouve le/les chemin(s) correspondant aux nb_heur heuristiques maximales
+        #On trouve les coups correspondants aux nb_heur valeurs de la fonction d'évaluation maximales
         for triplet in dico_heuristique.keys():
             if dico_heuristique[triplet] in max_heur :
                 chemins_opti.append(chemins_possibles_total[triplet[0]][triplet[1]][triplet[2]])
-                #On trouve les coordonnées de l'insertion correspondant au chemin optimal trouvé
                 inser_opti.append(plateau.insertions_possibles[triplet[0]])
                 orientation_opti.append(triplet[1])
                 
             
-        #Retourner un coup parmi les nb_heur ayant les meilleures heuristiques
+        #On prend un coup au hasard parmi ceux trouvés précédemment
         if output_type=="alea":
-            #Les instances de cartes stockées dans les chemins possibles correspondent
-            #aux instances du plateau dupliqué, il faut donc retrouver les instances qui
-            #correspondent au vrai plateau utilisé
+
             chemin_plateau = []
         
             rang = rd.randint(0,len(chemins_opti)-1)
@@ -212,8 +228,9 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single", nb_heur=2, nb_ev
             out=[inser_opti[rang], orientation_opti[rang],chemin_plateau]
     
     
-        #Ou retourne une liste contenant les coups de meilleures heuristiques
+        #Ou retourne une liste contenant les coups des meilleures valeurs de fonction d'évaluation
         elif output_type=="liste" :
+            
             #On recupere une liste de triplets inser_opti, orientation_opti, chemin_plateau
             meilleurs_chemins=[]
             
@@ -223,16 +240,14 @@ def IA_simple(id_joueur,plateau_en_cours, output_type="single", nb_heur=2, nb_ev
                     chemin_plateau.append(plateau_en_cours.dico_cartes[chemins_opti[rang][j].id])
                 meilleurs_chemins.append([orientation_opti[rang],inser_opti[rang],chemin_plateau])
             out=meilleurs_chemins
-            #reduire le nombre de coups testes
+            
+            #On reduit le nombre de coups retournés à nb_eval
             if len(out)>nb_eval:
                 out=rd.sample(out, nb_eval)
         
-
-    #Ou bien retourner le coup correspondant à la meilleure heuristique
     return(out)
     
-# = plateau(3,['Elodie', 'Joueur2', 'Ordinateur3', 'zodj'],[0, 0, 1],7,{'dimensions_plateau': '7', 'nb_fantomes': '21', 'nb_joueurs': '3', 'mode_joueur_1': 'manuel', 'mode_joueur_2': 'manuel', 'mode_joueur_3': 'automatique', 'mode_joueur_4': 'manuel', 'niveau_ia_1': '3', 'niveau_ia_2': '1', 'niveau_ia_3': '1', 'niveau_ia_4': '1', 'pseudo_joueur_1': 'Elodie', 'pseudo_joueur_2': 'Joueur2', 'pseudo_joueur_3': 'Ordinateur3', 'pseudo_joueur_4': 'zodj', 'nb_fantomes_mission': '3', 'nb_joker': '1', 'points_pepite': '1', 'points_fantome': '5', 'points_fantome_mission': '20', 'bonus_mission': '40'})
-#print(IA_simple(2,plat,"liste"))
+
 
 ###IA MINMAX
     

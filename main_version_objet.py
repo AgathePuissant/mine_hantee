@@ -37,7 +37,8 @@ class mine_hantee():
         Initialise les attributs servant aux graphismes du jeu (fenetre, les différents fonds,
         les différents polices, les couleurs nécessaires) selon des fichiers présents dans le 
         dossier racine ou des valeurs fixées.
-        Initialise un dictionnaire vide à la variable qui contrôles l'activation des méthodes (dico_stop).
+        Initialise un dictionnaire vide à la variable qui contrôle l'activation 
+        des méthodes (dico_stop).
         '''
     
         #Initialisation de pygame
@@ -74,6 +75,7 @@ class mine_hantee():
         A partir de ce menu, l'utilisateur peut lancer une nouvelle partie
         ou charger une nouvelle partie par l'intermédiaire de boutons. 
         """
+        
         #lancer la musique du menu
         pygame.mixer.music.load("musiqueretro.mp3")
 
@@ -140,10 +142,12 @@ class mine_hantee():
     def game(self) :
         '''
         Méthode qui gère le déroulement du jeu.
-        Cette méthode initialise le plateau ou le charge selon ce que l'opérateur a choisit.
-        Elle passe ensuite les tours pour chaque joueur et gère les étapes de jeu grâce à dico_stop.
-        En fonction du type de joueur, soit les actions de l'opérateur sont requises pour le tour de jeu,
-        soit la méthode fait appel aux fonctions du fichier IA.
+        Cette méthode initialise le plateau ou le charge selon ce que l'opérateur 
+        a choisit.
+        Elle passe ensuite les tours pour chaque joueur et gère les étapes de 
+        jeu grâce à dico_stop.
+        En fonction du type de joueur, soit les actions de l'opérateur sont 
+        requises pour le tour de jeu, soit la méthode fait appel à tour_IA.
         Quand les conditions de fin de jeu sont réunies, la méthode fin_du_jeu est appelée.
         '''
 
@@ -186,6 +190,8 @@ class mine_hantee():
         
         #Au début du jeu, on affiche automatiquement les commandes.
         self.afficher_commandes(debut=True)
+        pygame.mixer.music.stop()
+
         #Création du bouton qui permet d'afficher les commandes à tout moment.
         afficher_commandes_button=Bouton(725,5,150,40,"Commandes")
         N = self.plateau_jeu.N
@@ -410,11 +416,12 @@ class mine_hantee():
         Si Joker=True, cette méthode permet de jouer le Joker d'un joueur (en fait seuls les
         messages affichés changent..).
         Prend en entrée :
-            - joueur une instance de type joueur
-            - joker booléen True ou False
-            - information, afficher_commandes_button et etape : inputs permettant le bon affichage
-            des éléments déplacés par l'IA dans la fenêtre de jeu
+            - joueur : une instance de type joueur
+            - joker : booléen True ou False
+            - information, afficher_commandes_button et etape : inputs permettant 
+            le bon affichage des éléments déplacés par l'IA dans la fenêtre de jeu.
         """
+        
         #Mise à jour de l'étape du jeu 
         self.plateau_jeu.etape_jeu=joueur.nom+"_"+"inserer-carte"
 
@@ -444,6 +451,9 @@ class mine_hantee():
             etape = "l'"+str(joueur.nom)+" joue.."
         actualise_fenetre(self.plateau_jeu,self.fenetre,joueur,information,afficher_commandes_button,etape,joueur.nb_joker)
         
+        
+        #Dans la suite on utilise le module wait pour que chaque action de l'IA
+        #Soit visible une par une par les autres joueurs 
         
         #Rotation de la carte
         for i in range(orientation):
@@ -531,7 +541,7 @@ class mine_hantee():
         """
         Méthode permettant d'afficher dans la fenêtre les details des 
         commandes du jeu. 
-        L'utilisateur peut revenir à la partie en appuyant sur 'Espace' 
+        L'utilisateur peut revenir à la partie en appuyant sur 'Espace'.
         """
     
         #Activation de la méthode par le dico_stop
@@ -569,8 +579,10 @@ class mine_hantee():
                 
     def pause(self) :
         '''
-        Méthode d'affichage qui permet de lancer les méthodes pour sauvegarder la partie en cours ou revenir au menu.
-        Reste active tant que l'utilisateur n'a pas appuyé sur la touche espace, et quand elle est désactivée permet de revenir au jeu en cours à l'endroit précis 
+        Méthode d'affichage qui permet de lancer les méthodes pour sauvegarder 
+        la partie en cours ou revenir au menu.
+        Reste active tant que l'utilisateur n'a pas appuyé sur la touche espace, 
+        et quand elle est désactivée permet de revenir au jeu en cours à l'endroit précis 
         ou la méthode game en était.
         '''
         
@@ -614,17 +626,21 @@ class mine_hantee():
                     
     def sauvegarder(self):
         '''
-        Méthode qui permet de sauvegarder la partie en cours dans un fichier binaire grâce au module pickle.
+        Méthode qui permet de sauvegarder la partie en cours dans un fichier 
+        binaire grâce au module pickle.
         Affiche que la partie a été sauvegardée sur l'interface de pause.
         '''
         
         pickle.dump(self.plateau_jeu,open("sauvegarde "+str(self.num_partie),"wb"))
         
+        
     def afficher_partie(self,num) :
         '''
-        Méthode qui prend en argument le numéro de la partie qu'on veut charger, et attribue cette valeur à l'attribut num_partie de la classe ce qui permettra
+        Méthode qui prend en argument le numéro de la partie qu'on veut charger, 
+        et attribue cette valeur à l'attribut num_partie de la classe ce qui permettra
         par la suite de charger le fichier correspondant pour initialiser le plateau.
-        Cette méthode permet de lancer la méthode game ou bien de revenir en arrière pour choisir une autre partie à lancer.
+        Cette méthode permet de lancer la méthode game ou bien de revenir en 
+        arrière pour choisir une autre partie à lancer.
         '''
         
         #Attribution du numéro de partie choisie à l'attribut permettant de charger le bon plateau
@@ -663,8 +679,10 @@ class mine_hantee():
         
     def charger_partie(self):
         '''
-        Méthode affichant la liste des parties sauvegardées sous forme de fichier binaire dans le dossier de base, et permettant de sélectionner la partie
-        que l'on veut charger. Une fois qu'une des partie a été sélectionnée, lance la méthode suivante afficher_partie en lui passant en argument le numéro
+        Méthode affichant la liste des parties sauvegardées sous forme de fichier 
+        binaire dans le dossier de base, et permettant de sélectionner la partie
+        que l'on veut charger. Une fois qu'une des partie a été sélectionnée, 
+        lance la méthode suivante afficher_partie en lui passant en argument le numéro
         de la partie sélectionnée.
         '''
         
@@ -672,14 +690,16 @@ class mine_hantee():
         self.dico_stop = dict.fromkeys(self.dico_stop, False)
         self.dico_stop["charger"]=True
         
-        #Création du bouton de retour au menu
-        retour_menu_button=Bouton(500,300,200,50,"Retour au menu")
+        
         
         #Création des boutons permettant de sélectionner la partie voulue à partir de l'attribut contenant les numéros de partie
         if self.liste_sauv!=[] :
             boutons_charger_partie=[]
             for i in range(len(self.liste_sauv)) :
                 boutons_charger_partie.append(Bouton(500,100+i*100,200,50,"Partie "+str(self.liste_sauv[i])))
+                
+        #Création du bouton de retour au menu
+        retour_menu_button=Bouton(500,100+len(self.liste_sauv)*100,200,50,"Retour au menu")
             
         while self.dico_stop["charger"] ==True:
                     
@@ -715,9 +735,8 @@ class mine_hantee():
         """
         Méthode de paramétrisation d'une nouvelle partie : étape 1.
         Demande à l'utilisateur de choisir le nombre de joueurs.
-        L'utilisateur peut valider son choix pour passer à la 
-        deuxième étape de paramétrisation 
-        ou revenir au menu principal. 
+        L'utilisateur peut valider son choix pour passer à la deuxième étape de 
+        paramétrisation ou revenir au menu principal. 
         """
         
         self.nouvelle=True
@@ -976,6 +995,7 @@ class mine_hantee():
                 if event.type == QUIT:   
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
     
+    
     def parametrisation_2(self,dico_erreurs={}):
         """
         Méthode de paramétrisation d'une nouvelle partie : étape 3.
@@ -1125,6 +1145,10 @@ class mine_hantee():
                     self.dico_stop = dict.fromkeys(self.dico_stop, False)
         
 
+
+"""
+CODE PRINCIPAL
+"""
 
 mn = mine_hantee()
 
