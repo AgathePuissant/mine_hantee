@@ -690,14 +690,16 @@ class mine_hantee():
         self.dico_stop = dict.fromkeys(self.dico_stop, False)
         self.dico_stop["charger"]=True
         
-        #Création du bouton de retour au menu
-        retour_menu_button=Bouton(500,300,200,50,"Retour au menu")
+        
         
         #Création des boutons permettant de sélectionner la partie voulue à partir de l'attribut contenant les numéros de partie
         if self.liste_sauv!=[] :
             boutons_charger_partie=[]
             for i in range(len(self.liste_sauv)) :
                 boutons_charger_partie.append(Bouton(500,100+i*100,200,50,"Partie "+str(self.liste_sauv[i])))
+                
+        #Création du bouton de retour au menu
+        retour_menu_button=Bouton(500,100+len(self.liste_sauv)*100,200,50,"Retour au menu")
             
         while self.dico_stop["charger"] ==True:
                     
